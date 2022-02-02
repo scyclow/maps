@@ -1,0 +1,59 @@
+NOTES
+
+Visual theme idea: 2 dimensional map platered on top of a three dimensional topography. think of rolling hills with a two dimensional map drawn on top of it
+
+
+
+
+possible color scheme
+https://twitter.com/flight404/status/1434975996449591311/photo/1
+
+look into this algo
+https://roberthodgin.com/project/meander
+
+Old style
+https://en.wikipedia.org/wiki/London_Beer_Flood#/media/File:Horwood's_Plan_of_London_(1792-1799);_Horse_Shoe_Brewery.jpg
+
+middle of nowhere
+  - single road
+
+
+possible designs
+  - https://www.pinterest.co.uk/pin/229824387219383745/
+  - https://www.pinterest.co.uk/pin/519321400784650084/
+  - https://www.pinterest.co.uk/pin/216313588339958382/
+  - https://www.pinterest.co.uk/pin/554083560416256105/
+  - https://roberthodgin.com/project/meander
+  - https://www.pinterest.com/pin/8303580554102226/
+  - https://romanroadlondon.com/old-maps-bow-globe-town-mile-end/
+  - https://oppidanlibrary.com/wp-content/uploads/2017/05/Old-Street-Map.jpg
+
+
+Theory
+  https://jacket2.org/commentary/introduction-maps
+
+
+
+AVENUE
+  - thicker lines
+  - spawn streets at ~90deg
+  - occasionally spawn other avenues
+
+STREET
+  - occasionally skip
+  - occasionally jump over
+  - stop at avenues with higher precidence
+
+HIGHWAY
+  - sort of like avenues, exept overlaps, no precidence, no spawns (except maybe exits)
+
+POLYGON
+  - river
+    - stop or bridge
+
+
+
+Styles
+  - out of focus/seeing doubles
+  - very wavy
+  - multiple layers with blended starting/stopping
