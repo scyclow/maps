@@ -1,16 +1,25 @@
 /* TODO
 
-- circle clours
-- square clouds
-- break turbulence out by level
-- need smarter street color logic. I like the red center sometimes because of how bold it is, but i'm sick of the red/yellow combo
-  - shift base hue?
-  - change hue diff between streets?
-- turbulence adjsuts with scale
-- play with lighter bg, darker strokes
-- modify grid algo so outgrowth is most likely at begnining of branch (center of primary), and gets less likey as it goes out
+Maps of the Hyperreal
+Maps of Hyperreality
+Maps of the Imaginary
+Maps of Ideas
 
-- add cloud color scheme info to color palette fn
+- circle clouds?
+- square clouds?
+- break turbulence out by level
+- turbulence adjsuts with scale
+- modify grid algo so outgrowth is most likely at begnining of branch (center of primary), and gets less likey as it goes out
+  - then i can zoom waaaay out
+- logic for cloud borders
+- on double inverted cloud p3, make overlap color either the same as bg or more different
+- green clouds don't look very good on dark bgs
+  - well, a lot of colors don't look great on dark bg. explore using p3 for clouds  on p2/b&w base
+
+- increase length of primary street w/o increasing secondary street numbers
+- play around with other avenue types having extreme turbulence
+- lighter, pastell palette
+- dark bg + single color strokes
 
 
 rarities?
@@ -42,7 +51,7 @@ function keyPressed() {
 
 const BUFFER = 700
 let SCALE, LEFT, RIGHT, TOP, BOTTOM
-let STREET_COORD_NOISE_DIVISOR, STREET_BLOCK_HEIGHT, TURBULENCE, PRIMARY_DRIFT,
+let STREET_BLOCK_HEIGHT, TURBULENCE, PRIMARY_DRIFT,
     SECONDARY_DRIFT, TERTIARY_DRIFT, QUARTERNARY_DRIFT, STREET_DRIFT,
     SECONDARY_PRB, TERTIARY_PRB, QUARTERNARY_PRB, CLOUDS, COLOR_SCHEME, IGNORE_STREET_CAP,
     C, STREET_TURBULENCE
@@ -51,14 +60,13 @@ function setup() {
   __canvas = createCanvas(window.innerWidth, window.innerHeight);
   noiseSeed(int(rnd(10000000000000000)))
 
-  SCALE = rnd(0.25, 1)
+  SCALE = rnd(0.2, 1.2)
 
   LEFT = -width/(2*SCALE)
   RIGHT = width/(2*SCALE)
   TOP = -height/(2*SCALE)
   BOTTOM = height/(2*SCALE)
 
-  STREET_COORD_NOISE_DIVISOR = 5
   STREET_BLOCK_HEIGHT = 20 // can go up to maybe 200?
   TURBULENCE = rnd() < 0.7 ? 0.5 : 5 // 0.5
   STREET_TURBULENCE = rnd() < 0.2
@@ -110,7 +118,8 @@ function draw() {
     secondaryAveCoords,
     tertiaryAveCoords,
     quarternaryAveCoords,
-    streetCoords
+    streetCoords,
+    noiseCoordList
   } = generateAllCoords()
 
 
@@ -118,34 +127,39 @@ function draw() {
   const START_DRAW = Date.now()
 
 
-  // strokeWeight(0)
-
-
-
-
-
-
-
-  const noiseCoordList = times(CLOUDS, i =>
-    generateNoiseCoords(rnd(LEFT, RIGHT), rnd(TOP, BOTTOM), rnd(500/SCALE, 1000/SCALE)),
-  )
-
 
   const setNoiseColor = (x, y, c) => {
-    const sum = noiseCoordList.reduce((sum, nc) => inPolygon([x, y], nc) ? sum + 1 : sum, 0)
-    const h =
-      sum === 0 ? hue(c) :
-      sum === 1 ? hue(c) + 200 :
-      sum === 2 ? hue(c) + 40 :
-      hue(c) + 240
+    const sum = countCloudOverlaps(x, y, noiseCoordList)
+    const hAdj = + rnd(-10, 10)
 
-    const s =
-      sum === 0
-        ? (COLOR_SCHEME == 1) ? 0 : saturation(c)
-        : (COLOR_SCHEME == 2) ? 0 : saturation(c) + 10
+    let _color
+    if (sum === 0) {
+      _color = color(
+        hfix(hue(c) + hAdj),
+        (COLOR_SCHEME == 1) ? 0 : saturation(c),
+        brightness(c),
+      )
 
+    } else if (sum === 1 && C.cloud1Street) {
+      _color = C.cloud1Street
+    } else if (sum === 1) {
+      _color = color(
+        hfix(hue(c) + 200 + hAdj),
+        (COLOR_SCHEME == 2) ? 0 : saturation(c) + 10,
+        brightness(c),
+      )
+    } else if (sum === 2 && C.cloud2Street) {
+      _color = C.cloud2Street
+    } else if (sum === 2) {
+      _color = color(
+        hfix(hue(c) + 40 + hAdj),
+        (COLOR_SCHEME == 2) ? 0 : saturation(c) + 10,
+        brightness(c),
+      )
+    } else {
 
-    const _color = color(hfix(h + rnd(-10, 10)), s, brightness(c))
+    }
+
     fill(_color)
     stroke(_color)
   }
@@ -162,40 +176,25 @@ function draw() {
 
 // BACKGROUND
   const START_BG = Date.now()
+  drawBackground(noiseCoordList)
 
-  for(let x=LEFT; x<width/SCALE; x+=2) {
-    for(let y=TOP; y<height/SCALE; y+=2) {
-      const isInPoly = noiseCoordList.some((nc) => inPolygon([x, y], nc))
-      if (isInPoly) {
-        fill(C.noiseBg)
-      } else {
-        fill(
-          hue(C.bg1),
-          saturation(C.bg1),
-          brightness(C.bg1) + rnd(-10, 0),
-        )
-      }
-      circle(x+rnd(-3, 3), y+rnd(-3, 3), rnd(2, 4))
-    }
-  }
   const END_BG = Date.now()
   console.log('bg', END_BG - START_BG)
 
 
 
-
   // stroke(color(55, 40, 100))
   stroke(color(55, 0, 70))
-  noiseCoordList.forEach(nc => {
-    nc.forEach((coord, ix) => {
-      const [x0, y0] = coord
-      const [x1, y1] = nc[ix+1] || coord
+  // noiseCoordList.forEach(nc => {
+  //   nc.coords.forEach((coord, ix) => {
+  //     const [x0, y0] = coord
+  //     const [x1, y1] = nc.coords[ix+1] || coord
 
-      dotLine(x0, y0, x1, y1, (x, y) => {
-        circle(x, y, rnd(3*0.75, 3*1.2))
-      })
-    })
-  })
+  //     dotLine(x0, y0, x1, y1, (x, y) => {
+  //       circle(x, y, rnd(3*0.75, 3*1.2))
+  //     })
+  //   })
+  // })
 
 
 
@@ -203,9 +202,8 @@ function draw() {
   noStroke()
 
 
-  streetCoords.forEach(coords => drawCoords(coords.coords, (x, y, progress) => {
+  streetCoords.forEach(coords => drawCoords(coords.coords, noiseCoordList, (x, y, progress) => {
     // circle(x+rnd(0, 50), y+rnd(0, 50), rnd(1*0.75, 2*1.2))
-    const isInPolygon = noiseCoordList.some(nc => inPolygon([x, y], nc))
     setNoiseColor(x, y, C.street)
 
     circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(1*0.75, 1*1.2))
@@ -221,41 +219,32 @@ function draw() {
 
 
 
-  quarternaryAveCoords.forEach(coords => drawCoords(coords.coords, (x, y) => {
-    const isInPolygon = noiseCoordList.some(nc => inPolygon([x, y], nc))
+  quarternaryAveCoords.forEach(coords => drawCoords(coords.coords, noiseCoordList, (x, y) => {
     setNoiseColor(x, y, C.quarternary)
-
-
     circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(2*0.75, 2*1.2))
   }))
 
 
 
 
-  tertiaryAveCoords.forEach(coords => drawCoords(coords.coords, (x, y) => {
-    const isInPolygon = noiseCoordList.some(nc => inPolygon([x, y], nc))
+  tertiaryAveCoords.forEach(coords => drawCoords(coords.coords, noiseCoordList, (x, y) => {
     setNoiseColor(x, y, C.tertiary)
-
     circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(2*0.75, 4*1.2))
   }))
 
 
 
 
-  secondaryAveCoords.forEach(coords => drawCoords(coords.coords, (x, y) => {
-    const isInPolygon = noiseCoordList.some(nc => inPolygon([x, y], nc))
+  secondaryAveCoords.forEach(coords => drawCoords(coords.coords, noiseCoordList, (x, y) => {
     setNoiseColor(x, y, C.secondary)
-
     circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(6*0.75, 6*1.2))
   }))
 
 
 
 
-  drawCoords(primaryAveCoords.coords, (x, y) => {
-    const isInPolygon = noiseCoordList.some(nc => inPolygon([x, y], nc))
+  drawCoords(primaryAveCoords.coords, noiseCoordList, (x, y) => {
     setNoiseColor(x, y, C.primary)
-
     circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(8*0.75, 8*1.2))
   })
 
@@ -264,6 +253,26 @@ function draw() {
 
   console.log('draw', END - END_BG)
 
+}
+
+function drawBackground(noiseCoordList) {
+  for(let x=LEFT; x<width/SCALE; x+=2) {
+    for(let y=TOP; y<height/SCALE; y+=2) {
+      const cloudOverlaps = countCloudOverlaps(x, y, noiseCoordList)
+      if (cloudOverlaps === 1) {
+        fill(C.cloudBg1)
+      } else if (cloudOverlaps === 2) {
+        fill(C.cloudBg2)
+      } else {
+        fill(
+          hue(C.bg1),
+          saturation(C.bg1),
+          brightness(C.bg1) + rnd(-10, 0),
+        )
+      }
+      circle(x+rnd(-3, 3), y+rnd(-3, 3), rnd(2, 4))
+    }
+  }
 }
 
 function generateAllCoords() {
@@ -356,12 +365,17 @@ function generateAllCoords() {
     ]
   }))
 
+  const noiseCoordList = times(CLOUDS, i =>
+    generateNoiseCoords(rnd(LEFT, RIGHT), rnd(TOP, BOTTOM), rnd(500/SCALE, 1000/SCALE)),
+  )
+
   return {
     primaryAveCoords,
     secondaryAveCoords,
     tertiaryAveCoords,
     quarternaryAveCoords,
-    streetCoords
+    streetCoords,
+    noiseCoordList,
   }
 }
 
@@ -369,6 +383,7 @@ function getColorPalette() {
 
   const bg1Hue = hfix(rnd(360))
   const bg2Hue = hfix(rnd(360))
+
 
   const p1 = {
     primary: color(hfix(0), 60, 80),
@@ -379,11 +394,16 @@ function getColorPalette() {
     bg1: color(bg1Hue, 50, 20),
     bg2: color(bg2Hue, 20, 20),
     circle: color(255),
-    noiseBg: color(
+    cloudBg1: color(
       hfix(bg1Hue+120),
       COLOR_SCHEME === 2 ? 0 : 70,
       COLOR_SCHEME === 2 ? 0 : 30,
-    )
+    ),
+    cloudBg2: color(
+      hfix(bg1Hue+300),
+      COLOR_SCHEME === 2 ? 0 : 70,
+      COLOR_SCHEME === 2 ? 0 : 30,
+    ),
   }
 
   const h = hfix(rnd(360))
@@ -397,16 +417,32 @@ function getColorPalette() {
     bg1: color(bg1Hue, 35, 20),
     bg2: color(bg2Hue, 20, 20),
     circle: color(255),
-    noiseBg: color(
+    cloudBg1: color(
       hfix(bg1Hue+120),
       COLOR_SCHEME === 2 ? 0 : 70,
       COLOR_SCHEME === 2 ? 0 : 30,
-    )
+    ),
+    cloudBg2: color(
+      hfix(bg1Hue+300),
+      COLOR_SCHEME === 2 ? 0 : 70,
+      COLOR_SCHEME === 2 ? 0 : 30,
+    ),
   }
 
 
   const bgh = hfix(rnd(360))
   const dark = color(hfix(bgh+180), 30, 15)
+  const p3CloudBg1 = color(
+    hfix(bg1Hue+120),
+    COLOR_SCHEME === 2 ? 0 : 55,
+    COLOR_SCHEME === 2 ? 80 : 95,
+  )
+  const p3CloudBg2 = color(
+    hfix(bg1Hue+300),
+    COLOR_SCHEME === 2 ? 0 : 55,
+    COLOR_SCHEME === 2 ? 80 : 95,
+  )
+  const p3InvertCloud = rnd() < 0.5
   const p3 = {
     primary: dark,
     secondary: dark,
@@ -416,25 +452,35 @@ function getColorPalette() {
     bg1: color(bg1Hue, 55, 95), // looks good at (344, 90, 100) with dark blue strokes
     bg2: color(hfix(bg1Hue+rnd(-20, 20)), 50, 95),
     circle: dark,
-    noiseBg: color(
-      hfix(bg1Hue+120),
-      COLOR_SCHEME === 2 ? 0 : 55,
-      COLOR_SCHEME === 2 ? 80 : 95,
-    )
+    cloudBg1: p3CloudBg1,
+    cloudBg2: p3CloudBg1,
+    cloud1Street: p3InvertCloud ? inverseColor(p3CloudBg1) : dark,
+    cloud2Street: p3InvertCloud ? inverseColor(p3CloudBg2) : dark,
+    cloud1Circle: p3InvertCloud ? inverseColor(p3CloudBg1) : dark,
+    cloud2Circle: p3InvertCloud ? inverseColor(p3CloudBg2) : dark,
   }
-
 
   const output = rnd()
   console.log('OUTPUT', output)
   return output < 0.5 ? p2 : p3
 }
 
+const inverseColor = c => color(
+  hfix(hue(c) + 180),
+  saturation(c),
+  saturation(c) > 0 ? brightness(c) : 0
+)
 
+
+
+const distFromNoiseShapeCenter = (x, y, z, angle, maxR, noiseDivisor=1) => {
+  const [rx, ry] = getXYRotation(angle, 1, x + 1000, y + 1000)
+  return noise(rx/noiseDivisor, ry/noiseDivisor, z/noiseDivisor) * maxR
+}
 
 const noiseXY = (cx, cy, z, maxR, noiseDivisor=1) => (progress) => {
   const angle = progress*TWO_PI
-  const [rx, ry] = getXYRotation(angle, 1, cx + 1000, cy + 1000)
-  const r = noise(rx/noiseDivisor, ry/noiseDivisor, z/noiseDivisor) * maxR
+  const r = distFromNoiseShapeCenter(cx, cy, z, angle, maxR, noiseDivisor)
   return getXYRotation(angle, r, cx, cy)
 }
 
@@ -442,12 +488,15 @@ const noiseXY = (cx, cy, z, maxR, noiseDivisor=1) => (progress) => {
 function generateNoiseCoords(x, y, r) {
   const points = 250
   const pointFn = noiseXY(x, y, 1, r)
-  return [...times(points, p => pointFn(p/points)), pointFn(1)]
+  return {
+    x, y, r,
+    coords: [...times(points, p => pointFn(p/points)), pointFn(1)]
+  }
 }
 
 
 
-function drawCoords(coords, dotFn) {
+function drawCoords(coords, noiseCoordList, dotFn) {
   coords.forEach((coord, i) => {
     const { x: x0, y: y0 } = coord
 
@@ -463,8 +512,15 @@ function drawCoords(coords, dotFn) {
 
     if (i === coords.length-1 && !IGNORE_STREET_CAP) {
       push()
-      // fill(255)
-      fill(C.circle)
+      const cloudOverlaps = countCloudOverlaps(x0, y0, noiseCoordList)
+
+      if (cloudOverlaps === 1 && C.cloud1Circle) {
+        fill(C.cloud1Circle)
+      } else if (cloudOverlaps === 2 && C.cloud2Circle) {
+        fill(C.cloud2Circle)
+      } else {
+        fill(C.circle)
+      }
       noStroke()
       circle(x0, y0, 8)
 
@@ -547,7 +603,7 @@ function generateStreetCoords(startX, startY, startAngle, params={}) {
 
   for (let i=0; i<length; i++) {
     angle = map(
-      noise(x/STREET_COORD_NOISE_DIVISOR, y/STREET_COORD_NOISE_DIVISOR),
+      noise(x/5, y/5),
       0,
       1,
       angle - driftAmt,
@@ -647,14 +703,26 @@ function streetBg(streetCoords, quarternaryAveCoords, tertiaryAveCoords, seconda
 
 
 
+function countCloudOverlaps(x, y, noiseCoordList) {
+  return noiseCoordList.reduce((sum, nc) => inCloud({ x, y }, nc) ? sum + 1 : sum, 0)
+}
 
 
+function inCloud(p, polygon) {
+  const { d, angle } = lineStats(polygon.x, polygon.y, p.x, p.y)
+  return d < distFromNoiseShapeCenter(polygon.x, polygon.y, 1, angle, polygon.r)
+}
 
 function inPolygon(p, polygon) {
+  if (
+    dist(p[0], p[1], polygon.x, polygon.y) > polygon.r
+  )
+  return false
+
   const infLine = [width*2, height*2]
-  const intersections = polygon.reduce((sum, l, i) => {
-    const nextI = (i+1) % polygon.length
-    const nextLine = polygon[nextI]
+  const intersections = polygon.coords.reduce((sum, l, i) => {
+    const nextI = (i+1) % polygon.coords.length
+    const nextLine = polygon.coords[nextI]
 
     return intersects(p, infLine, l, nextLine)
       ? sum + 1
