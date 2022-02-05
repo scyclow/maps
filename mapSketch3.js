@@ -1,4 +1,35 @@
-// BOILERPLATE
+/* TODO
+
+- circle clours
+- square clouds
+- break turbulence out by level
+- need smarter street color logic. I like the red center sometimes because of how bold it is, but i'm sick of the red/yellow combo
+  - shift base hue?
+  - change hue diff between streets?
+- turbulence adjsuts with scale
+- play with lighter bg, darker strokes
+- modify grid algo so outgrowth is most likely at begnining of branch (center of primary), and gets less likey as it goes out
+
+- add cloud color scheme info to color palette fn
+
+
+rarities?
+5% fat and fuzzy
+5% skinny
+5% zoomed way in (1.25)
+10% zoomed out (0.35-0.4)
+5% zoomed far out (0.25)
+10% b/w streets
+5% straight
+5% really squigly
+
+
+20% cloud
+  - single
+  - double
+  - b/w
+*/
+
 
 function keyPressed() {
   if (keyCode === 83) {
@@ -10,70 +41,260 @@ function keyPressed() {
 
 
 const BUFFER = 700
-const SCALE = 1
-let LEFT, RIGHT, TOP, BOTTOM
+let SCALE, LEFT, RIGHT, TOP, BOTTOM
+let STREET_COORD_NOISE_DIVISOR, STREET_BLOCK_HEIGHT, TURBULENCE, PRIMARY_DRIFT,
+    SECONDARY_DRIFT, TERTIARY_DRIFT, QUARTERNARY_DRIFT, STREET_DRIFT,
+    SECONDARY_PRB, TERTIARY_PRB, QUARTERNARY_PRB, CLOUDS, COLOR_SCHEME, IGNORE_STREET_CAP,
+    C, STREET_TURBULENCE
+
 function setup() {
   __canvas = createCanvas(window.innerWidth, window.innerHeight);
   noiseSeed(int(rnd(10000000000000000)))
+
+  SCALE = rnd(0.25, 1)
 
   LEFT = -width/(2*SCALE)
   RIGHT = width/(2*SCALE)
   TOP = -height/(2*SCALE)
   BOTTOM = height/(2*SCALE)
 
+  STREET_COORD_NOISE_DIVISOR = 5
+  STREET_BLOCK_HEIGHT = 20 // can go up to maybe 200?
+  TURBULENCE = rnd() < 0.7 ? 0.5 : 5 // 0.5
+  STREET_TURBULENCE = rnd() < 0.2
 
+  const hardCurves = rnd() < 0.1
+
+  PRIMARY_DRIFT = HALF_PI/16
+  SECONDARY_DRIFT = HALF_PI/rnd(16, 25)
+  TERTIARY_DRIFT = HALF_PI/(hardCurves ? 2 : rnd(50, 100)) // baseDriftDenom
+  QUARTERNARY_DRIFT = HALF_PI/(hardCurves ? 2 : rnd(50, 100)) // baseDriftDenom
+  STREET_DRIFT = HALF_PI/(hardCurves ? 2 : rnd(50, 100)) // baseDriftDenom
+
+  SECONDARY_PRB = 0.2
+  TERTIARY_PRB = 0.2//0.5
+  QUARTERNARY_PRB = 0.4//0.5
+
+  CLOUDS =
+    rnd() < 0.5 ? 0 :
+    rnd() < 0.75 ? 1 :
+    2
+
+  IGNORE_STREET_CAP = rnd() < 0.05
+
+
+  const csSeed = rnd()
+  COLOR_SCHEME =
+    csSeed < 0.5 ? 0 :  // both colors
+    csSeed < 0.75 ? 1 : // bw base, color cloud
+    2                   // color base, bw cloud
+
+  colorMode(HSB, 360, 100, 100, 100)
+
+  C = getColorPalette()
 }
 
 function draw() {
 
   noLoop()
   noStroke()
-  translate(width/2, height/2)
-
-  // scale(rnd(0.2, 5))
-  // translate(rnd(-500,500), rnd(-500,500))
-
   colorMode(HSB, 360, 100, 100, 100)
-
-
-  background(0)
-
-
-
-  fill(40, 10, 90)
+  translate(width/2, height/2)
   scale(SCALE)
-
-  // stroke('red')
-  // fill('red')
-  // rectMode(CENTER)
-  // rect(0,0, width, height)
-
-  const driftDenom = rnd() < 0.1 ? 2 : 100
 
 
   const START = Date.now()
 
-  let primaryAveCoords
+  const {
+    primaryAveCoords,
+    secondaryAveCoords,
+    tertiaryAveCoords,
+    quarternaryAveCoords,
+    streetCoords
+  } = generateAllCoords()
 
-  const x = rnd()
-  if (x < 0.25) {
-    primaryAveCoords = generateStreetCoords(rnd(LEFT, RIGHT), BOTTOM, PI + rnd(-HALF_PI/4, HALF_PI/4))
-  } else if (x < 0.5) {
-    primaryAveCoords = generateStreetCoords(rnd(LEFT, RIGHT), TOP, 0 + rnd(-HALF_PI/4, HALF_PI/4))
-  } else if (x < 0.75) {
-    primaryAveCoords = generateStreetCoords(LEFT, rnd(TOP, BOTTOM), HALF_PI + rnd(-HALF_PI/4, HALF_PI/4))
-  } else {
-    primaryAveCoords = generateStreetCoords(RIGHT, rnd(TOP, BOTTOM), HALF_PI + PI + rnd(-HALF_PI/4, HALF_PI/4))
 
+
+  const START_DRAW = Date.now()
+
+
+  // strokeWeight(0)
+
+
+
+
+
+
+
+  const noiseCoordList = times(CLOUDS, i =>
+    generateNoiseCoords(rnd(LEFT, RIGHT), rnd(TOP, BOTTOM), rnd(500/SCALE, 1000/SCALE)),
+  )
+
+
+  const setNoiseColor = (x, y, c) => {
+    const sum = noiseCoordList.reduce((sum, nc) => inPolygon([x, y], nc) ? sum + 1 : sum, 0)
+    const h =
+      sum === 0 ? hue(c) :
+      sum === 1 ? hue(c) + 200 :
+      sum === 2 ? hue(c) + 40 :
+      hue(c) + 240
+
+    const s =
+      sum === 0
+        ? (COLOR_SCHEME == 1) ? 0 : saturation(c)
+        : (COLOR_SCHEME == 2) ? 0 : saturation(c) + 10
+
+
+    const _color = color(hfix(h + rnd(-10, 10)), s, brightness(c))
+    fill(_color)
+    stroke(_color)
   }
+
+  console.log('coords', START_DRAW - START)
+
+
+  background(C.bg2)
+
+  // nice bg colors:
+    // (359, 50, 20) (along with 0 sat streets)
+    // (178, 50, 20) (along with 0 sat streets)
+
+
+// BACKGROUND
+  const START_BG = Date.now()
+
+  for(let x=LEFT; x<width/SCALE; x+=2) {
+    for(let y=TOP; y<height/SCALE; y+=2) {
+      const isInPoly = noiseCoordList.some((nc) => inPolygon([x, y], nc))
+      if (isInPoly) {
+        fill(C.noiseBg)
+      } else {
+        fill(
+          hue(C.bg1),
+          saturation(C.bg1),
+          brightness(C.bg1) + rnd(-10, 0),
+        )
+      }
+      circle(x+rnd(-3, 3), y+rnd(-3, 3), rnd(2, 4))
+    }
+  }
+  const END_BG = Date.now()
+  console.log('bg', END_BG - START_BG)
+
+
+
+
+  // stroke(color(55, 40, 100))
+  stroke(color(55, 0, 70))
+  noiseCoordList.forEach(nc => {
+    nc.forEach((coord, ix) => {
+      const [x0, y0] = coord
+      const [x1, y1] = nc[ix+1] || coord
+
+      dotLine(x0, y0, x1, y1, (x, y) => {
+        circle(x, y, rnd(3*0.75, 3*1.2))
+      })
+    })
+  })
+
+
+
+
+  noStroke()
+
+
+  streetCoords.forEach(coords => drawCoords(coords.coords, (x, y, progress) => {
+    // circle(x+rnd(0, 50), y+rnd(0, 50), rnd(1*0.75, 2*1.2))
+    const isInPolygon = noiseCoordList.some(nc => inPolygon([x, y], nc))
+    setNoiseColor(x, y, C.street)
+
+    circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(1*0.75, 1*1.2))
+    if (STREET_TURBULENCE) {
+      times(5, () => {
+        circle(x+rnd(-10, 10), y+rnd(-10, 10), rnd(1*0.75, 1*1.2))
+      })
+    }
+  }))
+
+
+
+
+
+
+  quarternaryAveCoords.forEach(coords => drawCoords(coords.coords, (x, y) => {
+    const isInPolygon = noiseCoordList.some(nc => inPolygon([x, y], nc))
+    setNoiseColor(x, y, C.quarternary)
+
+
+    circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(2*0.75, 2*1.2))
+  }))
+
+
+
+
+  tertiaryAveCoords.forEach(coords => drawCoords(coords.coords, (x, y) => {
+    const isInPolygon = noiseCoordList.some(nc => inPolygon([x, y], nc))
+    setNoiseColor(x, y, C.tertiary)
+
+    circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(2*0.75, 4*1.2))
+  }))
+
+
+
+
+  secondaryAveCoords.forEach(coords => drawCoords(coords.coords, (x, y) => {
+    const isInPolygon = noiseCoordList.some(nc => inPolygon([x, y], nc))
+    setNoiseColor(x, y, C.secondary)
+
+    circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(6*0.75, 6*1.2))
+  }))
+
+
+
+
+  drawCoords(primaryAveCoords.coords, (x, y) => {
+    const isInPolygon = noiseCoordList.some(nc => inPolygon([x, y], nc))
+    setNoiseColor(x, y, C.primary)
+
+    circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(8*0.75, 8*1.2))
+  })
+
+
+  const END = Date.now()
+
+  console.log('draw', END - END_BG)
+
+}
+
+function generateAllCoords() {
+
+  let primaryCoordArgs
+  const argSeed = rnd()
+  if (argSeed < 0.25) {
+    primaryCoordArgs = [rnd(LEFT, RIGHT), BOTTOM, PI + rnd(-HALF_PI/4, HALF_PI/4)]
+  } else if (argSeed < 0.5) {
+    primaryCoordArgs = [rnd(LEFT, RIGHT), TOP, 0 + rnd(-HALF_PI/4, HALF_PI/4)]
+  } else if (argSeed < 0.75) {
+    primaryCoordArgs = [LEFT, rnd(TOP, BOTTOM), HALF_PI + rnd(-HALF_PI/4, HALF_PI/4)]
+  } else {
+    primaryCoordArgs = [RIGHT, rnd(TOP, BOTTOM), HALF_PI + PI + rnd(-HALF_PI/4, HALF_PI/4)]
+  }
+
+  const primaryAveCoords = generateStreetCoords(...primaryCoordArgs, {
+    driftAmt: PRIMARY_DRIFT
+  })
 
   let pBranch = 0
   const secondaryAveCoords = primaryAveCoords.coords.map((coord) => {
-    if (rnd() < 0.2) {
+    if (rnd() < SECONDARY_PRB) {
       const branch = pBranch++
       const direction = rnd() < 0.5 ? 1 : -1
       const angleAdj = direction === -1 ? HALF_PI : PI+HALF_PI
-      return generateStreetCoords(coord.x, coord.y, coord.angle + angleAdj, { direction, branch })
+      return generateStreetCoords(coord.x, coord.y, coord.angle + angleAdj, {
+        direction,
+        branch,
+        driftAmt: SECONDARY_DRIFT
+      })
     }
   }).filter(exists)
 
@@ -81,14 +302,14 @@ function draw() {
   const tertiaryAveCoords = secondaryAveCoords.flatMap((coords, i) => {
     let sBranch = 0
     return coords.coords.map(coord => {
-      if (rnd() < 0.5) {
+      if (rnd() < TERTIARY_PRB) {
 
         const direction = rnd() < 0.5 ? 1 : -1
         const angleAdj = direction === -1 ? HALF_PI : PI+HALF_PI
 
         const tertiaryAveParams = {
           direction,
-          driftAmt: HALF_PI/driftDenom,
+          driftAmt: TERTIARY_DRIFT,
           stopAtIntersections: [
             primaryAveCoords,
             ...secondaryAveCoords,
@@ -101,13 +322,13 @@ function draw() {
 
 
   const quarternaryAveCoords = tertiaryAveCoords.flatMap(coords => coords.coords.map(coord => {
-    if (rnd() < 0.5) {
+    if (rnd() < QUARTERNARY_PRB) {
       const direction = rnd() < 0.5 ? 1 : -1
       const angleAdj = direction === -1 ? HALF_PI : PI+HALF_PI
 
       const quarternaryAveParams = {
         direction,
-        driftAmt: HALF_PI/driftDenom,
+        driftAmt: QUARTERNARY_DRIFT,
         stopAtIntersections: [
           primaryAveCoords,
           ...secondaryAveCoords,
@@ -121,7 +342,7 @@ function draw() {
 
   const streetCoords = secondaryAveCoords.flatMap(coords => coords.coords.flatMap(coord => {
     const streetParams = {
-      driftAmt: HALF_PI/driftDenom,
+      driftAmt: STREET_DRIFT,
       stopAtIntersections: [
         primaryAveCoords,
         ...secondaryAveCoords,
@@ -135,146 +356,77 @@ function draw() {
     ]
   }))
 
+  return {
+    primaryAveCoords,
+    secondaryAveCoords,
+    tertiaryAveCoords,
+    quarternaryAveCoords,
+    streetCoords
+  }
+}
 
-  const START_DRAW = Date.now()
+function getColorPalette() {
 
+  const bg1Hue = hfix(rnd(360))
+  const bg2Hue = hfix(rnd(360))
 
-  // strokeWeight(0)
+  const p1 = {
+    primary: color(hfix(0), 60, 80),
+    secondary: color(hfix(60), 40, 80),
+    tertiary: color(hfix(120), 40, 80),
+    quarternary: color(hfix(180), 40, 80),
+    street: color(hfix(240), 40, 80),
+    bg1: color(bg1Hue, 50, 20),
+    bg2: color(bg2Hue, 20, 20),
+    circle: color(255),
+    noiseBg: color(
+      hfix(bg1Hue+120),
+      COLOR_SCHEME === 2 ? 0 : 70,
+      COLOR_SCHEME === 2 ? 0 : 30,
+    )
+  }
 
+  const h = hfix(rnd(360))
 
-  // stroke(25)
-  // let xOffset = 215
-  // let yOffset = 215
-  // streetCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 1))
-  // quarternaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 2))
-  // tertiaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 4))
-  // secondaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 6))
-  // drawCoordsLine(primaryAveCoords.coords, xOffset, yOffset, 8)
-
-
-  // xOffset = -215
-  // yOffset = -215
-  // streetCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 1))
-  // quarternaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 2))
-  // tertiaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 4))
-  // secondaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 6))
-  // drawCoordsLine(primaryAveCoords.coords, xOffset, yOffset, 8)
-
-  // xOffset = 215
-  // yOffset = -215
-  // streetCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 1))
-  // quarternaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 2))
-  // tertiaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 4))
-  // secondaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 6))
-  // drawCoordsLine(primaryAveCoords.coords, xOffset, yOffset, 8)
-
-  // xOffset = -215
-  // yOffset = 215
-  // streetCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 1))
-  // quarternaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 2))
-  // tertiaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 4))
-  // secondaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 6))
-  // drawCoordsLine(primaryAveCoords.coords, xOffset, yOffset, 8)
-
-
-
-
-
-
-  const noiseCoordList = times(0, i =>
-    generateNoiseCoords(rnd(LEFT, RIGHT), rnd(TOP, BOTTOM), rnd(250, 500)),
-  )
-
-
-  const setNoiseColor = (x, y, c) => {
-    const sum = noiseCoordList.reduce((sum, nc) => inPolygon([x, y], nc) ? sum + 1 : sum, 0)
-    const h =
-      sum === 0 ? hue(c) :
-      sum === 1 ? hue(c) + 100 :
-      sum === 2 ? hue(c) + 200 :
-      hue(c) + 300
-
-    const _color = color(hfix(h), saturation(c), brightness(c))
-    fill(_color)
-    stroke(_color)
+  const p2 = {
+    primary: color(hfix(h+20), 50, 80),
+    secondary: color(hfix(h+60), 40, 80),
+    tertiary: color(hfix(h+90), 40, 80),
+    quarternary: color(hfix(h+180), 40, 80),
+    street: color(hfix(h+240), 40, 80),
+    bg1: color(bg1Hue, 35, 20),
+    bg2: color(bg2Hue, 20, 20),
+    circle: color(255),
+    noiseBg: color(
+      hfix(bg1Hue+120),
+      COLOR_SCHEME === 2 ? 0 : 70,
+      COLOR_SCHEME === 2 ? 0 : 30,
+    )
   }
 
 
-  // stroke(color(55, 40, 100))
-  // noiseCoordList.forEach(nc => {
-  //   nc.forEach((coord, ix) => {
-  //     const [x0, y0] = coord
-  //     const [x1, y1] = nc[ix+1] || coord
-
-  //     dotLine(x0, y0, x1, y1, (x, y) => {
-  //       circle(x, y, rnd(3*0.75, 3*1.2))
-  //     })
-  //   })
-  // })
-
-
-
-  noStroke()
-
-  streetCoords.forEach(coords => drawCoords(coords.coords, (x, y, progress) => {
-    // circle(x+rnd(0, 50), y+rnd(0, 50), rnd(1*0.75, 2*1.2))
-    const isInPolygon = noiseCoordList.some(nc => inPolygon([x, y], nc))
-    setNoiseColor(x, y, color(hfix(240), 30, 80))
-
-    circle(x+rnd(-10, 10), y+rnd(-10, 10), rnd(1*0.75, 1*1.2))
-  }))
+  const bgh = hfix(rnd(360))
+  const dark = color(hfix(bgh+180), 30, 15)
+  const p3 = {
+    primary: dark,
+    secondary: dark,
+    tertiary: dark,
+    quarternary: dark,
+    street: dark,
+    bg1: color(bg1Hue, 55, 95), // looks good at (344, 90, 100) with dark blue strokes
+    bg2: color(hfix(bg1Hue+rnd(-20, 20)), 50, 95),
+    circle: dark,
+    noiseBg: color(
+      hfix(bg1Hue+120),
+      COLOR_SCHEME === 2 ? 0 : 55,
+      COLOR_SCHEME === 2 ? 80 : 95,
+    )
+  }
 
 
-
-
-
-
-  quarternaryAveCoords.forEach(coords => drawCoords(coords.coords, (x, y) => {
-    const isInPolygon = noiseCoordList.some(nc => inPolygon([x, y], nc))
-    setNoiseColor(x, y, color(hfix(180), 30, 80))
-
-
-    circle(x, y, rnd(2*0.75, 2*1.2))
-  }))
-
-
-
-
-  tertiaryAveCoords.forEach(coords => drawCoords(coords.coords, (x, y) => {
-    const isInPolygon = noiseCoordList.some(nc => inPolygon([x, y], nc))
-    setNoiseColor(x, y, color(hfix(120), 30, 80))
-
-    circle(x+rnd(-0.5, 0.5), y+rnd(-0.5, 0.5), rnd(2*0.75, 4*1.2))
-  }))
-
-
-
-
-  secondaryAveCoords.forEach(coords => drawCoords(coords.coords, (x, y) => {
-    const isInPolygon = noiseCoordList.some(nc => inPolygon([x, y], nc))
-    setNoiseColor(x, y, color(hfix(60), 30, 80))
-
-    circle(x+rnd(-0.5, 0.5), y+rnd(-0.5, 0.5), rnd(6*0.75, 6*1.2))
-  }))
-
-
-
-
-  drawCoords(primaryAveCoords.coords, (x, y) => {
-    const isInPolygon = noiseCoordList.some(nc => inPolygon([x, y], nc))
-    setNoiseColor(x, y, color(hfix(0), 50, 80))
-
-    circle(x+rnd(-0.5, 0.5), y+rnd(-0.5, 0.5), rnd(8*0.75, 8*1.2))
-  })
-
-
-
-
-  const END = Date.now()
-
-  console.log('coords', START_DRAW - START)
-  console.log('draw', END - START_DRAW)
-
+  const output = rnd()
+  console.log('OUTPUT', output)
+  return output < 0.5 ? p2 : p3
 }
 
 
@@ -309,11 +461,13 @@ function drawCoords(coords, dotFn) {
 
     }
 
-    if (i === coords.length-1) {
+    if (i === coords.length-1 && !IGNORE_STREET_CAP) {
       push()
-      fill(255)
+      // fill(255)
+      fill(C.circle)
       noStroke()
       circle(x0, y0, 8)
+
       pop()
     }
   })
@@ -382,9 +536,7 @@ function findIntersectionPoint(c1, c2, coordLists) {
 function generateStreetCoords(startX, startY, startAngle, params={}) {
   const driftAmt = params.driftAmt || HALF_PI/16
   const stopAtIntersections = params.stopAtIntersections || []
-  const noiseDivisor = 5
-  const blockHeight = 20
-  const length = 75
+  const length = 150
 
 
   let x = startX
@@ -395,13 +547,13 @@ function generateStreetCoords(startX, startY, startAngle, params={}) {
 
   for (let i=0; i<length; i++) {
     angle = map(
-      noise(x/noiseDivisor, y/noiseDivisor),
+      noise(x/STREET_COORD_NOISE_DIVISOR, y/STREET_COORD_NOISE_DIVISOR),
       0,
       1,
       angle - driftAmt,
       angle + driftAmt,
     )
-    const [nextX, nextY] = getXYRotation(angle, blockHeight, x, y)
+    const [nextX, nextY] = getXYRotation(angle, STREET_BLOCK_HEIGHT, x, y)
 
     if (i) {
       const c1 = { x, y }
@@ -457,66 +609,42 @@ const lineStats = (x1, y1, x2, y2) => ({
 
 
 
+function streetBg(streetCoords, quarternaryAveCoords, tertiaryAveCoords, secondaryAveCoords, primaryAveCoords) {
+  stroke(25)
+  let xOffset = 215
+  let yOffset = 215
+  streetCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 1))
+  quarternaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 2))
+  tertiaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 4))
+  secondaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 6))
+  drawCoordsLine(primaryAveCoords.coords, xOffset, yOffset, 8)
 
 
+  xOffset = -215
+  yOffset = -215
+  streetCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 1))
+  quarternaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 2))
+  tertiaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 4))
+  secondaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 6))
+  drawCoordsLine(primaryAveCoords.coords, xOffset, yOffset, 8)
 
+  xOffset = 215
+  yOffset = -215
+  streetCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 1))
+  quarternaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 2))
+  tertiaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 4))
+  secondaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 6))
+  drawCoordsLine(primaryAveCoords.coords, xOffset, yOffset, 8)
 
-
-
-
-
-
-
-
-
-
-
-
-
-// SHAPE FNs
-
-function drawShape(points, fns, offset=1, start=0, finish=1) {
-  times(offset, o => {
-
-    const _o = 2 * o / offset
-    const adjustedPoints = int(points * (finish-start))
-
-    fns.beforeFn(fns.drawFn, fns.xyFn, points, _o)
-    times(
-      points,
-      p => {
-        const xy = fns.xyFn(
-          start + (p+_o)/(points/(finish-start)),
-          p,
-          points
-        )
-
-        fns.drawFn(
-          xy,
-          p,
-          points
-        )
-
-        fns.eachFn(xy, p)
-      }
-    )
-    fns.afterFn(fns.drawFn, fns.xyFn, points, _o)
-  })
+  xOffset = -215
+  yOffset = 215
+  streetCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 1))
+  quarternaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 2))
+  tertiaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 4))
+  secondaryAveCoords.forEach(coords => drawCoordsLine(coords.coords, xOffset, yOffset, 6))
+  drawCoordsLine(primaryAveCoords.coords, xOffset, yOffset, 8)
 }
 
-function pointFn([x, y]) {
-  circle(x, y, 1)
-}
-
-
-
-function vertexFn([x, y]) {
-  vertex(x, y)
-}
-
-function curveVertexFn([x, y]) {
-  curveVertex(x, y)
-}
 
 
 
