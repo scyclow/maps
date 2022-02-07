@@ -508,7 +508,7 @@ const colorRules = {
     circle: color(hfix(h), 30, 15),
     border: color(hfix(h), 30, 15),
     theme: 'darkOnColor',
-    cloudRules: [...LIGHT_COLOR_RULES, 'darkOnColor'],
+    cloudRules: ALL_COLOR_RULES,
   }),
 
   colorOnDark: h => ({
@@ -522,7 +522,7 @@ const colorRules = {
     circle: color(hfix(h), 55, 95),
     border: color(hfix(h), 55, 95),
     theme: 'colorOnDark',
-    cloudRules: DARK_COLOR_RULES,
+    cloudRules: LIGHT_COLOR_RULES,
   }),
 
   invertedColors: h => {
