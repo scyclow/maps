@@ -5,6 +5,15 @@ Maps of Hyperreality
 Maps of the Imaginary
 Maps of Ideas
 
+
+1000 people were given a description of a complex system, and were asked to draw their interpretation of it in as high detail as possible.
+Some chose to hone in on specific details in high resolution while others chose to zoom out for a 50,000 foto view.
+Others still chose to omit details for simplicity, and some decided to add details of their own.
+Many can't keep their heads straight and combine multiple understandings of the same system into a single image
+
+
+
+
 - circle clouds?
 - square clouds?
 - break turbulence out by level
@@ -29,6 +38,9 @@ Maps of Ideas
   - medium, contained
   - large, on edge
   - several (4-5) covering entire map and overlapping
+
+gen1-4 notes
+- instead of clouds, do a noise grid. at certain breakpoints, change color
 
 
 
@@ -64,11 +76,14 @@ let SCALE, LEFT, RIGHT, TOP, BOTTOM
 let STREET_BLOCK_HEIGHT, TURBULENCE, PRIMARY_DRIFT,
     SECONDARY_DRIFT, TERTIARY_DRIFT, QUARTERNARY_DRIFT, STREET_DRIFT,
     SECONDARY_PRB, TERTIARY_PRB, QUARTERNARY_PRB, STREET_PRB, CLOUDS, IGNORE_STREET_CAP,
-    C, STREET_TURBULENCE, CLOUD_DIVISOR, HARD_CURVES, CLOUD_MIN, CLOUD_MAX
+    C, STREET_TURBULENCE, CLOUD_DIVISOR, HARD_CURVES, CLOUD_MIN, CLOUD_MAX, FOCAL_POINT,
+    HUE_SHIFT, SAT_SHIFT, BRT_SHIFT, MIN_ST_W, MAX_ST_W, SUNSPOT_CLOUDS, CLOUD_TOPO_DIVISOR,
+    CLOUD_SYM_OFFSET, CLOUD_MIDDLE, CLOUD_PEAK, IGNORE_CLOUDS
 
 const LIGHT_COLOR_RULES = ['lightMultiColor', 'blackOnWhite', 'darkOnColor', 'invertedColors']
 const DARK_COLOR_RULES = ['darkMultiColor', 'whiteOnBlack', 'colorOnDark', 'invertedColors']
 const ALL_COLOR_RULES = ['darkMultiColor', 'whiteOnBlack', 'colorOnDark', 'lightMultiColor', 'blackOnWhite', 'darkOnColor', 'invertedColors']
+
 
 let SIZE
 function setup() {
@@ -87,6 +102,9 @@ function setup() {
   TURBULENCE = rnd() < 0.85 ? 0.5 : 3 // 0.5
   STREET_TURBULENCE = rnd() < 0.2
 
+  MIN_ST_W = 0.8
+  MAX_ST_W = 1.2
+
   HARD_CURVES = rnd() < 0.1
 
   PRIMARY_DRIFT = HALF_PI/16
@@ -96,24 +114,62 @@ function setup() {
   STREET_DRIFT = HALF_PI/(HARD_CURVES ? 2 : rnd(50, 100)) // baseDriftDenom
 
 
-  const densityMinimum = map(SCALE, 0.2, 1.2, 0.05, 0.15)
-  SECONDARY_PRB = rnd(densityMinimum, 0.2)
-  TERTIARY_PRB = rnd(densityMinimum, 0.2)
-  QUARTERNARY_PRB = rnd(densityMinimum*2, 0.4)
-  STREET_PRB = rnd(0.25, 1)
+  const densityMinimum = map(SCALE, 0.2, 1.2, 0.1, 0.15)
+  const useDensityMax = rnd() < 0.15
 
-  CLOUDS = rnd() < 0.25 ? 0 : int(rnd(0, 10));
-    // rnd() < 0.675 ? 0 :
-    // rnd() < 0.92 ? 1 :
-    // 2
+  SECONDARY_PRB = useDensityMax ? 0.2 : rnd(densityMinimum, 0.2)
+  TERTIARY_PRB = useDensityMax ? 0.2 : rnd(densityMinimum, 0.2)
+  QUARTERNARY_PRB = useDensityMax ? 0.4 : rnd(densityMinimum*2, 0.4)
+  STREET_PRB = useDensityMax ? 1 : rnd(0.25, 1)
+
+  const cloudSeed = rnd()
+  CLOUDS =
+    cloudSeed < 0.25 ? 0 :
+    cloudSeed < 0.75 ? int(rnd(0, 4)) :
+    int(rnd(4, 10))
 
 
-  CLOUD_MIN = (500 - (CLOUDS + 1) * 40) / SCALE
-  CLOUD_MAX = (1000 - (CLOUDS + 1) * 40) / SCALE
+
+
+
+  // CLOUD_MIN = (500 - (CLOUDS + 1) * 40) / SCALE
+  // CLOUD_MAX = (1000 - (CLOUDS + 1) * 40) / SCALE
+
+  CLOUD_MIN = (500 - (CLOUDS + 1) * 20) / SCALE
+  CLOUD_MAX = (1000 - (CLOUDS + 1) * 20) / SCALE
 
   IGNORE_STREET_CAP = rnd() < 0.1
 
   CLOUD_DIVISOR = 1.1
+
+  FOCAL_POINT = {
+    x: rnd(LEFT, RIGHT),
+    y: rnd(TOP, BOTTOM),
+  }
+
+  const gradientSeed = rnd()
+  if (gradientSeed < 0.25) {
+    HUE_SHIFT = 0
+    SAT_SHIFT = 1
+  } else if (gradientSeed < 0.92) {
+    HUE_SHIFT = rnd(15, 30)
+    SAT_SHIFT = 0.9
+  } else {
+    HUE_SHIFT = rnd(45, 90)
+    SAT_SHIFT = 0.5
+  }
+
+  BRT_SHIFT = 1
+
+  // if (rnd() < 0.125) SUNSPOT_CLOUDS = true
+  if (rnd() < 0.25) IGNORE_CLOUDS = true
+
+  CLOUD_TOPO_DIVISOR = map(rnd(), 0, 1, 50, 500)
+  CLOUD_SYM_OFFSET = rnd() < 0.125 ? 0 : 100000
+  CLOUD_MIDDLE = rnd(0.4, 0.6)
+  CLOUD_PEAK = rnd() < 0.5 ? CLOUD_MIDDLE + 0.05 : CLOUD_MIDDLE + 0.25
+
+
 
   C = getColorThemes()
 }
@@ -215,10 +271,10 @@ function draw() {
   streetCoords.forEach(coords => drawCoords(coords.coords, cloudCoordList, (x, y, progress, angle) => {
     setDotColor(x, y, 'street')
 
-    circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(1*0.75, 1*1.2))
+    circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(1*MIN_ST_W, 1*MAX_ST_W))
     if (STREET_TURBULENCE) {
       times(5, () => {
-        circle(x+rnd(-10, 10), y+rnd(-10, 10), rnd(1*0.75, 1*1.2))
+        circle(x+rnd(-10, 10), y+rnd(-10, 10), rnd(1*MIN_ST_W, 1*MAX_ST_W))
         // rndLine(x, y, angle)
       })
     }
@@ -227,7 +283,7 @@ function draw() {
 
   quarternaryAveCoords.forEach(coords => drawCoords(coords.coords, cloudCoordList, (x, y, p, angle) => {
     setDotColor(x, y, 'quarternary')
-    circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(2*0.75, 2*1.2))
+    circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(2*MIN_ST_W, 2*MAX_ST_W))
     // rndLine(x, y, angle)
 
   }))
@@ -237,7 +293,7 @@ function draw() {
 
   tertiaryAveCoords.forEach(coords => drawCoords(coords.coords, cloudCoordList, (x, y, p, angle) => {
     setDotColor(x, y, 'tertiary')
-    circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(2*0.75, 4*1.2))
+    circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(3.5*MIN_ST_W, 3.5*MAX_ST_W))
     // rndLine(x, y, angle)
   }))
 
@@ -246,7 +302,7 @@ function draw() {
 
   secondaryAveCoords.forEach(coords => drawCoords(coords.coords, cloudCoordList, (x, y, p, angle) => {
     setDotColor(x, y, 'secondary')
-    circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(6*0.75, 6*1.2))
+    circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(6*MIN_ST_W, 6*MAX_ST_W))
     // rndLine(x, y, angle)
 
   }))
@@ -256,7 +312,7 @@ function draw() {
 
   drawCoords(primaryAveCoords.coords, cloudCoordList, (x, y, progress, angle) => {
     setDotColor(x, y, 'primary')
-    circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(8*0.75, 8*1.2))
+    circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(8*MIN_ST_W, 8*MAX_ST_W))
     // rndLine(x, y, angle)
   })
 
@@ -276,6 +332,7 @@ function drawBackground(cloudCoordList) {
   const cloud2Dark = DARK_COLOR_RULES.includes(C.cloud2.theme)
 
   const adjustedDotSize = 2/SCALE
+
 
   for(let x=LEFT; x<width/SCALE; x+=adjustedDotSize) {
     for(let y=TOP; y<height/SCALE; y+=adjustedDotSize) {
@@ -306,11 +363,13 @@ function drawBackground(cloudCoordList) {
 
       // circle(x+rnd(-offset, offset), y+rnd(-offset, offset), diam)
 
+      const adj = dist(x, y, FOCAL_POINT.x, FOCAL_POINT.y)/dist(LEFT, BOTTOM, FOCAL_POINT.x, FOCAL_POINT.y)
+
       strokeWeight(diam/3.5)
       stroke(
-        hue(bgC),
-        saturation(bgC),
-        brightness(bgC) + rnd(-10, 0),
+        hfix(hue(bgC) + map(adj, 0, 1, 0, HUE_SHIFT)),
+        saturation(bgC) * map(adj, 0, 1, SAT_SHIFT, 1),
+        (brightness(bgC) + rnd(-10, 0)) * map(adj, 0, 1, BRT_SHIFT, 1),
       )
       const angle = noise(x, y)
       const [x0, y0] = getXYRotation(PI+angle+rnd(-HALF_PI/2, HALF_PI/2), 5, x, y)
@@ -453,15 +512,30 @@ function generateAllCoords() {
 function createDotColorFn(cloudCoordList) {
   return (x, y, selection) => {
     const sum = countCloudOverlaps(x, y, cloudCoordList)
-    const hAdj = + rnd(-10, 10)
+
+    const adj = dist(x, y, FOCAL_POINT.x, FOCAL_POINT.y)/dist(LEFT, BOTTOM, FOCAL_POINT.x, FOCAL_POINT.y)
+
+    const hAdj = map(adj, 0, 1, 0, HUE_SHIFT)
 
     let _color
     if (sum === 0) {
-      _color = C.base[selection]
+      _color = color(
+        hfix(hue(C.base[selection]) + hAdj),
+        saturation(C.base[selection]) * map(adj, 0, 1, 0.5, 1),
+        brightness(C.base[selection]),
+      )
     } else if (sum === 1) {
-      _color = C.cloud1[selection]
+      _color = color(
+        hfix(hue(C.cloud1[selection]) + hAdj),
+        saturation(C.cloud1[selection]) * map(adj, 0, 1, 0.5, 1),
+        brightness(C.cloud1[selection]),
+      )
     } else if (sum >= 2) {
-      _color = C.cloud2[selection]
+      _color = color(
+        hfix(hue(C.cloud2[selection]) + hAdj),
+        saturation(C.cloud2[selection]) * map(adj, 0, 1, 0.5, 1),
+        brightness(C.cloud2[selection]),
+      )
     }
 
     fill(_color)
@@ -1030,7 +1104,14 @@ function streetBg(streetCoords, quarternaryAveCoords, tertiaryAveCoords, seconda
 
 
 function countCloudOverlaps(x, y, cloudCoordList) {
-  return cloudCoordList.reduce((sum, nc) => inCloud({ x, y }, nc) ? sum + 1 : sum, 0)
+  // if (SUNSPOT_CLOUDS) return cloudCoordList.reduce((sum, nc) => inCloud({ x, y }, nc) ? sum + 1 : sum, 0)
+  if (IGNORE_CLOUDS) return 0
+
+
+  const n = noise((x+CLOUD_SYM_OFFSET)/CLOUD_TOPO_DIVISOR, (y+CLOUD_SYM_OFFSET)/CLOUD_TOPO_DIVISOR)
+  if (n < CLOUD_MIDDLE) return 0
+  if (n < CLOUD_PEAK) return 1
+  return 2
 }
 
 
