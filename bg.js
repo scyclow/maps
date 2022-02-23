@@ -1,0 +1,97 @@
+
+const Q_PI = Math.PI/4
+const NEG_Q_PI = -Math.PI/4
+
+
+function drawBackground() {
+
+  background(LAYERS[0].colors.bg)
+
+  const strokeSize = 2/SCALE
+
+  for (let x = L; x < W; x += strokeSize) {
+    for (let y = T; y < H; y += strokeSize) {
+      const layer = findActiveLayer(x, y)
+      drawBackgroundStroke(x, y, layer, strokeSize)
+    }
+  }
+}
+
+function drawBackgroundStroke(x, y, layer, strokeSize) {
+  // increase/decrease rnd hue/sat for graininess
+  // TODO if layer 1 or 2 and is dark, diam *= 1.5
+
+  let diam = rnd(strokeSize, strokeSize*2)
+  let offset = strokeSize/2
+
+  strokeWeight(diam/3.5)
+
+  stroke(
+    hfix(hue(layer.colors.bg) + rnd(-3, 3)),
+    saturation(layer.colors.bg) + rnd(-5, 5),
+    brightness(layer.colors.bg) + rnd(-10, 0),
+  )
+  const angle = noise(x+W, y+H)
+
+  const [x0, y0] = getXYRotation(PI+angle+rnd(NEG_Q_PI, Q_PI), 5, x, y)
+  const [x1, y1] = getXYRotation(angle+rnd(NEG_Q_PI, Q_PI), 5, x, y)
+
+  line(x0, y0, x1, y1)
+}
+
+
+
+
+
+
+
+
+
+// function drawBackground() {
+//   const adjustedDotSize = 2/SCALE
+
+
+//   for (let x = L; x < W; x += adjustedDotSize) {
+//     for (let y = T; y < H; y += adjustedDotSize) {
+//       const activeLayer = findActiveLayer(x, y)
+//       let bgC
+//       let diam = rnd(adjustedDotSize, adjustedDotSize*2)
+//       let offset = adjustedDotSize/2
+//       if (activeLayer === 1) {
+//         bgC = C.layer1.bg
+//         if (layer1Dark) {
+//           diam *= 1.5
+//         }
+//       } else if (activeLayer >= 2) {
+//         bgC = C.layer2.bg
+//         if (layer2Dark) {
+//           diam *= 1.5
+//         }
+//       } else {
+//         bgC = C.base.bg
+//         offset *= 3
+//       }
+//       // fill(
+//       //   hue(bgC),
+//       //   saturation(bgC),
+//       //   brightness(bgC) + rnd(-10, 0),
+//       // )
+
+
+//       // circle(x+rnd(-offset, offset), y+rnd(-offset, offset), diam)
+
+//       const adj = dist(x, y, FOCAL_POINT.x, FOCAL_POINT.y)/dist(L, BOTTOM, FOCAL_POINT.x, FOCAL_POINT.y)
+
+//       strokeWeight(diam/3.5)
+//       stroke(
+//         hfix(hue(bgC) + map(adj, 0, 1, 0, HUE_SHIFT)),
+//         saturation(bgC) * map(adj, 0, 1, SAT_SHIFT, 1),
+//         (brightness(bgC) + rnd(-10, 0)) * map(adj, 0, 1, BRT_SHIFT, 1),
+//       )
+//       const angle = noise(x, y)
+//       const [x0, y0] = getXYRotation(PI+angle+rnd(-HALF_PI/2, HALF_PI/2), 5, x, y)
+//       const [x1, y1] = getXYRotation(angle+rnd(-HALF_PI/2, HALF_PI/2), 5, x, y)
+//       line(x0, y0, x1, y1)
+//     }
+//   }
+// }
