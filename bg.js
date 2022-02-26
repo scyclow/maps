@@ -26,10 +26,24 @@ function drawBackgroundStroke(x, y, layer, strokeSize) {
 
   strokeWeight(diam/3.5)
 
+  let hAdj = 0
+  let sAdj = 0
+  let bAdj = 0
+  if (layer.gradient) {
+    const d =
+      dist(x, y, layer.gradient.focalPoint.x, layer.gradient.focalPoint.y)
+      / dist(L, B, R, T)
+
+    hAdj = map(d, 0, 1, 0, layer.gradient.hue)
+    sAdj = map(d, 0, 1, 0, layer.gradient.sat)
+    bAdj = map(d, 0, 1, 0, layer.gradient.brt)
+
+  }
+
   stroke(
-    hfix(hue(layer.colors.bg) + rnd(-3, 3)),
-    saturation(layer.colors.bg) + rnd(-5, 5),
-    brightness(layer.colors.bg) + rnd(-10, 0),
+    hfix(hue(layer.colors.bg) + rnd(-3, 3) + hAdj),
+    saturation(layer.colors.bg) + rnd(-5, 5) + sAdj,
+    brightness(layer.colors.bg) + rnd(-10, 0) + bAdj,
   )
   const angle = noise(x+W, y+H)
 

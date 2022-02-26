@@ -1,3 +1,60 @@
+const setC = (x, y, c, g) => {
+
+  if (g) {
+    const d =
+      dist(x, y, g.focalPoint.x, g.focalPoint.y)
+      / dist(L, B, R, T)
+
+    const _c = color(
+      hfix(hue(c) + map(d, 0, 1, 0, g.hue)),
+      saturation(c) + map(d, 0, 1, 0, g.sat),
+      brightness(c) + map(d, 0, 1, 0, g.brt),
+    )
+    stroke(_c)
+    fill(_c)
+
+
+  } else {
+    stroke(c)
+    fill(c)
+  }
+
+
+
+}
+
+const coordToTuple = ({ x, y }) => [x, y]
+
+function findIntersectionPoint(c1, c2, coordLists) {
+  if (!coordLists.length) return false
+  const coord1 = coordToTuple(c1)
+  const coord2 = coordToTuple(c2)
+
+  return coordLists.some(coordList => {
+
+    if (coordList.coords.length < 10) return intersects(
+      coordToTuple(c1),
+      coordToTuple(c2),
+      coordToTuple(coordList.coords[0]),
+      coordToTuple(last(coordList.coords))
+    )
+
+    const size =
+      coordList.coords.length < 20 ? 2 :
+      coordList.coords.length < 40 ? 4 :
+      coordList.coords.length < 70 ? 7 :
+      10
+
+    for (let i=0; i<coordList.coords.length; i+=size) {
+      const coord3 = coordToTuple(coordList.coords[i])
+      const coord4 = coordToTuple(coordList.coords[i+size] || last(coordList.coords))
+      const bool = intersects(coord1, coord2, coord3, coord4)
+
+      if (bool) return bool
+    }
+    return false
+  })
+}
 
 function dotLine(x1, y1, x2, y2, dotFn) {
   const { d, angle } = lineStats(x1, y1, x2, y2)

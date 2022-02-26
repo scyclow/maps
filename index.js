@@ -1,3 +1,11 @@
+/*
+In 1973, a team of bulgarian scientists conducted an experiment in which 1000 participants
+were presented with a map of a non existent city. Several days later they were asked to
+remember the map in as much detail as possible while
+*/
+
+
+
 const BUFFER = 700
 let SIZE, SCALE, L, R, T, B, W, H
 
@@ -16,10 +24,7 @@ function setup() {
   noiseSeed(int(rnd(10000000000000000)))
   colorMode(HSB, 360, 100, 100, 100)
 
-  SCALE =
-    1.2
-    // rnd(0.2, 1.2)
-    * SIZE/800
+  SCALE = rnd(0.2, 1.2) * SIZE/800
 
   L = -width/(2*SCALE)
   R = width/(2*SCALE)
@@ -33,9 +38,16 @@ function setup() {
   SYMMETRICAL_NOISE = rnd() < 0.0625
   NOISE_DIVISOR = 75 * rnd(1, 10) / SCALE
 
-  LAYERS = setLayers()
-
-
+  const layerN = chance(
+    [10, 1],
+    [15, 2],
+    [25, 3],
+    [25, 4],
+    [15, 8],
+    [9, 12],
+    [1, 30],
+  )
+  LAYERS = setLayers(layerN, layerN===30 ? 0.02 : 0)
 }
 
 
@@ -51,5 +63,7 @@ function draw() {
 
   drawBackground()
 
-  drawGrid()
+  drawStreetGrid()
+
+  // drawGrid()
 }
