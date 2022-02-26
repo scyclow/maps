@@ -112,8 +112,7 @@ function drawCoords(coords, dotFn) {
 
     }
 
-    if (i === coords.length-1) {
-    // if (i === coords.length-1 && !IGNORE_STREET_CAP) {
+    if (i === coords.length-1 && !IGNORE_STREET_CAP && !STREET_TURBULENCE) {
       push()
 
       const layer = findActiveLayer(x0, y0)
@@ -149,11 +148,13 @@ function generateAllCoords() {
   STREET_BLOCK_HEIGHT = 20 // can go up to maybe 200?
 
 
-  PRIMARY_DRIFT = HALF_PI/16
-  SECONDARY_DRIFT = HALF_PI/rnd(16, 25)
-  TERTIARY_DRIFT = HALF_PI/(HARD_CURVES ? 2 : rnd(50, 100)) // baseDriftDenom
-  QUARTERNARY_DRIFT = HALF_PI/(HARD_CURVES ? 2 : rnd(50, 100)) // baseDriftDenom
-  STREET_DRIFT = HALF_PI/(HARD_CURVES ? 2 : rnd(50, 100)) // baseDriftDenom
+  const minDrift = rnd() < 0.05 ? 100 : 17
+
+  PRIMARY_DRIFT = HALF_PI/minDrift
+  SECONDARY_DRIFT = HALF_PI/rnd(minDrift, minDrift*2)
+  TERTIARY_DRIFT = HALF_PI/(HARD_CURVES ? 2 : rnd(minDrift * 3, minDrift * 6))
+  QUARTERNARY_DRIFT = HALF_PI/(HARD_CURVES ? 2 : rnd(minDrift * 3, minDrift * 6))
+  STREET_DRIFT = HALF_PI/(HARD_CURVES ? 2 : rnd(minDrift * 3, minDrift * 6))
 
 
   let primaryCoordArgs
@@ -171,19 +172,23 @@ function generateAllCoords() {
   }
 
   const primaryAveCoords = generateStreetCoords(...primaryCoordArgs, {
-    driftAmt: PRIMARY_DRIFT
+    driftAmt: PRIMARY_DRIFT,
+    maxLen: 300
   })
 
+  const cutoff = 150
+
   let pBranch = 0
-  const secondaryAveCoords = primaryAveCoords.coords.map((coord) => {
-    if (rnd() < SECONDARY_PRB) {
+  const secondaryAveCoords = primaryAveCoords.coords.map((coord, i) => {
+    if (rnd() < SECONDARY_PRB && i < cutoff) {
       const branch = pBranch++
       const direction = rnd() < 0.5 ? 1 : -1
       const angleAdj = direction === -1 ? HALF_PI : PI+HALF_PI
       return generateStreetCoords(coord.x, coord.y, coord.angle + angleAdj, {
         direction,
         branch,
-        driftAmt: SECONDARY_DRIFT
+        driftAmt: SECONDARY_DRIFT,
+        maxLen: 200
       })
     }
   }).filter(exists)
@@ -192,7 +197,7 @@ function generateAllCoords() {
   const tertiaryAveCoords = secondaryAveCoords.flatMap((coords, i) => {
     let sBranch = 0
     return coords.coords.map(coord => {
-      if (rnd() < TERTIARY_PRB) {
+      if (rnd() < TERTIARY_PRB && i < cutoff) {
 
         const direction = rnd() < 0.5 ? 1 : -1
         const angleAdj = direction === -1 ? HALF_PI : PI+HALF_PI
@@ -203,7 +208,7 @@ function generateAllCoords() {
           stopAtIntersections: [
             primaryAveCoords,
             ...secondaryAveCoords,
-          ]
+          ],
         }
         return generateStreetCoords(coord.x, coord.y, coord.angle + angleAdj, tertiaryAveParams)
       }
@@ -223,7 +228,7 @@ function generateAllCoords() {
           primaryAveCoords,
           ...secondaryAveCoords,
           ...tertiaryAveCoords,
-        ]
+        ],
       }
 
       return generateStreetCoords(coord.x, coord.y, coord.angle + angleAdj, quarternaryAveParams)
@@ -271,7 +276,7 @@ function generateStreetCoords(startX, startY, startAngle, params={}) {
 
   const driftAmt = params.driftAmt || HALF_PI/16
   const stopAtIntersections = params.stopAtIntersections || []
-  const length = 150
+  const length = params.maxLen || 150
 
 
   let x = startX
@@ -306,10 +311,10 @@ function generateStreetCoords(startX, startY, startAngle, params={}) {
     coords.push({ x, y, angle })
 
     if (
-      (x) < T - BUFFER ||
-      (x) > B + BUFFER ||
-      (y) < L - BUFFER ||
-      (y) > R + BUFFER
+      x < T - BUFFER ||
+      x > B + BUFFER ||
+      y < L - BUFFER ||
+      y > R + BUFFER
     ) {
       // debugger
       break

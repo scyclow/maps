@@ -9,7 +9,6 @@ function drawBackground() {
 
   const strokeSize = 2/SCALE
 
-  cos
 
   for (let x = L; x < W; x += strokeSize) {
     for (let y = T; y < H; y += strokeSize) {

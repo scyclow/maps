@@ -1,20 +1,34 @@
 /*
-In 1973, a team of bulgarian scientists conducted an experiment in which 1000 participants
-were presented with a map of a non existent city. Several days later they were asked to
-remember the map in as much detail as possible while
+In 1987, a team of bulgarian neuroscientists conducted an experiment in which participants
+were given a description of a non existent terain. Participants were then measured by an fMRI
+and were asked to describe, in as much detail as possible, the most likely infrastructural network
+to arise from this terrain.
+
+There are many other details missing from this experiment, chief of which is the initial hypothesis
+of the experiment
+
+
+In all, 961 trials have been confirmed, although many speculate that the methodology of the tests may have
+been inconsistent from trial to trial. Additionally, it's clear that the storage procedures differ drastically
+from output to output, with some having degraded substantially.
+
+
+
 */
 
 
 
 /*
-2-1 notes
+2-2 notes
 
-  - if color base bg, dark bg strokes should be thicker
-  - if dark base bg, color bg strokes should be thicker
+  - higher minimum noise divisor (or, make layer1 threshold higher when low noise divisor)
+  - layer 2 neon on neon/dark doesn't look great when only two layers
+
+
 */
 
 
-const BUFFER = 700
+const BUFFER = 300
 let SIZE, SCALE, L, R, T, B, W, H
 
 function keyPressed() {
@@ -34,17 +48,18 @@ function setup() {
 
   SCALE = rnd(0.2, 1.2) * SIZE/800
 
+  W = width/SCALE
+  H = height/SCALE
   L = -width/(2*SCALE)
   R = width/(2*SCALE)
   T = -height/(2*SCALE)
   B = height/(2*SCALE)
-  W = width/SCALE
-  H = height/SCALE
 
 
+  const noiseDiv = rnd(100, 750)
 
   SYMMETRICAL_NOISE = rnd() < 0.0625
-  NOISE_DIVISOR = 75 * rnd(1, 10) / SCALE
+  NOISE_DIVISOR = noiseDiv / SCALE
 
   const layerN = chance(
     [20, 1],
@@ -55,14 +70,23 @@ function setup() {
     [9, 12],
     [1, 30],
   )
-  LAYERS = setLayers(layerN, layerN===30 ? 0.02 : 0)
+
+  let thresholdAdj = 0
+  if (layerN === 30) {
+    thresholdAdj = 0.02
+  } else if (noiseDiv < 100) {
+    console.log(noiseDiv)
+    // thresholdAdj = map(0, 0, 100, 0.4, 0.6)
+    thresholdAdj = map(100 - noiseDiv, 0, 25, 0.4, 0.6)
+  }
+  LAYERS = setLayers(layerN, thresholdAdj)
 }
 
 
 function draw() {
 
   noLoop()
-  noStroke()
+
   translate(width/2, height/2)
   scale(SCALE)
 
@@ -70,8 +94,7 @@ function draw() {
   const START = Date.now()
 
   drawBackground()
-
   drawStreetGrid()
 
-  // drawGrid()
+  console.log(Date.now() - START)
 }

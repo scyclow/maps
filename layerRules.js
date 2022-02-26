@@ -22,7 +22,7 @@ function setLayers(layerN=3, startingElevation=false) {
     ix: 0,
     threshold: startingElevation || avgElevation,
     hideStreets: false,
-    ...r[sample(ruleNames)](rnd(360))
+    ...r[sample(ruleNames)](rnd(360), 120)
   }]
 
   const newLayer = (previousLayer, threshold, ix) => {
@@ -51,22 +51,22 @@ function setLayers(layerN=3, startingElevation=false) {
 
 
 const GRADIEN_PRB = 0.0625
-const getGradient = (force) => {
+const getGradient = (force, mx=360) => {
   return rnd() < GRADIEN_PRB || force
     ? {
       focalPoint: {
         x: rnd(L, R),
         y: rnd(T, B)
       },
-      hue: rnd(90, 360) * posOrNeg(),
+      hue: rnd(mx/4, mx) * posOrNeg(),
       sat: 0,
       brt: 0,
     }
     : null
 }
 const rules = () => {
-  const black = color(8)
-  const white = color(0, 0, 90)
+  const black = color(0,0,8, 80)
+  const white = color(0, 0, 90,80)
   const forceGradient = rnd() < 0.02
   return {
     blackAndWhite: (h) => {
@@ -117,18 +117,18 @@ const rules = () => {
       }
     },
 
-    neon: (h) => {
+    neon: (h, gradientMax) => {
       return {
         name: 'neon',
         baseHue: h,
         colors: {
           bg: color(hfix(h), 30, 12),
-          primary: color(hfix(h), adjSat(55, h), 95),
-          secondary: color(hfix(h), adjSat(55, h), 95),
-          tertiary: color(hfix(h), adjSat(55, h), 95),
-          quarternary: color(hfix(h), adjSat(55, h), 95),
-          street: color(hfix(h), adjSat(55, h), 95),
-          circle: color(hfix(h), adjSat(55, h), 95),
+          primary: color(hfix(h), adjSat(55, h), 95, 80),
+          secondary: color(hfix(h), adjSat(55, h), 95, 80),
+          tertiary: color(hfix(h), adjSat(55, h), 95, 80),
+          quarternary: color(hfix(h), adjSat(55, h), 95, 80),
+          street: color(hfix(h), adjSat(55, h), 95, 80),
+          circle: color(hfix(h), adjSat(55, h), 95, 80),
         },
         neighbors: [
           [0.4, 'blackAndWhite'],
@@ -136,15 +136,15 @@ const rules = () => {
           [0.2, 'neon'],
           [0.2, 'bright'],
         ],
-        gradient: getGradient(),
+        gradient: getGradient(forceGradient, gradientMax),
         isDark: true,
         isColor: false,
       }
     },
 
-    bright: (h) => {
-      const c1 = color(hfix(h), adjSat(55, h), 95)
-      const c2 = color(hfix(h + 180), 30, 15)
+    bright: (h, gradientMax) => {
+      const c1 = color(hfix(h), adjSat(55, h), 95, 80)
+      const c2 = color(hfix(h + 180), 30, 15, 80)
 
       return {
         name: 'bright',
@@ -163,7 +163,7 @@ const rules = () => {
           [0.4, 'whiteAndBlack'],
           [0.2, 'neon'],
         ],
-        gradient: getGradient(),
+        gradient: getGradient(forceGradient, gradientMax),
         isDark: false,
         isColor: true,
       }
@@ -234,8 +234,8 @@ function findAvgElevation() {
 function getElevation(x, y) {
   const offset = SYMMETRICAL_NOISE ? 0 : 100000
   return noise(
-    (x+100000)/NOISE_DIVISOR,
-    (y+100000)/NOISE_DIVISOR
+    (x+offset)/NOISE_DIVISOR,
+    (y+offset)/NOISE_DIVISOR
   )
 }
 
