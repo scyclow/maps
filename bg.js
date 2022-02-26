@@ -9,19 +9,31 @@ function drawBackground() {
 
   const strokeSize = 2/SCALE
 
+  cos
+
   for (let x = L; x < W; x += strokeSize) {
     for (let y = T; y < H; y += strokeSize) {
       const layer = findActiveLayer(x, y)
-      drawBackgroundStroke(x, y, layer, strokeSize)
+      drawBackgroundStroke(x, y, layer, strokeSize, LAYERS)
     }
   }
 }
 
-function drawBackgroundStroke(x, y, layer, strokeSize) {
+function drawBackgroundStroke(x, y, layer, strokeSize, layers) {
+  const baseLayer = layers[0]
   // increase/decrease rnd hue/sat for graininess
-  // TODO if layer 1 or 2 and is dark, diam *= 1.5
+  const colorMismatch = (
+    (layer.isColor && baseLayer.isDark) ||
+    (baseLayer.isColor && layer.isDark)
+  )
 
-  let diam = rnd(strokeSize, strokeSize*2)
+  const largeLayer = (layer.ix === 0 || layer.ix === layers.length - 1)
+
+  const strokeMultiplier = largeLayer && colorMismatch
+    ? 1
+    : 1
+
+  let diam = rnd(strokeSize, strokeSize*2) * strokeMultiplier
   let offset = strokeSize/2
 
   strokeWeight(diam/3.5)

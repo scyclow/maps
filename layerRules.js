@@ -5,13 +5,8 @@ let LAYERS = []
 
 function setLayers(layerN=3, startingElevation=false) {
   const avgElevation = findAvgElevation()
-  console.log(avgElevation)
+
   const thresholdDiff = 0.02
-  // chance(
-    // [0.5, 0.02],
-    // [0.25, 0.5],
-    // [0.25, 0.15],
-  // )
   const r = rules()
   const ruleNames = Object.keys(r)
 
@@ -24,14 +19,16 @@ function setLayers(layerN=3, startingElevation=false) {
 
 
   const layers = [{
+    ix: 0,
     threshold: startingElevation || avgElevation,
-    hideStreets: rnd() < 0.1,
+    hideStreets: false,
     ...r[sample(ruleNames)](rnd(360))
   }]
 
-  const newLayer = (previousLayer, threshold) => {
+  const newLayer = (previousLayer, threshold, ix) => {
     const hue = previousLayer.baseHue + hueDiff
     return {
+      ix,
       threshold,
       hideStreets: rnd() < 0.1,
       ...r[chance(...previousLayer.neighbors)](hue)
@@ -44,7 +41,7 @@ function setLayers(layerN=3, startingElevation=false) {
       ? 1
       : previousLayer.threshold + thresholdDiff
 
-    layers.push(newLayer(previousLayer, threshold))
+    layers.push(newLayer(previousLayer, threshold, i))
   }
 
 
@@ -91,6 +88,8 @@ const rules = () => {
           [0.3, 'bright'],
         ],
         gradient: null,
+        isDark: true,
+        isColor: false,
       }
     },
 
@@ -113,6 +112,8 @@ const rules = () => {
           [0.5, 'bright'],
         ],
         gradient: null,
+        isDark: false,
+        isColor: false,
       }
     },
 
@@ -136,6 +137,8 @@ const rules = () => {
           [0.2, 'bright'],
         ],
         gradient: getGradient(),
+        isDark: true,
+        isColor: false,
       }
     },
 
@@ -161,6 +164,8 @@ const rules = () => {
           [0.2, 'neon'],
         ],
         gradient: getGradient(),
+        isDark: false,
+        isColor: true,
       }
     }
 

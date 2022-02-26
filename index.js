@@ -6,6 +6,14 @@ remember the map in as much detail as possible while
 
 
 
+/*
+2-1 notes
+
+  - if color base bg, dark bg strokes should be thicker
+  - if dark base bg, color bg strokes should be thicker
+*/
+
+
 const BUFFER = 700
 let SIZE, SCALE, L, R, T, B, W, H
 
@@ -39,11 +47,11 @@ function setup() {
   NOISE_DIVISOR = 75 * rnd(1, 10) / SCALE
 
   const layerN = chance(
-    [10, 1],
-    [15, 2],
+    [20, 1],
+    [12.5, 2],
     [25, 3],
-    [25, 4],
-    [15, 8],
+    [22.5, 4],
+    [10, 8],
     [9, 12],
     [1, 30],
   )
