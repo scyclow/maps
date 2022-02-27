@@ -29,7 +29,7 @@ function drawBackgroundStroke(x, y, layer, strokeSize, layers) {
   const largeLayer = (layer.ix === 0 || layer.ix === layers.length - 1)
 
   const strokeMultiplier = largeLayer && colorMismatch
-    ? 1
+    ? 1.25/SCALE
     : 1
 
   let diam = rnd(strokeSize, strokeSize*2) * strokeMultiplier

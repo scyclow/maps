@@ -3,11 +3,11 @@ let LAYERS = []
 
 
 
-function setLayers(layerN=3, startingElevation=false) {
+function setLayers(layerN, startingElevation=false) {
   const avgElevation = findAvgElevation()
 
   const thresholdDiff = 0.02
-  const r = rules()
+  const r = rules(layerN)
   const ruleNames = Object.keys(r)
 
   const hueDiff = chance(
@@ -44,7 +44,6 @@ function setLayers(layerN=3, startingElevation=false) {
     layers.push(newLayer(previousLayer, threshold, i))
   }
 
-
   return layers
 }
 
@@ -64,7 +63,7 @@ const getGradient = (force, mx=360) => {
     }
     : null
 }
-const rules = () => {
+const rules = (layerN) => {
   const black = color(0,0,8, 80)
   const white = color(0, 0, 90,80)
   const forceGradient = rnd() < 0.02
@@ -118,17 +117,25 @@ const rules = () => {
     },
 
     neon: (h, gradientMax) => {
+      const bg = color(hfix(h), 30, 12)
+      let c = color(hfix(h), adjSat(55, h), 95, 80)
+
+      if (contrast(bg, c) > -0.5) {
+        c = setContrastC2(bg, c, -0.5)
+      }
+
+
       return {
         name: 'neon',
         baseHue: h,
         colors: {
-          bg: color(hfix(h), 30, 12),
-          primary: color(hfix(h), adjSat(55, h), 95, 80),
-          secondary: color(hfix(h), adjSat(55, h), 95, 80),
-          tertiary: color(hfix(h), adjSat(55, h), 95, 80),
-          quarternary: color(hfix(h), adjSat(55, h), 95, 80),
-          street: color(hfix(h), adjSat(55, h), 95, 80),
-          circle: color(hfix(h), adjSat(55, h), 95, 80),
+          bg,
+          primary: c,
+          secondary: c,
+          tertiary: c,
+          quarternary: c,
+          street: c,
+          circle: c,
         },
         neighbors: [
           [0.4, 'blackAndWhite'],
@@ -178,6 +185,7 @@ function adjSat(sat, hue) {
   // const h = ((hue + 90) % 180) / 180
   // return sat - map(h, 0, 1, 0, 50)
 
+  hue = hfix(hue)
 
   let amt = 0
   if (hue >= 90 && hue <= 150) {
@@ -241,7 +249,7 @@ function getElevation(x, y) {
 
 const setContrast = (_c1, _c2, newContrast=0.4) => {
   _contrast = contrast(_c1, _c2)
-  if (_contrast < 1) {
+  if (_contrast < 0) {
     const amt = (newContrast + _contrast)/0.3
     return {
       c1: color(
@@ -265,9 +273,10 @@ const setContrast = (_c1, _c2, newContrast=0.4) => {
 }
 
 const setContrastC2 = (_c1, _c2, newContrast=0.4) => {
-  _contrast = contrast(_c1, _c2)
+  const _contrast = contrast(_c1, _c2)
 
   const amt = (newContrast - _contrast)/0.3
+
   return color(
     hue(_c2),
     saturation(_c2) + 20*amt,

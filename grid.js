@@ -2,11 +2,8 @@
 
 
 function drawStreetGrid() {
-  TURBULENCE = rnd() < 0.85
   MIN_ST_W = 0.8
   MAX_ST_W = 1.2
-  IGNORE_STREET_CAP = rnd() < 0.75
-  STREET_TURBULENCE = rnd() < 0.1
 
   const {
     primaryAveCoords,
@@ -16,8 +13,8 @@ function drawStreetGrid() {
     streetCoords
   } = generateAllCoords()
 
-  const t = TURBULENCE ? 0.5 : 1.75 // 0.5
-  const d = TURBULENCE ? 0 : 1.25
+  const t = TURBULENCE ? 1.75 : 0.5 // 0.5
+  const d = TURBULENCE ? 1.25 : 0
 
   streetCoords.forEach(coords => drawCoords(coords.coords, (x, y, progress, angle) => {
     const _x = x+rnd(-t, t)
@@ -136,15 +133,13 @@ function drawCoords(coords, dotFn) {
 
 
 function generateAllCoords() {
-  const densityMinimum = map(SCALE, 0.2, 1.2, 0.1, 0.15)
+  const densityMinimum = map(SCALE, 0.2, 1.2, 0.1, 0.17)
   const useDensityMax = rnd() < 0.15
 
   SECONDARY_PRB = useDensityMax ? 0.2 : rnd(densityMinimum, 0.2)
   TERTIARY_PRB = useDensityMax ? 0.2 : rnd(densityMinimum, 0.2)
   QUARTERNARY_PRB = useDensityMax ? 0.4 : rnd(densityMinimum*2, 0.4)
   STREET_PRB = useDensityMax ? 1 : rnd(0.25, 1)
-
-  HARD_CURVES = rnd() < 0.1
   STREET_BLOCK_HEIGHT = 20 // can go up to maybe 200?
 
 
@@ -156,20 +151,18 @@ function generateAllCoords() {
   QUARTERNARY_DRIFT = HALF_PI/(HARD_CURVES ? 2 : rnd(minDrift * 3, minDrift * 6))
   STREET_DRIFT = HALF_PI/(HARD_CURVES ? 2 : rnd(minDrift * 3, minDrift * 6))
 
+  BUFFER = 150/SCALE
 
-  let primaryCoordArgs
-  const argSeed = rnd()
 
-  const buff = 50
-  if (argSeed < 0.25) {
-    primaryCoordArgs = [rnd(L-buff, R+buff), B+buff, PI + rnd(-HALF_PI/4, HALF_PI/4)]
-  } else if (argSeed < 0.5) {
-    primaryCoordArgs = [rnd(L-buff, R+buff), T-buff, 0 + rnd(-HALF_PI/4, HALF_PI/4)]
-  } else if (argSeed < 0.75) {
-    primaryCoordArgs = [L-buff, rnd(T-buff, B+buff), HALF_PI + rnd(-HALF_PI/4, HALF_PI/4)]
-  } else {
-    primaryCoordArgs = [R+buff, rnd(T-buff, B+buff), HALF_PI + PI + rnd(-HALF_PI/4, HALF_PI/4)]
-  }
+  const startBuff = 50 / SCALE
+  const primaryStartAdj = + rnd(-HALF_PI/8, HALF_PI/8)
+
+  const primaryCoordArgs = chance(
+    [0.25, [rnd(L+startBuff, R-startBuff), B+startBuff*2, PI + primaryStartAdj]],
+    [0.25, [rnd(L+startBuff, R-startBuff), T-startBuff*2, 0 + primaryStartAdj]],
+    [0.25, [L-startBuff*2, rnd(T+startBuff, B-startBuff), HALF_PI + primaryStartAdj]],
+    [0.25, [R+startBuff*2, rnd(T+startBuff, B-startBuff), HALF_PI + PI + primaryStartAdj]],
+  )
 
   const primaryAveCoords = generateStreetCoords(...primaryCoordArgs, {
     driftAmt: PRIMARY_DRIFT,
@@ -272,7 +265,7 @@ function generateAllCoords() {
 
 
 function generateStreetCoords(startX, startY, startAngle, params={}) {
-  const BUFFER = 700
+  // const BUFFER = 700
 
   const driftAmt = params.driftAmt || HALF_PI/16
   const stopAtIntersections = params.stopAtIntersections || []
@@ -311,12 +304,11 @@ function generateStreetCoords(startX, startY, startAngle, params={}) {
     coords.push({ x, y, angle })
 
     if (
-      x < T - BUFFER ||
-      x > B + BUFFER ||
-      y < L - BUFFER ||
-      y > R + BUFFER
+      x < L - BUFFER ||
+      x > R + BUFFER ||
+      y < T - BUFFER ||
+      y > B + BUFFER
     ) {
-      // debugger
       break
     }
   }
@@ -327,6 +319,7 @@ function generateStreetCoords(startX, startY, startAngle, params={}) {
     branch: params.branch || 0,
   }
 }
+
 
 
 function drawGrid() {
