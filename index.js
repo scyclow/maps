@@ -100,7 +100,7 @@ function setup() {
 
   let thresholdAdj = 0
   if (layerN === 30) {
-    thresholdAdj = 0.02
+    thresholdAdj = 0.01
   } else if (noiseDiv < 100) {
     thresholdAdj = map(100 - noiseDiv, 0, 25, 0.4, 0.6)
   }

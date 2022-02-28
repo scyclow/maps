@@ -4,7 +4,7 @@ const NEG_Q_PI = -Math.PI/4
 
 
 function drawBackground() {
-
+  push()
   background(LAYERS[0].colors.bg)
 
   const strokeSize = 2/SCALE
@@ -16,6 +16,7 @@ function drawBackground() {
       drawBackgroundStroke(x, y, layer, strokeSize, LAYERS)
     }
   }
+  pop()
 }
 
 function drawBackgroundStroke(x, y, layer, strokeSize, layers) {
@@ -26,11 +27,14 @@ function drawBackgroundStroke(x, y, layer, strokeSize, layers) {
     (baseLayer.isColor && layer.isDark)
   )
 
+  const colorMismatchIffy = (baseLayer.isLight && layer.isDark)
+
   const largeLayer = (layer.ix === 0 || layer.ix === layers.length - 1)
 
-  const strokeMultiplier = largeLayer && colorMismatch
-    ? 1.25/SCALE
-    : 1
+  const strokeMultiplier =
+    largeLayer && colorMismatch ? 1.25/SCALE :
+    largeLayer && colorMismatchIffy ? 1.15 :
+    1
 
   let diam = rnd(strokeSize, strokeSize*2) * strokeMultiplier
   let offset = strokeSize/2

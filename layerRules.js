@@ -1,4 +1,22 @@
 
+// TODO rule neighbor probabilities, starting threshold, + spacing should be set into multiple different strategies
+
+// gradual: lower initial threshold, higher threshold diff, subtle changes
+// chaotic: lower initial threshold, low threshold diff, drastic changes
+// decay: mid initial threshold, low threshold diff, drastic (but bounded) changes, cutoff at top
+
+
+
+
+/*
+These look good
+
+neon -> neon
+
+
+*/
+
+
 let LAYERS = []
 
 
@@ -16,7 +34,6 @@ function setLayers(layerN, startingElevation=false) {
     [2, 150],
     [2, 180],
   ) * posOrNeg()
-
 
   const layers = [{
     ix: 0,
@@ -89,6 +106,7 @@ const rules = (layerN) => {
         gradient: null,
         isDark: true,
         isColor: false,
+        isLight: false,
       }
     },
 
@@ -113,6 +131,7 @@ const rules = (layerN) => {
         gradient: null,
         isDark: false,
         isColor: false,
+        isLight: true,
       }
     },
 
@@ -146,6 +165,7 @@ const rules = (layerN) => {
         gradient: getGradient(forceGradient, gradientMax),
         isDark: true,
         isColor: false,
+        isLight: false,
       }
     },
 
@@ -173,6 +193,7 @@ const rules = (layerN) => {
         gradient: getGradient(forceGradient, gradientMax),
         isDark: false,
         isColor: true,
+        isLight: false,
       }
     }
 
@@ -195,7 +216,7 @@ function adjSat(sat, hue) {
     amt = 1 - abs(300 - hue) / 30
   }
 
-  return sat - map(amt, 0, 1, 0, 20)
+  return sat - map(amt, 0, 1, 0, 20) - 25
 }
 
 
