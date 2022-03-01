@@ -216,7 +216,7 @@ function adjSat(sat, hue) {
     amt = 1 - abs(300 - hue) / 30
   }
 
-  return sat - map(amt, 0, 1, 0, 20) - 25
+  return sat - map(amt, 0, 1, 0, 20)
 }
 
 
@@ -230,8 +230,8 @@ function adjSat(sat, hue) {
 
 
 
-function findActiveLayer(x, y) {
-  const n = getElevation(x, y)
+function findActiveLayer(x, y, z) {
+  const n = getElevation(x, y, z)
 
   for (let i = 0; i < LAYERS.length; i++) {
     if (n < LAYERS[i].threshold) return LAYERS[i]
@@ -260,11 +260,12 @@ function findAvgElevation() {
   return elevationSum/elevationIx
 }
 
-function getElevation(x, y) {
+function getElevation(x, y, z) {
   const offset = SYMMETRICAL_NOISE ? 0 : 100000
   return noise(
     (x+offset)/NOISE_DIVISOR,
-    (y+offset)/NOISE_DIVISOR
+    (y+offset)/NOISE_DIVISOR,
+    z
   )
 }
 

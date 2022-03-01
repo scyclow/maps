@@ -322,7 +322,7 @@ function generateStreetCoords(startX, startY, startAngle, params={}) {
 
 
 
-function drawGrid() {
+function drawGrid(t, smooth=false) {
   TURBULENCE = rnd() < 0.85
   SIMPLE = true
 
@@ -331,15 +331,28 @@ function drawGrid() {
   MIN_ST_W = 0.8
   MAX_ST_W = 1.2
 
-  const t = TURBULENCE ? 0.5 : 1.75 // 0.5
-  const d = TURBULENCE ? 0 : 1.25
+  const frameAmt = 60
+  const _t = int(t/frameAmt)
+  const frame = t % frameAmt
+  const frameIncrement = H / frameAmt
+
+  const start = T + (frame * frameIncrement)
+  const end = T + ((frame+1) * frameIncrement)
+
+  const _y = int(rnd(0, frameAmt))
+  const _x = int(rnd(0, frameAmt))
+
+  const startY = (smooth ? start : T + (_y * frameIncrement))
+  const endY = (smooth ? end : T + ((_y+6) * frameIncrement))
+
+  const startX = (smooth ? L : L + (_x * frameIncrement))
+  const endX = (smooth ? R : L + ((_x+6) * frameIncrement))
 
   fill(0)
   stroke(0)
 
   const setC = (x, y, c, g) => {
     if (g) {
-      console.log('.')
       const d =
         dist(x, y, g.focalPoint.x, g.focalPoint.y)
         / dist(L, B, R, T)
@@ -365,29 +378,25 @@ function drawGrid() {
   for (let x=L; x<W; x+=rnd(5, 80)) {
     const _x = SIMPLE ? x : rnd(L, R)
     dotLine(_x, T, _x, B, (x, y, prg, angle) => {
-      const _x = x+rnd(-t, t)
-      const _y = y+rnd(-t, t)
-      const layer = findActiveLayer(_x, _y)
+      const layer = findActiveLayer(x, y)
       if (layer.hideStreets) return
 
       setC(_x, _y, layer.colors.primary, layer.gradient)
 
-      circle(_x, _y, rnd(2*MIN_ST_W, 2*MAX_ST_W) + d)
+      circle(_x, _y, rnd(2*MIN_ST_W, 2*MAX_ST_W))
     })
   }
 
   for (let y=T; y<H; y+=rnd(5, 80)) {
     const _y = SIMPLE ? y : rnd(T, H)
     dotLine(L, _y, R, _y, (x, y, prg, angle) => {
-      const _x = x+rnd(-t, t)
-      const _y = y+rnd(-t, t)
-      const layer = findActiveLayer(_x, _y)
+      const layer = findActiveLayer(x, y)
 
       if (layer.hideStreets) return
 
       setC(_x, _y, layer.colors.primary, layer.gradient)
 
-      circle(_x, _y, rnd(2*MIN_ST_W, 2*MAX_ST_W) + d)
+      circle(_x, _y, rnd(2*MIN_ST_W, 2*MAX_ST_W))
     })
   }
 }

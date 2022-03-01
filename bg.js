@@ -3,23 +3,41 @@ const Q_PI = Math.PI/4
 const NEG_Q_PI = -Math.PI/4
 
 
-function drawBackground() {
+function drawBackground(t, smooth=false) {
   push()
-  background(LAYERS[0].colors.bg)
+  if (t===0) background(LAYERS[0].colors.bg)
 
-  const strokeSize = 2/SCALE
+  const strokeSize = 2//2/SCALE
 
 
-  for (let x = L; x < W; x += strokeSize) {
-    for (let y = T; y < H; y += strokeSize) {
-      const layer = findActiveLayer(x, y)
-      drawBackgroundStroke(x, y, layer, strokeSize, LAYERS)
+  const frameAmt = 60
+  const _t = int(t/frameAmt)
+  const frame = t % frameAmt
+  const frameIncrement = H / frameAmt
+
+  const start = T + (frame * frameIncrement)
+  const end = T + ((frame+1) * frameIncrement)
+
+  const _y = int(rnd(0, frameAmt))
+  const _x = int(rnd(0, frameAmt))
+
+  const startY = (smooth ? start : T + (_y * frameIncrement))
+  const endY = (smooth ? end : T + ((_y+6) * frameIncrement))
+
+  const startX = (smooth ? L : L + (_x * frameIncrement))
+  const endX = (smooth ? R : L + ((_x+6) * frameIncrement))
+
+
+  for (let y = startY; y < endY; y += strokeSize) {
+    for (let x = startX; x < endX; x += strokeSize) {
+      const layer = findActiveLayer(x, y, _t/200)
+      drawBackgroundStroke(x, y, layer, strokeSize, LAYERS, _t)
     }
   }
   pop()
 }
 
-function drawBackgroundStroke(x, y, layer, strokeSize, layers) {
+function drawBackgroundStroke(x, y, layer, strokeSize, layers, t) {
   const baseLayer = layers[0]
   // increase/decrease rnd hue/sat for graininess
   const colorMismatch = (
@@ -41,15 +59,15 @@ function drawBackgroundStroke(x, y, layer, strokeSize, layers) {
 
   strokeWeight(diam/3.5)
 
-  let hAdj = 0
-  let sAdj = 0
+  let hAdj = t * 5
+  let sAdj = SAT
   let bAdj = 0
   if (layer.gradient) {
     const d =
       dist(x, y, layer.gradient.focalPoint.x, layer.gradient.focalPoint.y)
       / dist(L, B, R, T)
 
-    hAdj = map(d, 0, 1, 0, layer.gradient.hue)
+    hAdj = map(d, 0, 1, 0, layer.gradient.hue) + t * 10
     sAdj = map(d, 0, 1, 0, layer.gradient.sat)
     bAdj = map(d, 0, 1, 0, layer.gradient.brt)
 
@@ -60,12 +78,18 @@ function drawBackgroundStroke(x, y, layer, strokeSize, layers) {
     saturation(layer.colors.bg) + rnd(-5, 5) + sAdj,
     brightness(layer.colors.bg) + rnd(-10, 0) + bAdj,
   )
+  // fill(
+  //   hfix(hue(layer.colors.bg) + rnd(-3, 3) + hAdj),
+  //   saturation(layer.colors.bg) + rnd(-5, 5) + sAdj,
+  //   brightness(layer.colors.bg) + rnd(-10, 0) + bAdj,
+  // )
   const angle = noise(x+W, y+H)
 
-  const [x0, y0] = getXYRotation(PI+angle+rnd(NEG_Q_PI, Q_PI), 5, x, y)
-  const [x1, y1] = getXYRotation(angle+rnd(NEG_Q_PI, Q_PI), 5, x, y)
+  const [x0, y0] = getXYRotation(PI+angle+rnd(NEG_Q_PI, Q_PI), strokeSize, x, y)
+  const [x1, y1] = getXYRotation(angle+rnd(NEG_Q_PI, Q_PI), strokeSize, x, y)
 
   line(x0, y0, x1, y1)
+  // rect(x0, y0, strokeSize, strokeSize)
 }
 
 
