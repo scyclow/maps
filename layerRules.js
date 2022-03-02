@@ -1,4 +1,22 @@
 
+// TODO rule neighbor probabilities, starting threshold, + spacing should be set into multiple different strategies
+
+// gradual: lower initial threshold, higher threshold diff, subtle changes
+// chaotic: lower initial threshold, low threshold diff, drastic changes
+// decay: mid initial threshold, low threshold diff, drastic (but bounded) changes, cutoff at top
+
+
+
+
+/*
+These look good
+
+neon -> neon
+
+
+*/
+
+
 let LAYERS = []
 
 
@@ -13,25 +31,33 @@ function setLayers(layerN, startingElevation=false) {
   const hueDiff = chance(
     [1, 0],
     [2, 100],
+    [2, 120],
     [2, 150],
     [2, 180],
   ) * posOrNeg()
 
+  const maxGradient = rnd() < 0.05 ? rnd(720, 3000) : 360
 
   const layers = [{
     ix: 0,
     threshold: startingElevation || avgElevation,
     hideStreets: false,
-    ...r[sample(ruleNames)](rnd(360), 120)
+    ...r[sample(ruleNames)](rnd(360), maxGradient/3)
   }]
 
   const newLayer = (previousLayer, threshold, ix) => {
-    const hue = previousLayer.baseHue + hueDiff
+    const hideStreets = rnd() < 0.1
+    const nextLayer = chance(...previousLayer.neighbors)
+
+    const hue = nextLayer === 'neon' || nextLayer === 'bright'
+      ? previousLayer.baseHue + hueDiff
+      : previousLayer.baseHue
+
     return {
       ix,
       threshold,
-      hideStreets: rnd() < 0.1,
-      ...r[chance(...previousLayer.neighbors)](hue)
+      hideStreets,
+      ...r[nextLayer](hue, maxGradient)
     }
   }
 
@@ -49,9 +75,9 @@ function setLayers(layerN, startingElevation=false) {
 
 
 
-const GRADIEN_PRB = 0.0625
+const GRADIENT_PRB = 0.0625
 const getGradient = (force, mx=360) => {
-  return rnd() < GRADIEN_PRB || force
+  return rnd() < GRADIENT_PRB || force
     ? {
       focalPoint: {
         x: rnd(L, R),
@@ -89,6 +115,7 @@ const rules = (layerN) => {
         gradient: null,
         isDark: true,
         isColor: false,
+        isLight: false,
       }
     },
 
@@ -113,6 +140,7 @@ const rules = (layerN) => {
         gradient: null,
         isDark: false,
         isColor: false,
+        isLight: true,
       }
     },
 
@@ -146,6 +174,7 @@ const rules = (layerN) => {
         gradient: getGradient(forceGradient, gradientMax),
         isDark: true,
         isColor: false,
+        isLight: false,
       }
     },
 
@@ -173,6 +202,7 @@ const rules = (layerN) => {
         gradient: getGradient(forceGradient, gradientMax),
         isDark: false,
         isColor: true,
+        isLight: false,
       }
     }
 
@@ -240,10 +270,10 @@ function findAvgElevation() {
 }
 
 function getElevation(x, y) {
-  const offset = SYMMETRICAL_NOISE ? 0 : 100000
+  const offset = SYMMETRICAL_NOISE ? 0 : NOISE_OFFSET
   return noise(
-    (x+offset)/NOISE_DIVISOR,
-    (y+offset)/NOISE_DIVISOR
+    (x/NOISE_DIVISOR)+offset,
+    (y/NOISE_DIVISOR)+offset
   )
 }
 

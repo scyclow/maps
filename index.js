@@ -52,15 +52,17 @@ function keyPressed() {
 
 let SYMMETRICAL_NOISE, NOISE_DIVISOR, TURBULENCE, IGNORE_STREET_CAP, STREET_TURBULENCE, HARD_CURVES
 
+const NOISE_OFFSET = 100000
+
 function setup() {
   SIZE = min(window.innerWidth, window.innerHeight)
   __canvas = createCanvas(SIZE, SIZE);
   noiseSeed(int(rnd(10000000000000000)))
   colorMode(HSB, 360, 100, 100, 100)
 
-  SCALE =
-    rnd(0.2, 1.2)
-    * SIZE/800
+  SCALE = rnd(0.2, 1.2)
+
+  SCALE_ADJ = SIZE/800
 
   W = width/SCALE
   H = height/SCALE
@@ -82,10 +84,12 @@ function setup() {
   STREET_TURBULENCE = rnd() < 0.1
   IGNORE_STREET_CAP = rnd() < 0.1
   HARD_CURVES = rnd() < 0.1
+  SOFT_CURVES = !HARD_CURVES && rnd() < 0.05
 
   const noiseDiv = rnd(100, 750)
   SYMMETRICAL_NOISE = rnd() < 0.01
   NOISE_DIVISOR = noiseDiv / SCALE
+  console.log(SCALE)
 
   const layerN = chance(
     [15, 1],
@@ -100,7 +104,7 @@ function setup() {
 
   let thresholdAdj = 0
   if (layerN === 30) {
-    thresholdAdj = 0.02
+    thresholdAdj = 0.01
   } else if (noiseDiv < 100) {
     thresholdAdj = map(100 - noiseDiv, 0, 25, 0.4, 0.6)
   }
@@ -113,13 +117,19 @@ function draw() {
   noLoop()
 
   translate(width/2, height/2)
-  scale(SCALE)
+  scale(SCALE * SCALE_ADJ)
 
 
   const START = Date.now()
 
   drawBackground()
   drawStreetGrid()
+
+  // drawStreetGrid2()
+
+
+  // translate(5, 5)
+  // drawStreetGrid()
 
   console.log(Date.now() - START)
 }

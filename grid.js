@@ -24,8 +24,6 @@ function drawStreetGrid() {
 
     setC(_x, _y, layer.colors.street, layer.gradient)
 
-    // setDotColor(x, y, 'street')
-    // circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(1*MIN_ST_W, 1*MAX_ST_W))
     if (STREET_TURBULENCE) {
       times(5, () => {
         circle(x+rnd(-10, 10), y+rnd(-10, 10), rnd(1*MIN_ST_W, 1*MAX_ST_W))
@@ -45,9 +43,6 @@ function drawStreetGrid() {
 
     setC(_x, _y, layer.colors.quarternary, layer.gradient)
     circle(_x, _y, rnd(2*MIN_ST_W, 2*MAX_ST_W) + d)
-
-    // setDotColor(x, y, 'quarternary')
-    // circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(2*MIN_ST_W, 2*MAX_ST_W))
   }))
 
 
@@ -61,10 +56,7 @@ function drawStreetGrid() {
 
     setC(_x, _y, layer.colors.tertiary, layer.gradient)
     circle(_x, _y, rnd(3.5*MIN_ST_W, 3.5*MAX_ST_W) + d)
-    // setDotColor(x, y, 'tertiary')
-    // circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(3.5*MIN_ST_W, 3.5*MAX_ST_W))
   }))
-
 
 
 
@@ -75,9 +67,7 @@ function drawStreetGrid() {
     if (layer.hideStreets) return
 
     setC(_x, _y, layer.colors.secondary, layer.gradient)
-    circle(_x, _y, rnd(6*MIN_ST_W, 6*MAX_ST_W) + d)
-    // setDotColor(x, y, 'secondary')
-    // circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(6*MIN_ST_W, 6*MAX_ST_W))
+    circle(_x, _y, rnd(5.5*MIN_ST_W, 5.5*MAX_ST_W) + d)
   }))
 
 
@@ -88,9 +78,7 @@ function drawStreetGrid() {
     if (layer.hideStreets) return
 
     setC(_x, _y, layer.colors.primary, layer.gradient)
-    circle(_x, _y, rnd(8*MIN_ST_W, 8*MAX_ST_W) + d)
-    // setDotColor(x, y, 'primary')
-    // circle(x+rnd(-TURBULENCE, TURBULENCE), y+rnd(-TURBULENCE, TURBULENCE), rnd(8*MIN_ST_W, 8*MAX_ST_W))
+    circle(_x, _y, rnd(7*MIN_ST_W, 7*MAX_ST_W) + d)
   })
 }
 
@@ -101,12 +89,7 @@ function drawCoords(coords, dotFn) {
 
     if (i > 0) {
       const { x: x1, y: y1 } = coords[i-1]
-
-      // strokeWeight(1)
-      // stroke(255)
-      // line(x0, y0, x1, y1)
       dotLine(x0, y0, x1, y1, dotFn)
-
     }
 
     if (i === coords.length-1 && !IGNORE_STREET_CAP && !STREET_TURBULENCE) {
@@ -126,8 +109,6 @@ function drawCoords(coords, dotFn) {
     }
   })
 }
-
-
 
 
 
@@ -153,15 +134,14 @@ function generateAllCoords() {
 
   BUFFER = 150/SCALE
 
-
-  const startBuff = 50 / SCALE
-  const primaryStartAdj = + rnd(-HALF_PI/8, HALF_PI/8)
+  const rndH = rnd(T, B)
+  const rndW = rnd(L, R)
 
   const primaryCoordArgs = chance(
-    [0.25, [rnd(L+startBuff, R-startBuff), B+startBuff*2, PI + primaryStartAdj]],
-    [0.25, [rnd(L+startBuff, R-startBuff), T-startBuff*2, 0 + primaryStartAdj]],
-    [0.25, [L-startBuff*2, rnd(T+startBuff, B-startBuff), HALF_PI + primaryStartAdj]],
-    [0.25, [R+startBuff*2, rnd(T+startBuff, B-startBuff), HALF_PI + PI + primaryStartAdj]],
+    [0.25, [rndW, B, lineStats(rndW, B, 0, 0).angle]],
+    [0.25, [rndW, T, lineStats(rndW, T, 0, 0).angle]],
+    [0.25, [L, rndH, lineStats(L, rndH, 0, 0).angle]],
+    [0.25, [R, rndH, lineStats(R, rndH, 0, 0).angle]],
   )
 
   const primaryAveCoords = generateStreetCoords(...primaryCoordArgs, {
@@ -244,14 +224,6 @@ function generateAllCoords() {
     ].filter(exists)
   }))
 
-  // const cloudCoordList = times(CLOUDS, i =>
-  //   generateCloudCoords(
-  //     rnd(L, R),
-  //     rnd(T, B),
-  //     rnd(CLOUD_MIN, CLOUD_MAX),
-  //     CLOUD_DIVISOR
-  //   ),
-  // )
 
   return {
     primaryAveCoords,
@@ -259,14 +231,11 @@ function generateAllCoords() {
     tertiaryAveCoords,
     quarternaryAveCoords,
     streetCoords,
-    // cloudCoordList,
   }
 }
 
 
 function generateStreetCoords(startX, startY, startAngle, params={}) {
-  // const BUFFER = 700
-
   const driftAmt = params.driftAmt || HALF_PI/16
   const stopAtIntersections = params.stopAtIntersections || []
   const length = params.maxLen || 150
@@ -280,7 +249,7 @@ function generateStreetCoords(startX, startY, startAngle, params={}) {
 
   for (let i=0; i<length; i++) {
     angle = map(
-      noise(x/5, y/5),
+      SOFT_CURVES ? getElevation(x, y) : noise(x+NOISE_OFFSET, y+NOISE_OFFSET),
       0,
       1,
       angle - driftAmt,
@@ -293,7 +262,6 @@ function generateStreetCoords(startX, startY, startAngle, params={}) {
       const c2 = { x: nextX, y: nextY }
       const intersectionPoint = findIntersectionPoint(c1, c2, stopAtIntersections)
       if (intersectionPoint) {
-        // circle(x, y, 8)
         break
       }
     }
@@ -322,72 +290,72 @@ function generateStreetCoords(startX, startY, startAngle, params={}) {
 
 
 
-function drawGrid() {
-  TURBULENCE = rnd() < 0.85
-  SIMPLE = true
+// function drawGrid() {
+//   TURBULENCE = rnd() < 0.85
+//   SIMPLE = true
 
 
 
-  MIN_ST_W = 0.8
-  MAX_ST_W = 1.2
+//   MIN_ST_W = 0.8
+//   MAX_ST_W = 1.2
 
-  const t = TURBULENCE ? 0.5 : 1.75 // 0.5
-  const d = TURBULENCE ? 0 : 1.25
+//   const t = TURBULENCE ? 0.5 : 1.75 // 0.5
+//   const d = TURBULENCE ? 0 : 1.25
 
-  fill(0)
-  stroke(0)
+//   fill(0)
+//   stroke(0)
 
-  const setC = (x, y, c, g) => {
-    if (g) {
-      console.log('.')
-      const d =
-        dist(x, y, g.focalPoint.x, g.focalPoint.y)
-        / dist(L, B, R, T)
+//   const setC = (x, y, c, g) => {
+//     if (g) {
+//       console.log('.')
+//       const d =
+//         dist(x, y, g.focalPoint.x, g.focalPoint.y)
+//         / dist(L, B, R, T)
 
-      const _c = color(
-        hfix(hue(c) + map(d, 0, 1, 0, g.hue)),
-        saturation(c) + map(d, 0, 1, 0, g.sat),
-        brightness(c) + map(d, 0, 1, 0, g.brt),
-      )
-      stroke(_c)
-      fill(_c)
+//       const _c = color(
+//         hfix(hue(c) + map(d, 0, 1, 0, g.hue)),
+//         saturation(c) + map(d, 0, 1, 0, g.sat),
+//         brightness(c) + map(d, 0, 1, 0, g.brt),
+//       )
+//       stroke(_c)
+//       fill(_c)
 
 
-    } else {
-      stroke(c)
-      fill(c)
-    }
+//     } else {
+//       stroke(c)
+//       fill(c)
+//     }
 
-  }
+//   }
 
-  const gridStep = rnd(5, 80)
+//   const gridStep = rnd(5, 80)
 
-  for (let x=L; x<W; x+=rnd(5, 80)) {
-    const _x = SIMPLE ? x : rnd(L, R)
-    dotLine(_x, T, _x, B, (x, y, prg, angle) => {
-      const _x = x+rnd(-t, t)
-      const _y = y+rnd(-t, t)
-      const layer = findActiveLayer(_x, _y)
-      if (layer.hideStreets) return
+//   for (let x=L; x<W; x+=rnd(5, 80)) {
+//     const _x = SIMPLE ? x : rnd(L, R)
+//     dotLine(_x, T, _x, B, (x, y, prg, angle) => {
+//       const _x = x+rnd(-t, t)
+//       const _y = y+rnd(-t, t)
+//       const layer = findActiveLayer(_x, _y)
+//       if (layer.hideStreets) return
 
-      setC(_x, _y, layer.colors.primary, layer.gradient)
+//       setC(_x, _y, layer.colors.primary, layer.gradient)
 
-      circle(_x, _y, rnd(2*MIN_ST_W, 2*MAX_ST_W) + d)
-    })
-  }
+//       circle(_x, _y, rnd(2*MIN_ST_W, 2*MAX_ST_W) + d)
+//     })
+//   }
 
-  for (let y=T; y<H; y+=rnd(5, 80)) {
-    const _y = SIMPLE ? y : rnd(T, H)
-    dotLine(L, _y, R, _y, (x, y, prg, angle) => {
-      const _x = x+rnd(-t, t)
-      const _y = y+rnd(-t, t)
-      const layer = findActiveLayer(_x, _y)
+//   for (let y=T; y<H; y+=rnd(5, 80)) {
+//     const _y = SIMPLE ? y : rnd(T, H)
+//     dotLine(L, _y, R, _y, (x, y, prg, angle) => {
+//       const _x = x+rnd(-t, t)
+//       const _y = y+rnd(-t, t)
+//       const layer = findActiveLayer(_x, _y)
 
-      if (layer.hideStreets) return
+//       if (layer.hideStreets) return
 
-      setC(_x, _y, layer.colors.primary, layer.gradient)
+//       setC(_x, _y, layer.colors.primary, layer.gradient)
 
-      circle(_x, _y, rnd(2*MIN_ST_W, 2*MAX_ST_W) + d)
-    })
-  }
-}
+//       circle(_x, _y, rnd(2*MIN_ST_W, 2*MAX_ST_W) + d)
+//     })
+//   }
+// }
