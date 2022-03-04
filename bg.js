@@ -10,8 +10,8 @@ function drawBackground() {
   const strokeSize = 2/SCALE
 
 
-  for (let y = T; y < B; y += strokeSize) {
-    for (let x = L; x < R; x += strokeSize) {
+  for (let y = T-50; y < B+50; y += strokeSize) {
+    for (let x = L-50; x < R+50; x += strokeSize) {
       const layer = findActiveLayer(x, y)
       drawBackgroundStroke(x, y, layer, strokeSize, LAYERS)
     }
@@ -34,6 +34,7 @@ function drawBackgroundStroke(x, y, layer, strokeSize, layers) {
   const strokeMultiplier =
     largeLayer && colorMismatch ? 1.25/SCALE :
     largeLayer && colorMismatchIffy ? 1.15 :
+    colorMismatchIffy || colorMismatch ? 1.1 :
     1
 
   let diam = rnd(strokeSize, strokeSize*2) * strokeMultiplier

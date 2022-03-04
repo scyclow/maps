@@ -27,11 +27,15 @@ function setLayers(layerN, startingElevation=false) {
   const thresholdDiff = 0.02
   const r = rules(layerN)
   const ruleName = chance(
-    [20, 'blackAndWhite'],
-    [20, 'neon'],
-    [10, 'whiteAndBlack'],
-    [35, 'paper'],
-    [15, 'bright'],
+    [25, 'paper'],
+    [5, 'whiteAndBlack'],
+
+    [25, 'faded'],
+    [10, 'bright'],
+
+    [25, 'burnt'],
+    [5, 'blackAndWhite'],
+    [5, 'neon'],
   )
 
   const hueDiff = chance(
@@ -213,27 +217,17 @@ const rules = (layerN) => {
     },
 
     paper: (h, gradientMax) => {
-    // DARK_C = color(HUE, 26, 25)
-    // LIGHT_C = color(hfix(HUE-72), 6, 91)
-    // LIGHT_GRADIENT_C = color(hfix(max(HUE-72, 0)), 6, 91)
-    // LIGHTENED_DARK_C = color(HUE, 16, 55)
-    // ACCENT_C = color(hfix(HUE-145), 80, 64)
-    // LIGHT_ACCENT_C = color(hfix(HUE-145), 55, 64, 30)
-    // BRIGHT_LIGHT_C = color(max(HUE-10, 0), 80, 54)
-    // BRIGHT_DARK_C = BRIGHT_LIGHT_C
-    // [1, 0],
-    // [2, 100],
-    // [2, 120],
-    // [2, 150],
-    // [2, 180],
-
       const c1 = color(hfix(h), 9, 91)
+      const hues = [
+        color(hfix(h + 180), 60, 30),
+        color(hfix(h + 150), 85, 35),
+        color(hfix(h + 120), 55, 37),
+      ].sort((a, b) => luminance(a) - luminance(b))
 
-      const c2 = color(hfix(h + 180), 60, 30)
-      const c3 = color(hfix(h + 180), 60, 30)
-      const c4 = color(hfix(h + 150), 85, 35)
-      const c5 = color(hfix(h + 150), 85, 35)
-      const c6 = color(hfix(h + 120), 55, 37)
+      const c2 = color(hue(hues[0]), 60, 30)
+      const c3 = color(hue(hues[1]), 85, 35)
+      const c4 = color(hue(hues[2]), 55, 37)
+
 
       return {
         name: 'paper',
@@ -241,17 +235,18 @@ const rules = (layerN) => {
         colors: {
           bg: c1, // looks good at (344, 90, 100) with dark blue strokes
           primary: c2,
-          secondary: c3,
-          tertiary: c4,
-          quarternary: c5,
-          street: c6,
-          circle: c6,
+          secondary: c2,
+          tertiary: c3,
+          quarternary: c3,
+          street: c4,
+          circle: c4,
         },
         neighbors: [
           [0.2, 'blackAndWhite'],
           [0.2, 'whiteAndBlack'],
           [0.2, 'neon'],
           [0.2, 'bright'],
+          [0.4, 'faded'],
         ],
         gradient: forceGradient
           ? getGradient(forceGradient, gradientMax)
@@ -260,8 +255,78 @@ const rules = (layerN) => {
         isColor: true,
         isLight: false,
       }
-    }
+    },
+    faded: (h, gradientMax) => {
+      const c1 = color(hfix(h), adjSat(35, h), 95, 80)
 
+
+
+      const c2 = setContrastC2(c1, color(hfix(h+180), 85, 30), 0.7)
+      const c3 = setContrastC2(c1, color(hfix(h+150), 85, 30), 0.65)
+      const c4 = setContrastC2(c1, color(hfix(h+120), 85, 30), 0.6)
+
+      return {
+        name: 'faded',
+        baseHue: h,
+        colors: {
+          bg: c1, // looks good at (344, 90, 100) with dark blue strokes
+          primary: c2,
+          secondary: c2,
+          tertiary: c3,
+          quarternary: c3,
+          street: c4,
+          circle: c4,
+        },
+        neighbors: [
+          [0.2, 'blackAndWhite'],
+          [0.2, 'whiteAndBlack'],
+          [0.2, 'neon'],
+          [0.2, 'bright'],
+          [0.4, 'paper'],
+          [0.4, 'burnt'],
+        ],
+        gradient: forceGradient
+          ? getGradient(forceGradient, gradientMax)
+          : getGradient(true, 75),
+        isDark: false,
+        isColor: true,
+        isLight: false,
+      }
+    },
+
+    burnt: (h, gradientMax) => {
+      const c1 = color(hfix(h), 35, 15)
+
+      const c2 = color(hfix(h + 180), 50, 95, 80)
+      const c3 = color(hfix(h + 150), 50, 95, 80)
+      const c4 = color(hfix(h + 120), 50, 95, 80)
+
+
+      return {
+        name: 'burnt',
+        baseHue: h,
+        colors: {
+          bg: c1,
+          primary: c2,
+          secondary: c2,
+          tertiary: c3,
+          quarternary: c3,
+          street: c4,
+          circle: c4,
+        },
+        neighbors: [
+          [0.3, 'blackAndWhite'],
+          [0.4, 'whiteAndBlack'],
+          [0.2, 'neon'],
+          [0.2, 'bright'],
+          [0.4, 'faded'],
+        ],
+        gradient: getGradient(forceGradient, gradientMax),
+        isDark: true,
+        isColor: false,
+        isLight: false,
+      }
+    },
   }
 }
 

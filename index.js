@@ -38,6 +38,14 @@ from output to output, with some having degraded substantially.
   - for hard curves, and zoomed out, noise divisor should be a lot higher
   - for zoomed in, main avenue should start within the frame, be straighter
 
+
+
+2-6 notes
+  - it seems like the avg elevation thing isn't quite working any more? ex 142, 125 (it works sometimes, but not sure i like it on the whole)
+  - for papers, should make street colors in reverse order of luminesence
+  - base bright should also have a version where streets have some color
+  - maybe dark/neon should have base color streets as well
+
 */
 
 
@@ -86,16 +94,15 @@ function setup() {
   HARD_CURVES = rnd() < 0.1
   SOFT_CURVES = !HARD_CURVES && rnd() < 0.05
 
-  const noiseDiv = rnd(100, 750)
   SYMMETRICAL_NOISE = rnd() < 0.01
-  NOISE_DIVISOR = noiseDiv / SCALE
-  console.log(SCALE)
+  NOISE_DIVISOR = rnd(100, 750) / SCALE
+
 
   const layerN = chance(
-    [15, 1],
+    [7, 1],
     [10, 2],
-    [27, 3],
-    [27, 4],
+    [31, 3],
+    [31, 4],
     [11, 8],
     [9, 12],
     [1, 30],
@@ -105,8 +112,8 @@ function setup() {
   let thresholdAdj = 0
   if (layerN === 30) {
     thresholdAdj = 0.01
-  } else if (noiseDiv < 100) {
-    thresholdAdj = map(100 - noiseDiv, 0, 25, 0.4, 0.6)
+  } else if (NOISE_DIVISOR < 100) {
+    thresholdAdj = map(100 - NOISE_DIVISOR, 0, 25, 0.4, 0.6)
   }
   LAYERS = setLayers(layerN, thresholdAdj)
 }
