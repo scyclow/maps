@@ -115,12 +115,26 @@ function drawCoords(coords, dotFn) {
 
 function generateAllCoords() {
   const densityMinimum = map(SCALE, 0.2, 1.2, 0.1, 0.17)
-  const useDensityMax = rnd() < 0.15
 
-  SECONDARY_PRB = useDensityMax ? 0.2 : rnd(densityMinimum, 0.2)
-  TERTIARY_PRB = useDensityMax ? 0.2 : rnd(densityMinimum, 0.2)
-  QUARTERNARY_PRB = useDensityMax ? 0.4 : rnd(densityMinimum*2, 0.4)
-  STREET_PRB = useDensityMax ? 1 : rnd(0.25, 1)
+  const densityOverride =
+    DENSITY === 0 ? 0.05 :
+    DENSITY === 2 ? 0.5 :
+    false
+
+
+  SECONDARY_PRB = densityOverride
+    ? densityOverride
+    : rnd(densityMinimum, 0.2)
+  TERTIARY_PRB = densityOverride
+    ? densityOverride*1.5
+    : rnd(densityMinimum, 0.2)
+  QUARTERNARY_PRB = densityOverride
+    ? densityOverride*1.5
+    : rnd(densityMinimum*2, 0.4)
+  STREET_PRB = densityOverride
+    ? densityOverride*2
+    : rnd(0.25, 1)
+
   STREET_BLOCK_HEIGHT = 20 // can go up to maybe 200?
 
 

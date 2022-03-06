@@ -58,7 +58,7 @@ function keyPressed() {
 }
 
 
-let SYMMETRICAL_NOISE, NOISE_DIVISOR, TURBULENCE, IGNORE_STREET_CAP, STREET_TURBULENCE, HARD_CURVES
+let SYMMETRICAL_NOISE, NOISE_DIVISOR, TURBULENCE, IGNORE_STREET_CAP, STREET_TURBULENCE, HARD_CURVES, DENSITY
 
 const NOISE_OFFSET = 100000
 
@@ -69,15 +69,15 @@ function setup() {
   colorMode(HSB, 360, 100, 100, 100)
 
   SCALE = rnd(0.2, 1.2)
-
   SCALE_ADJ = SIZE/800
+  const sizeADJ = SCALE*SCALE_ADJ
 
-  W = width/SCALE
-  H = height/SCALE
-  L = -width/(2*SCALE)
-  R = width/(2*SCALE)
-  T = -height/(2*SCALE)
-  B = height/(2*SCALE)
+  W = width/sizeADJ
+  H = height/sizeADJ
+  L = -width/(2*sizeADJ)
+  R = width/(2*sizeADJ)
+  T = -height/(2*sizeADJ)
+  B = height/(2*sizeADJ)
 
   // chaos budget
     // turbulence
@@ -96,6 +96,12 @@ function setup() {
 
   SYMMETRICAL_NOISE = rnd() < 0.01
   NOISE_DIVISOR = rnd(100, 750) / SCALE
+
+  DENSITY = chance(
+    [0.02, 0],
+    [0.96, 1],
+    [0.02, 2],
+  )
 
 
   const layerN = chance(
