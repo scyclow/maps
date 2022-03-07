@@ -25,18 +25,18 @@ function setLayers(layerN, startingElevation=false) {
   const avgElevation = findAvgElevation()
 
   const thresholdDiff = 0.02
-  const r = rules(layerN)
-  const ruleName = chance(
-    [25, 'paper'],
+  const baseRule = chance(
+    [layerN <= 4 ? 25 : 0, 'paper'],
     [5, 'whiteAndBlack'],
 
-    [25, 'faded'],
-    [10, 'bright'],
+    [layerN <= 4 ? 25 : 0, 'faded'],
+    [layerN <= 4 ? 10 : 5, 'bright'],
 
-    [25, 'burnt'],
+    [layerN <= 4 ? 25 : 0, 'burnt'],
     [5, 'blackAndWhite'],
     [5, 'neon'],
   )
+  const r = rules(layerN, baseRule)
 
   const hueDiff = chance(
     [1, 0],
@@ -45,14 +45,15 @@ function setLayers(layerN, startingElevation=false) {
     [2, 150],
     [2, 180],
   ) * posOrNeg()
+  console.log(hueDiff)
 
-  const maxGradient = rnd() < 0.05 ? rnd(720, 3000) : 360
+  const maxGradient = rnd() < 0.05 ? rnd(720, 3000) : 300
 
   const layers = [{
     ix: 0,
     threshold: startingElevation || avgElevation,
     hideStreets: false,
-    ...r[ruleName](rnd(360), maxGradient/3)
+    ...r[baseRule](rnd(360), maxGradient/3, 0)
   }]
 
   const newLayer = (previousLayer, threshold, ix) => {
@@ -67,7 +68,7 @@ function setLayers(layerN, startingElevation=false) {
       ix,
       threshold,
       hideStreets,
-      ...r[nextLayer](hue, maxGradient)
+      ...r[nextLayer](hue, maxGradient, ix)
     }
   }
 
@@ -99,12 +100,33 @@ const getGradient = (force, mx=360) => {
     }
     : null
 }
-const rules = (layerN) => {
+
+
+const rules = (layerN, baseRule) => {
   const black = color(0,0,8, 80)
   const white = color(0, 0, 90,80)
   const forceGradient = rnd() < 0.02
+  const baseIsDark = ['blackAndWhite', 'neon', 'burnt'].includes(baseRule)
+
+  const colorProgressRule = chance(
+    [layerN <= 4 ? 0.5 : 0.25, 0], // no special rules
+    [0.15, 1], // alternate
+    [layerN > 2 ? 0.15 : 0, 2], // all light
+    [baseIsDark ? 0.1 : 0, 3], // all dark
+    [!baseIsDark ? 0.1 : 0, 4], // lots of color
+  )
+  console.log(colorProgressRule)
+
+  const canShowLight = isLight => {
+    return [0, 2, 4, isLight ? 0 : 1].includes(colorProgressRule)
+  }
+
+  const canShowDark = isDark => {
+    return [0, 3, isDark ? 0 : 1].includes(colorProgressRule)
+  }
+
   return {
-    blackAndWhite: (h) => {
+    blackAndWhite: (h, _, ix) => {
       return {
         name: 'blackAndWhite',
         baseHue: h,
@@ -118,9 +140,9 @@ const rules = (layerN) => {
           circle: white,
         },
         neighbors: [
-          [0.7, 'whiteAndBlack'],
-          [0.3, 'neon'],
-          [0.3, 'bright'],
+          [canShowLight(false) ? 0.7 : 0, 'whiteAndBlack'],
+          [canShowDark(true) ? 0.3 : 0, 'neon'],
+          [canShowLight(false) ? 0.3 : 0, 'bright'],
         ],
         gradient: null,
         isDark: true,
@@ -129,7 +151,7 @@ const rules = (layerN) => {
       }
     },
 
-    whiteAndBlack: (h) => {
+    whiteAndBlack: (h, _, ix) => {
       return {
         name: 'whiteAndBlack',
         baseHue: h,
@@ -143,9 +165,10 @@ const rules = (layerN) => {
           circle: black,
         },
         neighbors: [
-          [0.5, 'blackAndWhite'],
-          [0.5, 'neon'],
-          [0.5, 'bright'],
+          [canShowDark(false) ? 0.5 : 0, 'blackAndWhite'],
+          [canShowDark(false) ? 0.5 : 0, 'neon'],
+          [canShowLight(true) ? 0.5 : 0, 'bright'],
+          [colorProgressRule === 4 ? 2 : 0, 'bright'],
         ],
         gradient: null,
         isDark: false,
@@ -154,7 +177,7 @@ const rules = (layerN) => {
       }
     },
 
-    neon: (h, gradientMax) => {
+    neon: (h, gradientMax, ix) => {
       const bg = color(hfix(h), 30, 12)
       let c = color(hfix(h), adjSat(55, h), 95, 80)
 
@@ -176,10 +199,10 @@ const rules = (layerN) => {
           circle: c,
         },
         neighbors: [
-          [0.4, 'blackAndWhite'],
-          [0.4, 'whiteAndBlack'],
-          [0.2, 'neon'],
-          [0.2, 'bright'],
+          [canShowDark(true) ? 0.4 : 0, 'blackAndWhite'],
+          [canShowLight(false) ? 0.4 : 0, 'whiteAndBlack'],
+          [canShowDark(true) ? 0.2 : 0, 'neon'],
+          [canShowLight(false) ? 0.2 : 0, 'bright'],
         ],
         gradient: getGradient(forceGradient, gradientMax),
         isDark: true,
@@ -188,7 +211,7 @@ const rules = (layerN) => {
       }
     },
 
-    bright: (h, gradientMax) => {
+    bright: (h, gradientMax, ix) => {
       const c1 = color(hfix(h), adjSat(55, h), 95, 80)
       const c2 = color(hfix(h + 180), 30, 15, 80)
 
@@ -205,9 +228,10 @@ const rules = (layerN) => {
           circle: c2,
         },
         neighbors: [
-          [0.4, 'blackAndWhite'],
-          [0.4, 'whiteAndBlack'],
-          [0.2, 'neon'],
+          [canShowDark(false) ? 0.4 : 0, 'blackAndWhite'],
+          [canShowLight(true) ? 0.4 : 0, 'whiteAndBlack'],
+          [canShowDark(false) ? 0.2 : 0, 'neon'],
+          [colorProgressRule === 4 ? 2 : 0, 'bright'],
         ],
         gradient: getGradient(forceGradient, gradientMax),
         isDark: false,
@@ -216,7 +240,7 @@ const rules = (layerN) => {
       }
     },
 
-    paper: (h, gradientMax) => {
+    paper: (h, gradientMax, ix) => {
       const c1 = color(hfix(h), 9, 91)
       const hues = [
         color(hfix(h + 180), 60, 30),
@@ -242,25 +266,24 @@ const rules = (layerN) => {
           circle: c4,
         },
         neighbors: [
-          [0.2, 'blackAndWhite'],
-          [0.2, 'whiteAndBlack'],
-          [0.2, 'neon'],
-          [0.2, 'bright'],
-          [0.4, 'faded'],
+          [canShowDark(false) ? 0.2 : 0, 'blackAndWhite'],
+          [canShowDark(false) && layerN > 2 ? 0.2 : 0, 'neon'],
+          [canShowDark(false) ? 0.2 : 0, 'burnt'],
+          [canShowLight(true) ? 0.2 : 0, 'whiteAndBlack'],
+          [canShowLight(true) ? 0.2 : 0, 'bright'],
+          [canShowLight(true) ? 0.4 : 0, 'faded'],
+          [colorProgressRule === 4 ? 2 : 0, 'bright'],
         ],
         gradient: forceGradient
           ? getGradient(forceGradient, gradientMax)
           : getGradient(true, 120),
         isDark: false,
-        isColor: true,
-        isLight: false,
+        isColor: false,
+        isLight: true,
       }
     },
-    faded: (h, gradientMax) => {
+    faded: (h, gradientMax, ix) => {
       const c1 = color(hfix(h), adjSat(35, h), 95, 80)
-
-
-
       const c2 = setContrastC2(c1, color(hfix(h+180), 85, 30), 0.7)
       const c3 = setContrastC2(c1, color(hfix(h+150), 85, 30), 0.65)
       const c4 = setContrastC2(c1, color(hfix(h+120), 85, 30), 0.6)
@@ -278,12 +301,13 @@ const rules = (layerN) => {
           circle: c4,
         },
         neighbors: [
-          [0.2, 'blackAndWhite'],
-          [0.2, 'whiteAndBlack'],
-          [0.2, 'neon'],
-          [0.2, 'bright'],
-          [0.4, 'paper'],
-          [0.4, 'burnt'],
+          [canShowDark(false) ? 0.2 : 0, 'blackAndWhite'],
+          [canShowDark(false) ? 0.2 : 0, 'neon'],
+          [canShowDark(false) ? 0.4 : 0, 'burnt'],
+          [canShowLight(true) ? 0.2 : 0, 'whiteAndBlack'],
+          [canShowLight(true) ? 0.2 : 0, 'bright'],
+          [canShowLight(true) ? 0.4 : 0, 'paper'],
+          [colorProgressRule === 4 ? 2 : 0, 'bright'],
         ],
         gradient: forceGradient
           ? getGradient(forceGradient, gradientMax)
@@ -294,13 +318,12 @@ const rules = (layerN) => {
       }
     },
 
-    burnt: (h, gradientMax) => {
+    burnt: (h, gradientMax, ix) => {
       const c1 = color(hfix(h), 35, 15)
 
       const c2 = color(hfix(h + 180), 50, 95, 80)
       const c3 = color(hfix(h + 150), 50, 95, 80)
       const c4 = color(hfix(h + 120), 50, 95, 80)
-
 
       return {
         name: 'burnt',
@@ -315,11 +338,11 @@ const rules = (layerN) => {
           circle: c4,
         },
         neighbors: [
-          [0.3, 'blackAndWhite'],
-          [0.4, 'whiteAndBlack'],
-          [0.2, 'neon'],
-          [0.2, 'bright'],
-          [0.4, 'faded'],
+          [canShowDark(true) ? 0.3 : 0, 'blackAndWhite'],
+          [canShowDark(true) ? 0.2 : 0, 'neon'],
+          [canShowLight(false) ? 0.4 : 0, 'whiteAndBlack'],
+          [canShowLight(false) ? 0.2 : 0, 'bright'],
+          [canShowLight(false) ? 0.4 : 0, 'faded'],
         ],
         gradient: getGradient(forceGradient, gradientMax),
         isDark: true,

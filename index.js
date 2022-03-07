@@ -46,6 +46,16 @@ from output to output, with some having degraded substantially.
   - base bright should also have a version where streets have some color
   - maybe dark/neon should have base color streets as well
 
+
+2-8 notes
+  - should have more that have no black bg color schemes
+  - fewer with choppy clouds
+    - maybe when it does pop up, either have really low threshold or higher threshold
+    - or, at very least have a higher noise divisor
+    - 92, 112 are good ones
+  - rare bg: each stroke is a random hue
+
+
 */
 
 
@@ -104,15 +114,17 @@ function setup() {
   )
 
 
-  const layerN = chance(
+  const layerN =
+  chance(
     [7, 1],
     [10, 2],
-    [31, 3],
-    [31, 4],
-    [11, 8],
-    [9, 12],
+    [34, 3],
+    [34, 4],
+    [10, 8],
+    [4, 12],
     [1, 30],
   )
+  console.log(layerN, NOISE_DIVISOR*SCALE)
 
 
   let thresholdAdj = 0
