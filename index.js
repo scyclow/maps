@@ -101,7 +101,7 @@ function setup() {
   TURBULENCE = rnd() < 0.15
   STREET_TURBULENCE = rnd() < 0.1
   IGNORE_STREET_CAP = rnd() < 0.1
-  HARD_CURVES = rnd() < 0.1
+  HARD_CURVES = rnd() < 0.075
   SOFT_CURVES = !HARD_CURVES && rnd() < 0.05
 
   SYMMETRICAL_NOISE = rnd() < 0.01

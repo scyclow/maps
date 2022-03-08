@@ -56,10 +56,13 @@ function drawBackgroundStroke(x, y, layer, strokeSize, layers) {
 
   }
 
+  const hGrain = layer.grain * 45 + 3
+  const sGrain = layer.grain * 10 + 5
+  const bGrain = layer.grain * 5
   stroke(
-    hfix(hue(layer.colors.bg) + rnd(-3, 3) + hAdj),
-    saturation(layer.colors.bg) + rnd(-5, 5) + sAdj,
-    brightness(layer.colors.bg) + rnd(-10, 0) + bAdj,
+    hfix(hue(layer.colors.bg) + hAdj + rnd(-hGrain, hGrain)),
+    saturation(layer.colors.bg) + sAdj + rnd(-sGrain, sGrain),
+    brightness(layer.colors.bg) + bAdj + rnd(-10 - bGrain, 0) ,
   )
   const angle = noise(x+W, y+H)
 

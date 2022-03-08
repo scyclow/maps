@@ -36,8 +36,6 @@ function setLayers(layerN, startingElevation=false) {
     [5, 'blackAndWhite'],
     [5, 'neon'],
   )
-  const r = rules(layerN, baseRule)
-
   const hueDiff = chance(
     [1, 0],
     [2, 100],
@@ -45,6 +43,9 @@ function setLayers(layerN, startingElevation=false) {
     [2, 150],
     [2, 180],
   ) * posOrNeg()
+
+  const r = rules(layerN, baseRule, hueDiff)
+
   console.log(hueDiff)
 
   const maxGradient = rnd() < 0.05 ? rnd(720, 3000) : 300
@@ -102,18 +103,19 @@ const getGradient = (force, mx=360) => {
 }
 
 
-const rules = (layerN, baseRule) => {
+const rules = (layerN, baseRule, hueDiff) => {
   const black = color(0,0,8, 80)
   const white = color(0, 0, 90,80)
   const forceGradient = rnd() < 0.02
   const baseIsDark = ['blackAndWhite', 'neon', 'burnt'].includes(baseRule)
+  const grain = rnd() < 0.5 ? 0 : rnd(0.2, 1)
 
   const colorProgressRule = chance(
     [layerN <= 4 ? 0.5 : 0.25, 0], // no special rules
     [0.15, 1], // alternate
     [layerN > 2 ? 0.15 : 0, 2], // all light
     [baseIsDark ? 0.1 : 0, 3], // all dark
-    [!baseIsDark ? 0.1 : 0, 4], // lots of color
+    [!baseIsDark ? 0.05 : 0, 4], // lots of color
   )
   console.log(colorProgressRule)
 
@@ -125,11 +127,13 @@ const rules = (layerN, baseRule) => {
     return [0, 3, isDark ? 0 : 1].includes(colorProgressRule)
   }
 
+  const d = hueDiff < 0 ? -1 : 1
   return {
     blackAndWhite: (h, _, ix) => {
       return {
         name: 'blackAndWhite',
         baseHue: h,
+        grain,
         colors: {
           bg: black,
           primary: white,
@@ -155,6 +159,7 @@ const rules = (layerN, baseRule) => {
       return {
         name: 'whiteAndBlack',
         baseHue: h,
+        grain,
         colors: {
           bg: white,
           primary: black,
@@ -189,6 +194,7 @@ const rules = (layerN, baseRule) => {
       return {
         name: 'neon',
         baseHue: h,
+        grain,
         colors: {
           bg,
           primary: c,
@@ -213,11 +219,12 @@ const rules = (layerN, baseRule) => {
 
     bright: (h, gradientMax, ix) => {
       const c1 = color(hfix(h), adjSat(55, h), 95, 80)
-      const c2 = color(hfix(h + 180), 30, 15, 80)
+      const c2 = color(hfix(h + 180*d), 30, 15, 80)
 
       return {
         name: 'bright',
         baseHue: h,
+        grain,
         colors: {
           bg: c1, // looks good at (344, 90, 100) with dark blue strokes
           primary: c2,
@@ -243,9 +250,9 @@ const rules = (layerN, baseRule) => {
     paper: (h, gradientMax, ix) => {
       const c1 = color(hfix(h), 9, 91)
       const hues = [
-        color(hfix(h + 180), 60, 30),
-        color(hfix(h + 150), 85, 35),
-        color(hfix(h + 120), 55, 37),
+        color(hfix(h + 180*d), 60, 30),
+        color(hfix(h + 150*d), 85, 35),
+        color(hfix(h + 120*d), 55, 37),
       ].sort((a, b) => luminance(a) - luminance(b))
 
       const c2 = color(hue(hues[0]), 60, 30)
@@ -256,6 +263,7 @@ const rules = (layerN, baseRule) => {
       return {
         name: 'paper',
         baseHue: h,
+        grain,
         colors: {
           bg: c1, // looks good at (344, 90, 100) with dark blue strokes
           primary: c2,
@@ -284,13 +292,14 @@ const rules = (layerN, baseRule) => {
     },
     faded: (h, gradientMax, ix) => {
       const c1 = color(hfix(h), adjSat(35, h), 95, 80)
-      const c2 = setContrastC2(c1, color(hfix(h+180), 85, 30), 0.7)
-      const c3 = setContrastC2(c1, color(hfix(h+150), 85, 30), 0.65)
-      const c4 = setContrastC2(c1, color(hfix(h+120), 85, 30), 0.6)
+      const c2 = setContrastC2(c1, color(hfix(h+180*d), 85, 30), 0.7)
+      const c3 = setContrastC2(c1, color(hfix(h+150*d), 85, 30), 0.65)
+      const c4 = setContrastC2(c1, color(hfix(h+120*d), 85, 30), 0.6)
 
       return {
         name: 'faded',
         baseHue: h,
+        grain,
         colors: {
           bg: c1, // looks good at (344, 90, 100) with dark blue strokes
           primary: c2,
@@ -321,13 +330,14 @@ const rules = (layerN, baseRule) => {
     burnt: (h, gradientMax, ix) => {
       const c1 = color(hfix(h), 35, 15)
 
-      const c2 = color(hfix(h + 180), 50, 95, 80)
-      const c3 = color(hfix(h + 150), 50, 95, 80)
-      const c4 = color(hfix(h + 120), 50, 95, 80)
+      const c2 = color(hfix(h + 180*d), 50, 95, 80)
+      const c3 = color(hfix(h + 150*d), 50, 95, 80)
+      const c4 = color(hfix(h + 120*d), 50, 95, 80)
 
       return {
         name: 'burnt',
         baseHue: h,
+        grain,
         colors: {
           bg: c1,
           primary: c2,
