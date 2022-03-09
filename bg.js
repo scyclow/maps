@@ -21,7 +21,6 @@ function drawBackground() {
 
 function drawBackgroundStroke(x, y, layer, strokeSize, layers) {
   const baseLayer = layers[0]
-  // increase/decrease rnd hue/sat for graininess
   const colorMismatch = (
     (layer.isColor && baseLayer.isDark) ||
     (baseLayer.isColor && layer.isDark)
@@ -33,7 +32,7 @@ function drawBackgroundStroke(x, y, layer, strokeSize, layers) {
 
   const strokeMultiplier =
     largeLayer && colorMismatch ? 1.25/SCALE :
-    largeLayer && colorMismatchIffy ? 1.15 :
+    largeLayer && colorMismatchIffy ? max(1, 0.55/SCALE) :
     colorMismatchIffy || colorMismatch ? 1.1 :
     1
 

@@ -1,7 +1,32 @@
 /*
 
-
 Zones
+Abstractions of Nothing
+Maps of Hyperreality
+Fake Hyperrealities
+Fake Maps
+Fake Abstractions
+Maps Without Terretories
+Simulacras
+
+maps are representations of reality. highlight the fact that this is a representation.
+In the Borges story, the maps become so larger that they effectively contain no abstraction.
+
+
+each map seems to tell a story, but they're stories of things that have never existed.
+
+all of the zones/clouds/splotches can represent numerous things.
+they can represent a social abstraction - an ideology, a community, a district
+they can represent a natural system parallel to the city grid - topology, weather
+or, they can represent the degredation of the map itself
+
+
+one thing that this makes me think of is how there are all of these immaterial zones and structures
+that we try to map onto physical space and represent with abstractions. it could be walking into a neighborhood
+and crossing through the in-between area of that neighborhood. what do the blotches represent in the context of the map?
+or, do they represent nothing? are they a random coffee stain
+
+
 
 i guess the idea is that maps are a representation of reality, and that representation can be constructed in multiple different ways
 
@@ -68,7 +93,8 @@ function keyPressed() {
 }
 
 
-let SYMMETRICAL_NOISE, NOISE_DIVISOR, TURBULENCE, IGNORE_STREET_CAP, STREET_TURBULENCE, HARD_CURVES, DENSITY
+let SYMMETRICAL_NOISE, NOISE_DIVISOR, TURBULENCE, IGNORE_STREET_CAP, STREET_TURBULENCE, HARD_CURVES, DENSITY, COLOR_RULE
+let LAYERS = []
 
 const NOISE_OFFSET = 100000
 
@@ -113,27 +139,112 @@ function setup() {
     [0.02, 2],
   )
 
+  COLOR_RULE = chance(
+    [0.45, 0], // anything goes
+    [0.25, 1], // high contrast
+    [0.1, 2], // all light
+    [0.075, 3], // all dark
+    [0.075, 4], // all color
+    [0.05, 5], // topographic
+  )
 
-  const layerN =
-  chance(
+  let layerN = chance(
     [7, 1],
-    [10, 2],
+    [10, 2], // todo don't include if all light?
     [34, 3],
     [34, 4],
-    [10, 8],
-    [4, 12],
-    [1, 30],
+    [10, 8], // more likely if alternate
+    [4, 12], // more likely if alternate
+    [1, 30], // more likely if alternate
   )
+
+
+  let thresholdAdj = 1
+  if (layerN === 30) {
+    thresholdAdj = 0.01
+  }
+
+
+  let baseRule = chance(
+    [layerN <= 4 ? 25 : 0, 'paper'],
+    [layerN <= 4 ? 25 : 0, 'burnt'],
+    [layerN <= 4 ? 25 : 0, 'faded'],
+
+    [layerN <= 4 ? 10 : 5, 'bright'],
+    [5, 'whiteAndBlack'],
+    [5, 'blackAndWhite'],
+    [5, 'neon'],
+  )
+
+  let hueDiff = chance(
+    [1, 0],
+    [2, 100],
+    [2, 120],
+    [2, 150],
+    [2, 180],
+  ) * posOrNeg()
+
+
+  if (COLOR_RULE === 3) {
+    baseRule = chance(
+      [10, 'burnt'],
+      [5, 'blackAndWhite'],
+      [5, 'neon'],
+    )
+
+  } else if (COLOR_RULE === 4) {
+    baseRule = chance(
+      [25, 'faded'],
+      [25, 'bright'],
+      [25, 'paper'],
+      [25, 'whiteAndBlack'],
+    )
+
+    hueDiff = chance(
+      [1, 100],
+      [1, 120],
+      [1, 150],
+      [1, 180],
+    ) * posOrNeg()
+
+    layerN = chance(
+      [34, 3],
+      [34, 4],
+      [10, 8],
+      [10, 12],
+      [5, 30],
+    )
+
+  } else if ([5, 6].includes(COLOR_RULE)) {
+    thresholdAdj = 0.01
+
+    NOISE_DIVISOR = rnd(350, 1000) / SCALE
+
+
+    layerN = 50
+
+    baseRule = chance(
+      [25, 'paper'],
+      [25, 'faded'],
+      [25, 'bright'],
+      [10, 'whiteAndBlack'],
+    )
+
+
+    hueDiff = chance(
+      [4, 0],
+      [1, 120],
+      [1, 180],
+    ) * posOrNeg()
+  }
+
   console.log(layerN, NOISE_DIVISOR*SCALE)
 
 
-  let thresholdAdj = 0
-  if (layerN === 30) {
-    thresholdAdj = 0.01
-  } else if (NOISE_DIVISOR < 100) {
-    thresholdAdj = map(100 - NOISE_DIVISOR, 0, 25, 0.4, 0.6)
-  }
-  LAYERS = setLayers(layerN, thresholdAdj)
+  console.log(COLOR_RULE)
+  console.log(hueDiff)
+
+  LAYERS = setLayers(layerN, baseRule, hueDiff, thresholdAdj)
 }
 
 
