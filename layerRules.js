@@ -156,8 +156,8 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff) => {
 
       const neighbors = {
         light: [
-          [0.7, 'whiteAndBlack'],
-          [0.3, 'bright'],
+          [0.8, 'whiteAndBlack'],
+          [0.2, 'bright'],
         ],
         dark: [
           [1, 'neon']

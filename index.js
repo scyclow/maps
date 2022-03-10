@@ -127,7 +127,7 @@ function setup() {
   TURBULENCE = rnd() < 0.15
   STREET_TURBULENCE = rnd() < 0.1
   IGNORE_STREET_CAP = rnd() < 0.1
-  HARD_CURVES = rnd() < 0.075
+  HARD_CURVES = rnd() < 0.05
   SOFT_CURVES = !HARD_CURVES && rnd() < 0.05
 
   SYMMETRICAL_NOISE = rnd() < 0.01
@@ -140,19 +140,19 @@ function setup() {
   )
 
   COLOR_RULE = chance(
-    [0.45, 0], // anything goes
-    [0.25, 1], // high contrast
+    [0.46, 0], // anything goes
+    [0.27, 1], // high contrast
     [0.1, 2], // all light
-    [0.075, 3], // all dark
-    [0.075, 4], // all color
-    [0.05, 5], // topographic
+    [0.07, 3], // all dark
+    [0.07, 4], // all color
+    [0.03, 5], // topographic
   )
 
   let layerN = chance(
     [7, 1],
-    [10, 2], // todo don't include if all light?
-    [34, 3],
-    [34, 4],
+    [8, 2], // todo don't include if all light?
+    [35, 3],
+    [35, 4],
     [10, 8], // more likely if alternate
     [4, 12], // more likely if alternate
     [1, 30], // more likely if alternate
