@@ -108,7 +108,6 @@ function setLayers(layerN, baseRule, hueDiff, thresholdAdj=1, thresholdDiff = 0.
     layers.push(newLayer(previousLayer, threshold, i))
   }
 
-  console.log(layers)
 
   return layers
 }
@@ -132,8 +131,9 @@ const getGradient = (force, mx=360) => {
 
 
 const rules = (layerN, baseRule, COLOR_RULE, hueDiff) => {
-  const black = color(0,0,8, 80)
-  const white = color(0, 0, 90,80)
+  const black = color(0,0,8)
+  const whiteBg = color(0, 0, 90)
+  const whiteStroke = color(0, 0, 85)
   const forceGradient = rnd() < 0.02
   const grain = rnd() < 0.5 ? 0 : rnd(0.2, 1)
 
@@ -184,12 +184,12 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff) => {
         grain,
         colors: {
           bg: black,
-          primary: white,
-          secondary: white,
-          tertiary: white,
-          quarternary: white,
-          street: white,
-          circle: white,
+          primary: whiteStroke,
+          secondary: whiteStroke,
+          tertiary: whiteStroke,
+          quarternary: whiteStroke,
+          street: whiteStroke,
+          circle: whiteStroke,
         },
         neighbors,
         gradient: null,
@@ -225,7 +225,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff) => {
         baseHue: h,
         grain,
         colors: {
-          bg: white,
+          bg: whiteBg,
           primary: black,
           secondary: black,
           tertiary: black,
@@ -243,7 +243,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff) => {
 
     neon: (h, gradientMax, ix) => {
       const bg = color(hfix(h), 30, 12)
-      let c = color(hfix(h), adjSat(55, h), 95, 80)
+      let c = color(hfix(h), adjSat(55, h), 95)
 
       if (contrast(bg, c) > -0.5) {
         c = setContrastC2(bg, c, -0.5)
@@ -297,8 +297,8 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff) => {
     },
 
     bright: (h, gradientMax, ix) => {
-      const c1 = color(hfix(h), adjSat(55, h), 95, 80)
-      const c2 = color(hfix(h + 180*d), 30, 15, 80)
+      const c1 = color(hfix(h), adjSat(55, h), 95)
+      const c2 = color(hfix(h + 180*d), 30, 15)
 
       let key
       if ([1, 3].includes(COLOR_RULE)) key = 'dark'
@@ -347,15 +347,10 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff) => {
 
     paper: (h, gradientMax, ix) => {
       const c1 = color(hfix(h), 9, 91)
-      const hues = [
-        color(hfix(h + 180*d), 60, 30),
-        color(hfix(h + 150*d), 85, 35),
-        color(hfix(h + 120*d), 55, 37),
-      ].sort((a, b) => luminance(a) - luminance(b))
 
-      const c2 = color(hue(hues[0]), 60, 30)
-      const c3 = color(hue(hues[1]), 85, 35)
-      const c4 = color(hue(hues[2]), 55, 37)
+      const c2 = color(hfix(h + 180*d), 60, 30)
+      const c3 = color(hfix(h + 170*d), 40, 35)
+      const c4 = color(hfix(h + 160*d), 40, 35)
 
       let key
       if ([1, 3].includes(COLOR_RULE)) key = 'dark'
@@ -413,7 +408,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff) => {
     },
 
     faded: (h, gradientMax, ix) => {
-      const c1 = color(hfix(h), adjSat(35, h), 95, 80)
+      const c1 = color(hfix(h), adjSat(35, h), 95)
       const c2 = setContrastC2(c1, color(hfix(h+180*d), 85, 30), 0.7)
       const c3 = setContrastC2(c1, color(hfix(h+150*d), 85, 30), 0.65)
       const c4 = setContrastC2(c1, color(hfix(h+120*d), 85, 30), 0.6)
@@ -474,9 +469,9 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff) => {
     burnt: (h, gradientMax, ix) => {
       const c1 = color(hfix(h), 35, 15)
 
-      const c2 = color(hfix(h + 180*d), 50, 95, 80)
-      const c3 = color(hfix(h + 150*d), 50, 95, 80)
-      const c4 = color(hfix(h + 120*d), 50, 95, 80)
+      const c2 = color(hfix(h + 180*d), 50, 95)
+      const c3 = color(hfix(h + 150*d), 50, 95)
+      const c4 = color(hfix(h + 120*d), 50, 95)
 
       let key
       if ([1, 2].includes(COLOR_RULE)) key = 'light'

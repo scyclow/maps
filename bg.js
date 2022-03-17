@@ -32,7 +32,7 @@ function drawBackgroundStroke(x, y, layer, strokeSize, layers) {
 
   const strokeMultiplier =
     largeLayer && colorMismatch ? 1.25/SCALE :
-    largeLayer && colorMismatchIffy ? max(1, 0.55/SCALE) :
+    largeLayer && colorMismatchIffy ? max(1, 0.75/SCALE) :
     colorMismatchIffy || colorMismatch ? 1.1 :
     1
 
@@ -57,7 +57,7 @@ function drawBackgroundStroke(x, y, layer, strokeSize, layers) {
 
   const hGrain = layer.grain * 45 + 3
   const sGrain = layer.grain * 10 + 5
-  const bGrain = layer.grain * 5
+  const bGrain = layer.grain * 5 * (colorMismatchIffy || colorMismatch ? 0 : 1)
   stroke(
     hfix(hue(layer.colors.bg) + hAdj + rnd(-hGrain, hGrain)),
     saturation(layer.colors.bg) + sAdj + rnd(-sGrain, sGrain),

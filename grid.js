@@ -1,9 +1,11 @@
 
 
 
-function drawStreetGrid() {
-  MIN_ST_W = 0.8
-  MAX_ST_W = 1.2
+function drawStreetGrid(startX=0, startY=0) {
+  push()
+  translate(startX, startY)
+  MIN_ST_W = 0.7
+  MAX_ST_W = 1.3
 
   const {
     primaryAveCoords,
@@ -16,9 +18,15 @@ function drawStreetGrid() {
   const t = TURBULENCE ? 1.75 : 0.5 // 0.5
   const d = TURBULENCE ? 1.25 : 0
 
+  const nsrnd = (x, y, mn, mx) =>
+  mn + noise(x/15, y/15) * (mx-mn) + rnd(-0.25, 0.25)
+  // rnd(mn, mx)
+
   streetCoords.forEach(coords => drawCoords(coords.coords, (x, y, progress, angle) => {
-    const _x = x+rnd(-t, t)
-    const _y = y+rnd(-t, t)
+    const streetT = t * 0.7
+    const streetD = d * 1.3
+    const _x = x+rnd(-streetT, streetT)
+    const _y = y+rnd(-streetT, streetT)
     const layer = findActiveLayer(_x, _y)
     if (layer.hideStreets) return
 
@@ -29,20 +37,22 @@ function drawStreetGrid() {
         circle(x+rnd(-10, 10), y+rnd(-10, 10), rnd(1*MIN_ST_W, 1*MAX_ST_W))
       })
     } else {
-      circle(_x, _y, rnd(MIN_ST_W, MAX_ST_W) + d)
+      circle(_x, _y, nsrnd(_x, _y, MIN_ST_W, MAX_ST_W) + streetD)
 
     }
   }))
 
 
   quarternaryAveCoords.forEach(coords => drawCoords(coords.coords, (x, y, p, angle) => {
-    const _x = x+rnd(-t, t)
-    const _y = y+rnd(-t, t)
+    const qT = t * 0.9
+    const qD = d * 1.1
+    const _x = x+rnd(-qT, qT)
+    const _y = y+rnd(-qT, qT)
     const layer = findActiveLayer(_x, _y)
     if (layer.hideStreets) return
 
     setC(_x, _y, layer.colors.quarternary, layer.gradient)
-    circle(_x, _y, rnd(2*MIN_ST_W, 2*MAX_ST_W) + d)
+    circle(_x, _y, nsrnd(_x, _y, 2*MIN_ST_W, 2*MAX_ST_W) + qD)
   }))
 
 
@@ -55,7 +65,7 @@ function drawStreetGrid() {
     if (layer.hideStreets) return
 
     setC(_x, _y, layer.colors.tertiary, layer.gradient)
-    circle(_x, _y, rnd(3.5*MIN_ST_W, 3.5*MAX_ST_W) + d)
+    circle(_x, _y, nsrnd(_x, _y, 3.5*MIN_ST_W, 3.5*MAX_ST_W) + d)
   }))
 
 
@@ -67,7 +77,7 @@ function drawStreetGrid() {
     if (layer.hideStreets) return
 
     setC(_x, _y, layer.colors.secondary, layer.gradient)
-    circle(_x, _y, rnd(5.5*MIN_ST_W, 5.5*MAX_ST_W) + d)
+    circle(_x, _y, nsrnd(_x, _y, 5.5*MIN_ST_W, 5.5*MAX_ST_W) + d)
   }))
 
 
@@ -78,8 +88,9 @@ function drawStreetGrid() {
     if (layer.hideStreets) return
 
     setC(_x, _y, layer.colors.primary, layer.gradient)
-    circle(_x, _y, rnd(7*MIN_ST_W, 7*MAX_ST_W) + d)
+    circle(_x, _y, nsrnd(_x, _y, 6.75*MIN_ST_W, 6.75*MAX_ST_W) + d)
   })
+  pop()
 }
 
 function drawCoords(coords, dotFn) {
@@ -138,7 +149,7 @@ function generateAllCoords() {
   STREET_BLOCK_HEIGHT = 20 // can go up to maybe 200?
 
 
-  const minDrift = rnd() < 0.05 ? 100 : 17
+  const minDrift = STRAIGHT_STREETS ? 100 : 17
 
   PRIMARY_DRIFT = HALF_PI/minDrift
   SECONDARY_DRIFT = HALF_PI/rnd(minDrift, minDrift*2)
@@ -152,15 +163,16 @@ function generateAllCoords() {
   const rndW = rnd(L, R)
 
   const primaryCoordArgs = chance(
-    [0.25, [rndW, B, lineStats(rndW, B, 0, 0).angle]],
-    [0.25, [rndW, T, lineStats(rndW, T, 0, 0).angle]],
-    [0.25, [L, rndH, lineStats(L, rndH, 0, 0).angle]],
-    [0.25, [R, rndH, lineStats(R, rndH, 0, 0).angle]],
+    [0.25, [rndW, B+25, lineStats(rndW, B, 0, 0).angle]],
+    [0.25, [rndW, T-25, lineStats(rndW, T, 0, 0).angle]],
+    [0.25, [L-25, rndH, lineStats(L, rndH, 0, 0).angle]],
+    [0.25, [R+25, rndH, lineStats(R, rndH, 0, 0).angle]],
   )
 
   const primaryAveCoords = generateStreetCoords(...primaryCoordArgs, {
     driftAmt: PRIMARY_DRIFT,
-    maxLen: 300
+    maxLen: 300,
+    ix: 0
   })
 
   const cutoff = 150
@@ -170,7 +182,7 @@ function generateAllCoords() {
     if (rnd() < SECONDARY_PRB && i < cutoff) {
       const branch = pBranch++
       const direction = rnd() < 0.5 ? 1 : -1
-      const angleAdj = direction === -1 ? HALF_PI : PI+HALF_PI
+      const angleAdj = (direction === -1 ? HALF_PI : PI+HALF_PI) + rnd(-SECONDARY_ANGLE_ADJ, SECONDARY_ANGLE_ADJ)
       return generateStreetCoords(coord.x, coord.y, coord.angle + angleAdj, {
         direction,
         branch,

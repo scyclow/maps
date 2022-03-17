@@ -6,8 +6,35 @@ Maps of Hyperreality
 Fake Hyperrealities
 Fake Maps
 Fake Abstractions
-Maps Without Terretories
+Maps Without Territories
 Simulacras
+Districts
+Digital Renderings of Hand Drawn Maps
+Metaverse
+hyperreality
+Hand Drawn Maps With Coffee Stain
+Nonexistant Maps
+Simulations of Territory
+Territorial Simulations
+Artifacts
+Digital artifacts
+Simulated Cartographies
+The Treachery of Cartography
+The Treachery of Maps
+Maps of Distress
+
+
+
+
+i guess the idea is that it's unclear where the map starts and the territory ends.
+the map is a territory in itself. and when it comes to street layouts, the territory is actually a form of map.
+
+
+
+do the blotches represent a mapping of the territory, or the territory of the map?
+is it a representation of the thing th emap is of? or is it a decay of the actual map itself?
+
+
 
 maps are representations of reality. highlight the fact that this is a representation.
 In the Borges story, the maps become so larger that they effectively contain no abstraction.
@@ -81,6 +108,37 @@ from output to output, with some having degraded substantially.
   - rare bg: each stroke is a random hue
 
 
+2-12 notes
+  - do a deep dive on 2-layer outputs. modify rules to make those look better
+  - do a deep dive on zoomed out pieces. make high contrast bg strokes look better
+  - adjust high density zoomed out outputs
+  - animation intro?
+  - name?
+
+
+
+
+  2 layers
+    - no paper/faded/burnt
+    - no gradient
+
+
+
+2-11 notes
+  - should make the primary/secondary aves thinner, espescially for hig density
+  - with turbulence, streets look too dotty
+  - maybe don't have high graininess on neon
+  - play with noise harmonics
+
+
+
+  Material:
+    - digital (b/w, neon, burnt)
+    - paper (w/b, paper)
+    - unknown (color, faded)
+
+  - blotches should stay the same hue, but get lighter/darker
+
 */
 
 
@@ -93,14 +151,15 @@ function keyPressed() {
 }
 
 
-let SYMMETRICAL_NOISE, NOISE_DIVISOR, TURBULENCE, IGNORE_STREET_CAP, STREET_TURBULENCE, HARD_CURVES, DENSITY, COLOR_RULE
+let SYMMETRICAL_NOISE, NOISE_DIVISOR, TURBULENCE, IGNORE_STREET_CAP, STREET_TURBULENCE, HARD_CURVES, DENSITY,
+    COLOR_RULE, STRAIGHT_STREETS, SECONDARY_ANGLE_ADJ, DOUBLE_STREETS
 let LAYERS = []
 
 const NOISE_OFFSET = 100000
 
 function setup() {
   SIZE = min(window.innerWidth, window.innerHeight)
-  __canvas = createCanvas(SIZE, SIZE);
+  __canvas = createCanvas(SIZE, SIZE)
   noiseSeed(int(rnd(10000000000000000)))
   colorMode(HSB, 360, 100, 100, 100)
 
@@ -129,15 +188,26 @@ function setup() {
   IGNORE_STREET_CAP = rnd() < 0.1
   HARD_CURVES = rnd() < 0.05
   SOFT_CURVES = !HARD_CURVES && rnd() < 0.05
+  STRAIGHT_STREETS = rnd() < 0.05
+
+
+  SECONDARY_ANGLE_ADJ = chance(
+    [1, 0],
+    [STRAIGHT_STREETS ? 0 : 0.2, HALF_PI/3],
+  )
 
   SYMMETRICAL_NOISE = rnd() < 0.01
   NOISE_DIVISOR = rnd(100, 750) / SCALE
 
   DENSITY = chance(
-    [0.02, 0],
+    [SCALE >= 0.8 ? 0.005 : 0.02, 0],
     [0.96, 1],
     [0.02, 2],
   )
+
+  DOUBLE_STREETS = DENSITY === 1 && !HARD_CURVES && rnd() < 0.01
+
+  console.log(DENSITY, SCALE)
 
   COLOR_RULE = chance(
     [0.46, 0], // anything goes
@@ -178,8 +248,9 @@ function setup() {
 
   let hueDiff = chance(
     [1, 0],
+    [1, 20],
     [2, 100],
-    [2, 120],
+    [3, 120],
     [2, 150],
     [2, 180],
   ) * posOrNeg()
@@ -201,6 +272,7 @@ function setup() {
     )
 
     hueDiff = chance(
+      [1, 20],
       [1, 100],
       [1, 120],
       [1, 150],
@@ -215,7 +287,7 @@ function setup() {
       [5, 30],
     )
 
-  } else if ([5, 6].includes(COLOR_RULE)) {
+  } else if (5 === COLOR_RULE) {
     thresholdAdj = 0.01
 
     NOISE_DIVISOR = rnd(350, 1000) / SCALE
@@ -259,9 +331,9 @@ function draw() {
   const START = Date.now()
 
   drawBackground()
-  drawStreetGrid()
+  drawStreetGrid(0,0)
 
-  // drawStreetGrid2()
+  if (DOUBLE_STREETS) drawStreetGrid(0,0)
 
 
   // translate(5, 5)
