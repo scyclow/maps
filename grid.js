@@ -281,7 +281,8 @@ function generateStreetCoords(startX, startY, startAngle, params={}) {
       angle - driftAmt,
       angle + driftAmt,
     )
-    const [nextX, nextY] = getXYRotation(angle, STREET_BLOCK_HEIGHT, x, y)
+    const a = KINKED_STREET_FACTOR && findActiveLayer(x, y).ix > 0 ? KINKED_STREET_FACTOR : 0
+    const [nextX, nextY] = getXYRotation(angle+a, STREET_BLOCK_HEIGHT, x, y)
 
     if (i) {
       const c1 = { x, y }

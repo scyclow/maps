@@ -45,9 +45,10 @@ function drawBackgroundStroke(x, y, layer, strokeSize, layers) {
   let sAdj = 0
   let bAdj = 0
   if (layer.gradient) {
-    const d =
-      dist(x, y, layer.gradient.focalPoint.x, layer.gradient.focalPoint.y)
-      / dist(L, B, R, T)
+    const d = layer.gradient.useElevation
+      ? getElevation(x, y) * 10
+      : dist(x, y, layer.gradient.focalPoint.x, layer.gradient.focalPoint.y)
+        / dist(L, B, R, T)
 
     hAdj = map(d, 0, 1, 0, layer.gradient.hue)
     sAdj = map(d, 0, 1, 0, layer.gradient.sat)

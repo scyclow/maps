@@ -113,7 +113,7 @@ function setLayers(layerN, baseRule, hueDiff, thresholdAdj=1, thresholdDiff = 0.
 
 
 
-const GRADIENT_PRB = 0.0625
+const GRADIENT_PRB = 0.1
 const getGradient = (force, mx=360) => {
   return rnd() < GRADIENT_PRB || force
     ? {
@@ -121,6 +121,7 @@ const getGradient = (force, mx=360) => {
         x: rnd(L, R),
         y: rnd(T, B)
       },
+      useElevation: rnd() < 0.5,
       hue: rnd(mx/4, mx) * posOrNeg(),
       sat: 0,
       brt: 0,

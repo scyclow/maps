@@ -161,7 +161,7 @@ function keyPressed() {
 
 
 let SYMMETRICAL_NOISE, NOISE_DIVISOR, TURBULENCE, IGNORE_STREET_CAP, STREET_TURBULENCE, HARD_CURVES, DENSITY,
-    COLOR_RULE, STRAIGHT_STREETS, SECONDARY_ANGLE_ADJ, DOUBLE_STREETS
+    COLOR_RULE, STRAIGHT_STREETS, SECONDARY_ANGLE_ADJ, DOUBLE_STREETS, KINKED_STREET_FACTOR
 let LAYERS = []
 
 const NOISE_OFFSET = 100000
@@ -198,6 +198,10 @@ function setup() {
   HARD_CURVES = rnd() < 0.05
   SOFT_CURVES = !HARD_CURVES && rnd() < 0.05
   STRAIGHT_STREETS = rnd() < 0.05
+  KINKED_STREET_FACTOR =
+    rnd() < 0.05
+      ? random(QUARTER_PI/2, QUARTER_PI) * posOrNeg()
+      : 0
 
 
   SECONDARY_ANGLE_ADJ = chance(
@@ -223,7 +227,7 @@ function setup() {
     [0.35, 1], // high contrast
     [0.1, 2], // all light
     [0.1, 3], // all dark
-    [0.17, 4], // all color
+    [0.15, 4], // all color
     [0.03, 5], // topographic
   )
 

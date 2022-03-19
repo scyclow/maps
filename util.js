@@ -1,9 +1,10 @@
 const setC = (x, y, c, g) => {
 
   if (g) {
-    const d =
-      dist(x, y, g.focalPoint.x, g.focalPoint.y)
-      / dist(L, B, R, T)
+    const d = g.useElevation
+      ? getElevation(x, y) * 10
+      : dist(x, y, g.focalPoint.x, g.focalPoint.y)
+        / dist(L, B, R, T)
 
     const _c = color(
       hfix(hue(c) + map(d, 0, 1, 0, g.hue)),
