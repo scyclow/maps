@@ -43,6 +43,7 @@ neon -> neon
 
 function setLayers(layerN, baseRule, hueDiff, thresholdAdj=1, thresholdDiff = 0.02) {
   const avgElevation = findAvgElevation()
+
   const r = rules(layerN, baseRule, COLOR_RULE, hueDiff)
 
   const maxGradient = rnd() < 0.05 ? rnd(720, 3000) : 300
@@ -71,8 +72,6 @@ function setLayers(layerN, baseRule, hueDiff, thresholdAdj=1, thresholdDiff = 0.
     const hideStreets = rnd() < 0.1
 
     let nextLayer
-
-
     if (COLOR_RULE === 5 && !(ix % 2)) {
       nextLayer = layers[0]
 
@@ -243,7 +242,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff) => {
 
     neon: (h, gradientMax, ix) => {
       const bg = color(hfix(h), 30, 12)
-      let c = color(hfix(h), adjSat(55, h), 95)
+      let c = adjColor(h, 55, 92)
 
       if (contrast(bg, c) > -0.5) {
         c = setContrastC2(bg, c, -0.5)
@@ -297,7 +296,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff) => {
     },
 
     bright: (h, gradientMax, ix) => {
-      const c1 = color(hfix(h), adjSat(55, h), 95)
+      const c1 = adjColor(h, 55, 95)
       const c2 = color(hfix(h + 180*d), 30, 15)
 
       let key
@@ -408,7 +407,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff) => {
     },
 
     faded: (h, gradientMax, ix) => {
-      const c1 = color(hfix(h), adjSat(35, h), 95)
+      const c1 = adjColor(h, 35, 95)
       const c2 = setContrastC2(c1, color(hfix(h+180*d), 85, 30), 0.7)
       const c3 = setContrastC2(c1, color(hfix(h+150*d), 85, 30), 0.65)
       const c4 = setContrastC2(c1, color(hfix(h+120*d), 85, 30), 0.6)
@@ -469,9 +468,9 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff) => {
     burnt: (h, gradientMax, ix) => {
       const c1 = color(hfix(h), 35, 15)
 
-      const c2 = color(hfix(h + 180*d), 50, 95)
-      const c3 = color(hfix(h + 150*d), 50, 95)
-      const c4 = color(hfix(h + 120*d), 50, 95)
+      const c2 = color(hfix(h + 180*d), 50, 85)
+      const c3 = color(hfix(h + 150*d), 50, 85)
+      const c4 = color(hfix(h + 120*d), 50, 85)
 
       let key
       if ([1, 2].includes(COLOR_RULE)) key = 'light'
@@ -526,11 +525,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff) => {
 }
 
 
-
-function adjSat(sat, hue) {
-  // const h = ((hue + 90) % 180) / 180
-  // return sat - map(h, 0, 1, 0, 50)
-
+function adjColor(hue, sat, brt, b) {
   hue = hfix(hue)
 
   let amt = 0
@@ -541,7 +536,9 @@ function adjSat(sat, hue) {
     amt = 1 - abs(300 - hue) / 30
   }
 
-  return sat - map(amt, 0, 1, 0, 20)
+  sat = sat - map(amt, 0, 1, 0, sat)
+
+  return color(hue, sat, brt)
 }
 
 

@@ -144,6 +144,7 @@ let __randomSeed = parseInt(tokenData.hash.slice(50, 58), 16)
 
 const resetRandomSeed = () => { __randomSeed = parseInt(tokenData.hash.slice(50, 58), 16) }
 
+const rndint = (mn, mx) => int(rnd(mn, mx))
 function rnd(mn, mx) {
   __randomSeed ^= __randomSeed << 13
   __randomSeed ^= __randomSeed >> 17
@@ -166,7 +167,7 @@ const posOrNeg = () => prb(0.5) ? 1 : -1
 const sample = (a) => a[int(rnd(a.length))]
 const exists = x => !!x
 const last = a => a[a.length-1]
-const hfix = h => (h + 360) % 360
+const hfix = h => ((h%360) + 360) % 360
 
 const luminance = c => (299*red(c) + 587*green(c) + 114*blue(c))/1000
 const contrast = (c1, c2) => (luminance(c1) - luminance(c2))/255

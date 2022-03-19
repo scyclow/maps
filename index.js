@@ -132,6 +132,15 @@ from output to output, with some having degraded substantially.
 
 
 
+2-13 notes
+  - more 20deg color changes
+  - should have an initial hue change, and the subsequent hue change
+  - should also play around with changing darkness, saturation
+  - higher noise divisor min with dark bgs
+  - more straight streets
+
+
+
   Material:
     - digital (b/w, neon, burnt)
     - paper (w/b, paper)
@@ -193,15 +202,15 @@ function setup() {
 
   SECONDARY_ANGLE_ADJ = chance(
     [1, 0],
-    [STRAIGHT_STREETS ? 0 : 0.2, HALF_PI/3],
+    [STRAIGHT_STREETS ? 0 : 0.15, HALF_PI/3],
   )
 
   SYMMETRICAL_NOISE = rnd() < 0.01
-  NOISE_DIVISOR = rnd(100, 750) / SCALE
+  NOISE_DIVISOR = rnd(150, 750) / SCALE
 
   DENSITY = chance(
-    [SCALE >= 0.8 ? 0.005 : 0.02, 0],
-    [0.96, 1],
+    [SCALE >= 0.8 ? 0.0025 : 0.01, 0],
+    [0.97, 1],
     [0.02, 2],
   )
 
@@ -210,18 +219,18 @@ function setup() {
   console.log(DENSITY, SCALE)
 
   COLOR_RULE = chance(
-    [0.46, 0], // anything goes
-    [0.27, 1], // high contrast
+    [0.25, 0], // anything goes
+    [0.35, 1], // high contrast
     [0.1, 2], // all light
-    [0.07, 3], // all dark
-    [0.07, 4], // all color
+    [0.1, 3], // all dark
+    [0.17, 4], // all color
     [0.03, 5], // topographic
   )
 
   let layerN = chance(
-    [7, 1],
+    [SCALE > 1 ? 1 : 5, 1],
     [8, 2], // todo don't include if all light?
-    [35, 3],
+    [37, 3],
     [35, 4],
     [10, 8], // more likely if alternate
     [4, 12], // more likely if alternate
@@ -248,10 +257,10 @@ function setup() {
 
   let hueDiff = chance(
     [1, 0],
-    [1, 20],
-    [2, 100],
+    [2, 20],
+    [1, 100],
     [3, 120],
-    [2, 150],
+    [1, 150],
     [2, 180],
   ) * posOrNeg()
 
@@ -264,28 +273,33 @@ function setup() {
     )
 
   } else if (COLOR_RULE === 4) {
+
     baseRule = chance(
-      [25, 'faded'],
+      [15, 'faded'],
       [25, 'bright'],
-      [25, 'paper'],
+      [15, 'paper'],
       [25, 'whiteAndBlack'],
     )
 
+    layerN = chance(
+      [25, 3],
+      [35, rndint(4,6)],
+      [25, rndint(6,9)],
+      [10, rnd(9, 15)],
+      [5, rnd(15, 30)],
+    )
+
     hueDiff = chance(
-      [1, 20],
-      [1, 100],
-      [1, 120],
-      [1, 150],
-      [1, 180],
+      [layerN >= 12 ? 2 : 1, 10],
+      [4, 20],
+      [layerN >= 12 ? 1 : 2, 100],
+      [3, 120],
+      [layerN >= 12 ? 1 : 3, 150],
+      [3, 180],
     ) * posOrNeg()
 
-    layerN = chance(
-      [34, 3],
-      [34, 4],
-      [10, 8],
-      [10, 12],
-      [5, 30],
-    )
+
+    if (layerN >= 12) thresholdAdj = rnd(0.05, 1)
 
   } else if (5 === COLOR_RULE) {
     thresholdAdj = 0.01
