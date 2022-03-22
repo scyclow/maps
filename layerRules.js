@@ -41,10 +41,12 @@ neon -> neon
 
 
 
-function setLayers(layerN, baseRule, hueDiff, thresholdAdj=1, thresholdDiff = 0.02) {
+function setLayers(layerN, baseRule, hueDiff, thresholdAdj=1, lightenDarks=false) {
+  const thresholdDiff = 0.02
+
   const avgElevation = findAvgElevation()
 
-  const r = rules(layerN, baseRule, COLOR_RULE, hueDiff)
+  const r = rules(layerN, baseRule, COLOR_RULE, hueDiff, lightenDarks)
 
   const maxGradient = rnd() < 0.05 ? rnd(720, 3000) : 300
   const layers = [{
@@ -122,15 +124,15 @@ const getGradient = (force, mx=360) => {
         y: rnd(T, B)
       },
       useElevation: rnd() < 0.5,
-      hue: rnd(mx/4, mx) * posOrNeg(),
-      sat: 0,
-      brt: 0,
+      hue: rnd(mx/4, mx) * posOrNeg() ,
+      sat: -1,
+      brt: -1,
     }
     : null
 }
 
 
-const rules = (layerN, baseRule, COLOR_RULE, hueDiff) => {
+const rules = (layerN, baseRule, COLOR_RULE, hueDiff, lightenDarks) => {
   const black = color(0,0,8)
   const whiteBg = color(0, 0, 90)
   const whiteStroke = color(0, 0, 85)
@@ -242,7 +244,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff) => {
     },
 
     neon: (h, gradientMax, ix) => {
-      const bg = color(hfix(h), 30, 12)
+      const bg = adjColor(h, 30, lightenDarks ? 22 : 12)
       let c = adjColor(h, 55, 92)
 
       if (contrast(bg, c) > -0.5) {
@@ -467,7 +469,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff) => {
     },
 
     burnt: (h, gradientMax, ix) => {
-      const c1 = color(hfix(h), 35, 15)
+      const c1 = color(hfix(h), 35, lightenDarks ? 17 : 15)
 
       const c2 = color(hfix(h + 180*d), 50, 85)
       const c3 = color(hfix(h + 150*d), 50, 85)
@@ -584,10 +586,9 @@ function findAvgElevation() {
 }
 
 function getElevation(x, y) {
-  const offset = SYMMETRICAL_NOISE ? 0 : NOISE_OFFSET
   return noise(
-    (x/NOISE_DIVISOR)+offset,
-    (y/NOISE_DIVISOR)+offset
+    (x/NOISE_DIVISOR)+NOISE_OFFSET,
+    (y/NOISE_DIVISOR)+NOISE_OFFSET
   )
 }
 

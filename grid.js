@@ -77,7 +77,7 @@ function drawStreetGrid(startX=0, startY=0) {
     if (layer.hideStreets) return
 
     setC(_x, _y, layer.colors.secondary, layer.gradient)
-    circle(_x, _y, nsrnd(_x, _y, 5.5*MIN_ST_W, 5.5*MAX_ST_W) + d)
+    circle(_x, _y, nsrnd(_x, _y, 5*MIN_ST_W, 5*MAX_ST_W) + d)
   }))
 
 
@@ -88,7 +88,7 @@ function drawStreetGrid(startX=0, startY=0) {
     if (layer.hideStreets) return
 
     setC(_x, _y, layer.colors.primary, layer.gradient)
-    circle(_x, _y, nsrnd(_x, _y, 6.75*MIN_ST_W, 6.75*MAX_ST_W) + d)
+    circle(_x, _y, nsrnd(_x, _y, 6.25*MIN_ST_W, 6.25*MAX_ST_W) + d)
   })
   pop()
 }
@@ -275,7 +275,7 @@ function generateStreetCoords(startX, startY, startAngle, params={}) {
 
   for (let i=0; i<length; i++) {
     angle = map(
-      SOFT_CURVES ? getElevation(x, y) : noise(x+NOISE_OFFSET, y+NOISE_OFFSET),
+      noise(x+NOISE_OFFSET, y+NOISE_OFFSET),
       0,
       1,
       angle - driftAmt,
