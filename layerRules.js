@@ -41,14 +41,14 @@ neon -> neon
 
 
 
-function setLayers(layerN, baseRule, hueDiff, thresholdAdj=1, lightenDarks=false) {
+function setLayers(layerN, baseRule, hueDiff, thresholdAdj=1, lightenDarks, forceGradient, invertStreets) {
   const thresholdDiff = 0.02
 
   const avgElevation = findAvgElevation()
 
-  const r = rules(layerN, baseRule, COLOR_RULE, hueDiff, lightenDarks)
+  const r = rules(layerN, baseRule, COLOR_RULE, hueDiff, lightenDarks, forceGradient, invertStreets)
 
-  const maxGradient = rnd() < 0.05 ? rnd(720, 3000) : 300
+  const maxGradient = rnd() < 0.05 ? rnd(720, 3000) : 200
   const layers = [{
     ix: 0,
     threshold: thresholdAdj * avgElevation,
@@ -72,6 +72,7 @@ function setLayers(layerN, baseRule, hueDiff, thresholdAdj=1, lightenDarks=false
 
   const newLayer = (previousLayer, threshold, ix) => {
     const hideStreets = rnd() < 0.1
+    const mxGrd = ix === layerN-1 ? maxGradient/3 : maxGradient
 
     let nextLayer
     if (COLOR_RULE === 5 && !(ix % 2)) {
@@ -81,14 +82,14 @@ function setLayers(layerN, baseRule, hueDiff, thresholdAdj=1, lightenDarks=false
       const hue = nextLayer === 'bright'
         ? previousLayer.baseHue + hueDiff
         : previousLayer.baseHue + altHueDiff
-      nextLayer = r[alternateRule](hue, maxGradient, ix)
+      nextLayer = r[alternateRule](hue, mxGrd, ix)
 
     } else {
       const nextRule = chance(...previousLayer.neighbors)
       const hue = nextRule === 'neon' || nextRule === 'bright'
         ? previousLayer.baseHue + hueDiff
         : previousLayer.baseHue
-      nextLayer = r[nextRule](hue, maxGradient, ix)
+      nextLayer = r[nextRule](hue, mxGrd, ix)
     }
 
 
@@ -115,29 +116,33 @@ function setLayers(layerN, baseRule, hueDiff, thresholdAdj=1, lightenDarks=false
 
 
 
-const GRADIENT_PRB = 0.1
-const getGradient = (force, mx=360) => {
-  return rnd() < GRADIENT_PRB || force
-    ? {
-      focalPoint: {
-        x: rnd(L, R),
-        y: rnd(T, B)
-      },
-      useElevation: rnd() < 0.5,
-      hue: rnd(mx/4, mx) * posOrNeg() ,
-      sat: -1,
-      brt: -1,
-    }
-    : null
-}
 
 
-const rules = (layerN, baseRule, COLOR_RULE, hueDiff, lightenDarks) => {
+const rules = (layerN, baseRule, COLOR_RULE, hueDiff, lightenDarks, forceGradient, invertStreets) => {
   const black = color(0,0,8)
   const whiteBg = color(0, 0, 90)
   const whiteStroke = color(0, 0, 85)
-  const forceGradient = rnd() < 0.02
+
   const grain = rnd() < 0.5 ? 0 : rnd(0.2, 1)
+
+  const GRADIENT_PRB = 0.1
+  const getGradient = (force, mx=360) => {
+    return rnd() < GRADIENT_PRB || force
+      ? {
+        focalPoint: {
+          x: rnd(L, R),
+          y: rnd(T, B)
+        },
+        useElevation: rnd() < 0.9,
+        // colorChangeFn(d) {
+
+        // },
+        hue: rnd(mx/4, mx) * posOrNeg(),
+        sat: 3,
+        brt: 2,
+      }
+      : null
+  }
 
   const canShowLight = isLight => {
     return [0, 2, 4, isLight ? 0 : 1].includes(COLOR_RULE)
@@ -300,7 +305,9 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, lightenDarks) => {
 
     bright: (h, gradientMax, ix) => {
       const c1 = adjColor(h, 55, 95)
-      const c2 = color(hfix(h + 180*d), 30, 15)
+      const c2 = invertStreets
+        ? setContrastC2(c1, color(hfix(h+180*d), 50, 85), 0.7)
+        : color(hfix(h + 180*d), 30, 15)
 
       let key
       if ([1, 3].includes(COLOR_RULE)) key = 'dark'

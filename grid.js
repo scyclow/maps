@@ -127,11 +127,16 @@ function drawCoords(coords, dotFn) {
 function generateAllCoords() {
   const densityMinimum = map(SCALE, 0.2, 1.2, 0.1, 0.17)
 
+
   const densityOverride =
     DENSITY === 0 ? 0.05 :
     DENSITY === 2 ? 0.5 :
     false
 
+  const getPrb = (mn, mx, coord, override=1) =>
+    densityOverride
+      ? densityOverride * override
+      : mn + (mx-mn) * (1-getElevation(coord.x, coord.y))
 
   SECONDARY_PRB = densityOverride
     ? densityOverride
@@ -178,10 +183,18 @@ function generateAllCoords() {
   const cutoff = 150
 
   let pBranch = 0
+  let lastIx = {}
   const secondaryAveCoords = primaryAveCoords.coords.map((coord, i) => {
-    if (rnd() < SECONDARY_PRB && i < cutoff) {
+
+    const prb = getPrb(densityMinimum, 0.2, coord)
+
+    if (rnd() < prb && i < cutoff) {
+    // if (rnd() < prb && i < cutoff) {
       const branch = pBranch++
       const direction = rnd() < 0.5 ? 1 : -1
+      if (lastIx[direction] && lastIx[direction] + 3 > i) return
+
+      lastIx[direction] = i
       const angleAdj = (direction === -1 ? HALF_PI : PI+HALF_PI) + rnd(-SECONDARY_ANGLE_ADJ, SECONDARY_ANGLE_ADJ)
       return generateStreetCoords(coord.x, coord.y, coord.angle + angleAdj, {
         direction,
@@ -196,7 +209,9 @@ function generateAllCoords() {
   const tertiaryAveCoords = secondaryAveCoords.flatMap((coords, i) => {
     let sBranch = 0
     return coords.coords.map(coord => {
-      if (rnd() < TERTIARY_PRB && i < cutoff) {
+      const prb = getPrb(densityMinimum, 0.2, coord, 1.5)
+
+      if (rnd() < prb && i < cutoff) {
 
         const direction = rnd() < 0.5 ? 1 : -1
         const angleAdj = direction === -1 ? HALF_PI : PI+HALF_PI
@@ -216,7 +231,9 @@ function generateAllCoords() {
 
 
   const quarternaryAveCoords = tertiaryAveCoords.flatMap(coords => coords.coords.map(coord => {
-    if (rnd() < QUARTERNARY_PRB) {
+    const prb = getPrb(densityMinimum*2, 0.4, coord, 1.5)
+
+    if (rnd() < prb) {
       const direction = rnd() < 0.5 ? 1 : -1
       const angleAdj = direction === -1 ? HALF_PI : PI+HALF_PI
 
@@ -244,9 +261,11 @@ function generateAllCoords() {
         ...quarternaryAveCoords,
       ]
     }
+    const prb = getPrb(0.25, 1, coord, 2)
+
     return [
-      rnd() < STREET_PRB && generateStreetCoords(coord.x, coord.y, coord.angle + HALF_PI, streetParams),
-      rnd() < STREET_PRB && generateStreetCoords(coord.x, coord.y, coord.angle + HALF_PI + PI, streetParams),
+      rnd() < prb && generateStreetCoords(coord.x, coord.y, coord.angle + HALF_PI, streetParams),
+      rnd() < prb && generateStreetCoords(coord.x, coord.y, coord.angle + HALF_PI + PI, streetParams),
     ].filter(exists)
   }))
 

@@ -27,6 +27,22 @@ Maps of Nothing
 Maps of a Decaying Territory
 Facsimiles of Maps
 Facsimiles
+Artificial Maps
+Reified Maps
+Imagined Maps
+
+
+
+As the map frays
+
+
+
+
+And while there have definitely been plenty of other amaxing map-based generative art projects, this one strikes a slightly different tone.
+
+It focuses on the artificiality of map and its fallibility.
+To put things in Baudrillardian terms: it highlights the fact that the map is a representation of the territory, and not the territory itself.
+And as the map frays, it's unclear whether it represents the decay of the map or of the territory itself.
 
 
 
@@ -168,13 +184,11 @@ from output to output, with some having degraded substantially.
     - maybe try saturation/brightness modifications again
 
 
+2-16 notes
+  - high density zoomed out looks weird
+  - maybe increase kinked streets
 
-  Material:
-    - digital (b/w, neon, burnt)
-    - paper (w/b, paper)
-    - unknown (color, faded)
 
-  - blotches should stay the same hue, but get lighter/darker
 
 */
 
@@ -243,7 +257,7 @@ function setup() {
   HARD_CURVES = rnd() < 0.05
   STRAIGHT_STREETS = rnd() < 0.05
   KINKED_STREET_FACTOR =
-    rnd() < 0.05
+    rnd() < 0.15
       ? random(QUARTER_PI/2, QUARTER_PI) * posOrNeg()
       : 0
 
@@ -312,7 +326,10 @@ function setup() {
   ) * posOrNeg()
 
 
+  let forceGradients = rnd() < 0.02
+  let invertStreets = false
   let lightenDarks = false
+
   if (COLOR_RULE === 3) {
     baseRule = chance(
       [20, 'burnt'],
@@ -351,6 +368,13 @@ function setup() {
       [3, 180],
     ) * posOrNeg()
 
+    if (rnd() < 0.05) {
+      forceGradients = true
+      invertStreets = true
+    } else {
+      invertStreets = 0.5
+    }
+
   } else if (5 === COLOR_RULE) {
     thresholdAdj = 0.01
 
@@ -380,7 +404,7 @@ function setup() {
   console.log(COLOR_RULE)
   console.log(hueDiff)
 
-  LAYERS = setLayers(layerN, baseRule, hueDiff, thresholdAdj, lightenDarks)
+  LAYERS = setLayers(layerN, baseRule, hueDiff, thresholdAdj, lightenDarks, forceGradients, invertStreets)
 }
 
 

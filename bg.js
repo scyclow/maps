@@ -51,6 +51,7 @@ function drawBackgroundStroke(x, y, layer, strokeSize, layers) {
         / dist(L, B, R, T)
 
     hAdj = map(d, 0, 1, 0, layer.gradient.hue)
+    // hAdj = layer.gradient.colorChangeFn(d)
     sAdj = map(d, 0, 1, 0, layer.gradient.sat)
     bAdj = map(d, 0, 1, 0, layer.gradient.brt)
 
