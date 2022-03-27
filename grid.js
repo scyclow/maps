@@ -154,7 +154,15 @@ function generateAllCoords() {
   STREET_BLOCK_HEIGHT = 20 // can go up to maybe 200?
 
 
-  const minDrift = STRAIGHT_STREETS ? 100 : 17
+  const minDrift =
+    STRAIGHT_STREETS ? 100 :
+    17 + map(
+      max(0, 0.35 - SCALE),
+      0,
+      0.15,
+      0,
+      7,
+    )
 
   PRIMARY_DRIFT = HALF_PI/minDrift
   SECONDARY_DRIFT = HALF_PI/rnd(minDrift, minDrift*2)
@@ -188,7 +196,7 @@ function generateAllCoords() {
 
     const prb = getPrb(densityMinimum, 0.2, coord)
 
-    if (rnd() < prb && i < cutoff) {
+    if (rnd() < prb && i < 250) {
     // if (rnd() < prb && i < cutoff) {
       const branch = pBranch++
       const direction = rnd() < 0.5 ? 1 : -1

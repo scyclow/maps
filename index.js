@@ -30,10 +30,26 @@ Facsimiles
 Artificial Maps
 Reified Maps
 Imagined Maps
+Fucked up maps
+
+Reific maps
+
+Heat Maps
+
+Untitled Maps Project
+Leaky Abstractions
 
 
 
 As the map frays
+
+
+
+
+A map is defined as a representation, usually on a flat surface, of a whole or part of an area.
+The job of a map is to describe spatial relationships of specific features that the map aims to represent.
+There are many different types of maps that attempt to represent specific things.
+Maps can display political boundaries, population, physical features, natural resources, roads, climates, elevation (topography), and economic activities.
 
 
 
@@ -313,7 +329,7 @@ function setup() {
     [layerN <= 4 ? 10 : 5, 'bright'],
     [5, 'whiteAndBlack'],
     [5, 'blackAndWhite'],
-    [5, 'neon'],
+    [SCALE <= 0.3 ? 0 : 5, 'neon'],
   )
 
   let hueDiff = chance(
@@ -345,10 +361,10 @@ function setup() {
   } else if (COLOR_RULE === 4) {
 
     baseRule = chance(
-      [15, 'faded'],
-      [25, 'bright'],
-      [15, 'paper'],
-      [25, 'whiteAndBlack'],
+      [10, 'faded'],
+      [30, 'bright'],
+      [10, 'paper'],
+      [30, 'whiteAndBlack'],
     )
 
     layerN = chance(
@@ -396,6 +412,17 @@ function setup() {
       [1, 120],
       [1, 180],
     ) * posOrNeg()
+
+  // } else if (COLOR_RULE === 6) {
+  //   baseRule = 'blackAndWhite'
+  //   forceGradients = true
+  //   layerN = chance(
+  //     [25, 3],
+  //     [35, rndint(4,6)],
+  //     [25, rndint(6,9)],
+  //     [10, rndint(9, 15)],
+  //     [5, rndint(15, 30)],
+  //   )
   }
 
   console.log(layerN, NOISE_DIVISOR*SCALE)

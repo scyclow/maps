@@ -5,38 +5,47 @@ const NEG_Q_PI = -Math.PI/4
 
 function drawBackground() {
   push()
-  background(LAYERS[0].colors.bg)
+  const baseLayer = LAYERS[0]
+  background(baseLayer.colors.bg)
 
   const strokeSize = 2/SCALE
+
+  const strokeParams = LAYERS.map((layer, ix) => {
+    const colorMismatch = (
+      (layer.isColor && baseLayer.isDark) ||
+      (baseLayer.isColor && layer.isDark)
+    )
+    const colorMismatchIffy = (baseLayer.isLight && layer.isDark)
+    const largeLayer = (ix === 0 || ix === LAYERS.length - 1)
+
+    return {
+      potentialMismatch: colorMismatch || colorMismatchIffy,
+      multiplier: (
+        largeLayer && layer.gradient ? map(SCALE, 0.2, 1.2, 1.75, 1) :
+        // min(2,max(1, 0.5/SCALE)) :
+        largeLayer && colorMismatch ? 1.25/SCALE :
+        largeLayer && colorMismatchIffy ? max(1, 0.75/SCALE) :
+        colorMismatchIffy || colorMismatch ? 1.1 :
+        1
+      ),
+
+    }
+  })
 
 
   for (let y = T-50; y < B+50; y += strokeSize) {
     for (let x = L-50; x < R+50; x += strokeSize) {
       const layer = findActiveLayer(x, y)
-      drawBackgroundStroke(x, y, layer, strokeSize, LAYERS)
+      drawBackgroundStroke(x, y, layer, strokeSize, strokeParams[layer.ix])
     }
   }
   pop()
 }
 
-function drawBackgroundStroke(x, y, layer, strokeSize, layers) {
-  const baseLayer = layers[0]
-  const colorMismatch = (
-    (layer.isColor && baseLayer.isDark) ||
-    (baseLayer.isColor && layer.isDark)
-  )
+function drawBackgroundStroke(x, y, layer, strokeSize, strokeParams) {
 
-  const colorMismatchIffy = (baseLayer.isLight && layer.isDark)
 
-  const largeLayer = (layer.ix === 0 || layer.ix === layers.length - 1)
-
-  const strokeMultiplier =
-    largeLayer && colorMismatch ? 1.25/SCALE :
-    largeLayer && colorMismatchIffy ? max(1, 0.75/SCALE) :
-    colorMismatchIffy || colorMismatch ? 1.1 :
-    1
-
-  let diam = rnd(strokeSize, strokeSize*2) * strokeMultiplier
+  let diam = rnd(strokeSize, strokeSize*2) * strokeParams.multiplier
   let offset = strokeSize/2
 
   strokeWeight(diam/3.5)
@@ -59,7 +68,7 @@ function drawBackgroundStroke(x, y, layer, strokeSize, layers) {
 
   const hGrain = layer.grain * 45 + 3
   const sGrain = layer.grain * 10 + 5
-  const bGrain = layer.grain * 5 * (colorMismatchIffy || colorMismatch ? 0 : 1)
+  const bGrain = layer.grain * 5 * (strokeParams.potentialMismatch ? 0 : 1)
   stroke(
     hfix(hue(layer.colors.bg) + hAdj + rnd(-hGrain, hGrain)),
     saturation(layer.colors.bg) + sAdj + rnd(-sGrain, sGrain),

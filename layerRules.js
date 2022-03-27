@@ -305,9 +305,9 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, lightenDarks, forceGradien
 
     bright: (h, gradientMax, ix) => {
       const c1 = adjColor(h, 55, 95)
-      const c2 = invertStreets
-        ? setContrastC2(c1, color(hfix(h+180*d), 50, 85), 0.7)
-        : color(hfix(h + 180*d), 30, 15)
+      const c2 = invertStreets && ix > 0
+        ? invertStreetColor(h+180, 50, 85, c1)
+        : color(hfix(h + 180), 30, 15)
 
       let key
       if ([1, 3].includes(COLOR_RULE)) key = 'dark'
@@ -418,9 +418,12 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, lightenDarks, forceGradien
 
     faded: (h, gradientMax, ix) => {
       const c1 = adjColor(h, 35, 95)
-      const c2 = setContrastC2(c1, color(hfix(h+180*d), 85, 30), 0.7)
-      const c3 = setContrastC2(c1, color(hfix(h+150*d), 85, 30), 0.65)
-      const c4 = setContrastC2(c1, color(hfix(h+120*d), 85, 30), 0.6)
+      const c2 = invertStreetColor(h+180*d, 85, 30, c1)
+      // const c2 = setContrastC2(c1, color(hfix(h+180*d), 85, 30), 0.7)
+      const c3 = invertStreetColor(h+150*d, 85, 30, c1)
+      // const c3 = setContrastC2(c1, color(hfix(h+150*d), 85, 30), 0.65)
+      const c4 = invertStreetColor(h+120*d, 85, 30, c1)
+      // const c4 = setContrastC2(c1, color(hfix(h+120*d), 85, 30), 0.6)
 
       let key
       if ([1, 3].includes(COLOR_RULE)) key = 'dark'
@@ -551,10 +554,11 @@ function adjColor(hue, sat, brt, b) {
   return color(hue, sat, brt)
 }
 
-
-
-
-
+function invertStreetColor(_hue, sat, brt, c1) {
+  const h = hfix(_hue)
+  let c = 0.7
+  return setContrastC2(c1, color(h, sat, brt), c)
+}
 
 
 
