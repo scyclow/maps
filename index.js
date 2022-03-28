@@ -31,13 +31,40 @@ Artificial Maps
 Reified Maps
 Imagined Maps
 Fucked up maps
-
 Reific maps
-
 Heat Maps
-
 Untitled Maps Project
 Leaky Abstractions
+Virtual Landscapes
+Facsimiles
+Replicas
+Imitation Maps
+Simulations
+Simulation Printouts
+Simulations of Simulations
+Simulated Imitations
+
+
+980/720
+
+
+In 1993, an obscure publication company, Simulacra Publications
+
+published and distributed the following documents.
+
+Their business strategy appears to have been to distribute low quality, computer generated maps to various cities across the continental United States and Europe.
+
+They appear to have been taken off the market immediately because they were fraudulent.
+
+Very little information has survived
+
+
+The
+
+
+These maps are all out of print
+
+No known information survives about the publisher
 
 
 
@@ -316,9 +343,6 @@ function setup() {
 
 
   let thresholdAdj = 1
-  if (layerN === 30) {
-    thresholdAdj = 0.01
-  }
 
 
   let baseRule = chance(
@@ -392,10 +416,7 @@ function setup() {
     }
 
   } else if (5 === COLOR_RULE) {
-    thresholdAdj = 0.01
-
     NOISE_DIVISOR = rnd(350, 1000) / SCALE
-
 
     layerN = 50
 
@@ -423,6 +444,10 @@ function setup() {
   //     [10, rndint(9, 15)],
   //     [5, rndint(15, 30)],
   //   )
+  }
+
+  if (layerN >= 30) {
+    thresholdAdj = 0.01
   }
 
   console.log(layerN, NOISE_DIVISOR*SCALE)
