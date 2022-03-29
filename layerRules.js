@@ -338,7 +338,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, lightenDarks, forceGradien
         baseHue: h,
         grain,
         colors: {
-          bg: c1, // looks good at (344, 90, 100) with dark blue strokes
+          bg: c1,
           primary: c2,
           secondary: c2,
           tertiary: c2,
@@ -355,11 +355,11 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, lightenDarks, forceGradien
     },
 
     paper: (h, gradientMax, ix) => {
-      const c1 = color(hfix(h), 9, 91)
+      const c1 = color(hfix(h), 8, 91)
 
-      const c2 = color(hfix(h + 180*d), 60, 30)
-      const c3 = color(hfix(h + 170*d), 40, 35)
-      const c4 = color(hfix(h + 160*d), 40, 35)
+      const c2 = invertStreetColor(h + 180*d, 60, 30, c1)
+      const c3 = invertStreetColor(h + 170*d, 40, 35, c1)
+      const c4 = invertStreetColor(h + 160*d, 40, 35, c1)
 
       let key
       if ([1, 3].includes(COLOR_RULE)) key = 'dark'
@@ -392,13 +392,13 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, lightenDarks, forceGradien
         ],
       }[key]
 
-
+      const g = forceGradient ? gradientMax : rnd(90)
       return {
         name: 'paper',
         baseHue: h,
         grain,
         colors: {
-          bg: c1, // looks good at (344, 90, 100) with dark blue strokes
+          bg: c1,
           primary: c2,
           secondary: c2,
           tertiary: c3,
@@ -407,9 +407,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, lightenDarks, forceGradien
           circle: c4,
         },
         neighbors,
-        gradient: forceGradient
-          ? getGradient(forceGradient, gradientMax)
-          : getGradient(true, 120),
+        gradient: getGradient(true, g),
         isDark: false,
         isColor: false,
         isLight: true,
@@ -419,11 +417,8 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, lightenDarks, forceGradien
     faded: (h, gradientMax, ix) => {
       const c1 = adjColor(h, 35, 95)
       const c2 = invertStreetColor(h+180*d, 85, 30, c1)
-      // const c2 = setContrastC2(c1, color(hfix(h+180*d), 85, 30), 0.7)
       const c3 = invertStreetColor(h+150*d, 85, 30, c1)
-      // const c3 = setContrastC2(c1, color(hfix(h+150*d), 85, 30), 0.65)
       const c4 = invertStreetColor(h+120*d, 85, 30, c1)
-      // const c4 = setContrastC2(c1, color(hfix(h+120*d), 85, 30), 0.6)
 
       let key
       if ([1, 3].includes(COLOR_RULE)) key = 'dark'
@@ -455,12 +450,14 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, lightenDarks, forceGradien
         ],
       }[key]
 
+      const g = forceGradient ? gradientMax : rnd(75)
+
       return {
         name: 'faded',
         baseHue: h,
         grain,
         colors: {
-          bg: c1, // looks good at (344, 90, 100) with dark blue strokes
+          bg: c1,
           primary: c2,
           secondary: c2,
           tertiary: c3,
@@ -469,9 +466,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, lightenDarks, forceGradien
           circle: c4,
         },
         neighbors,
-        gradient: forceGradient
-          ? getGradient(forceGradient, gradientMax)
-          : getGradient(true, 75),
+        gradient: getGradient(forceGradient, g),
         isDark: false,
         isColor: true,
         isLight: false,

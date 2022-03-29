@@ -233,6 +233,8 @@ from output to output, with some having degraded substantially.
 
 
 
+2-19 notes
+  - paper gradient looks pretty bad
 */
 
 

@@ -25,7 +25,8 @@ function drawBackground() {
         // min(2,max(1, 0.5/SCALE)) :
         largeLayer && colorMismatch ? 1.25/SCALE :
         largeLayer && colorMismatchIffy ? max(1, 0.75/SCALE) :
-        colorMismatchIffy || colorMismatch ? 1.1 :
+        colorMismatchIffy ? max(1, 0.45/SCALE) :
+        colorMismatch ? 1.1 :
         1
       ),
 
