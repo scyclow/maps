@@ -86,11 +86,15 @@ function drawStreetGrid(startX=0, startY=0) {
 
     setC(_x, _y, layer.colors.primary, layer.gradient)
     circle(_x, _y, nsrnd(_x, _y, 6.25*MIN_ST_W, 6.25*MAX_ST_W) + d)
-  })
+  }, 1/SCALE)
   pop()
 }
 
-function drawCoords(coords, dotFn) {
+function drawCoords(coords, dotFn, extend=0) {
+  const outsideBorders = BORDER_PADDING
+    ? createBorderFn(BORDER_PADDING-extend)
+    : createBorderFn(-20/SCALE)
+
   coords.forEach((coord, i) => {
     const { x: x0, y: y0 } = coord
 
@@ -161,8 +165,6 @@ function generateAllCoords() {
   TERTIARY_DRIFT = HALF_PI/(HARD_CURVES ? 2 : rnd(minDrift * 3, minDrift * 6))
   QUARTERNARY_DRIFT = HALF_PI/(HARD_CURVES ? 2 : rnd(minDrift * 3, minDrift * 6))
   STREET_DRIFT = HALF_PI/(HARD_CURVES ? 2 : rnd(minDrift * 3, minDrift * 6))
-
-  BUFFER = 150/SCALE
 
   const rndH = rnd(T, B)
   const rndW = rnd(L, R)
@@ -284,6 +286,7 @@ function generateStreetCoords(startX, startY, startAngle, params={}) {
   const driftAmt = params.driftAmt || HALF_PI/16
   const stopAtIntersections = params.stopAtIntersections || []
   const length = params.maxLen || 150
+  const borderFn = createBorderFn(-150/SCALE)
 
 
   let x = startX
@@ -317,12 +320,7 @@ function generateStreetCoords(startX, startY, startAngle, params={}) {
     y = nextY
     coords.push({ x, y, angle })
 
-    if (
-      x < L - BUFFER ||
-      x > R + BUFFER ||
-      y < T - BUFFER ||
-      y > B + BUFFER
-    ) {
+    if (borderFn(x, y)) {
       break
     }
   }

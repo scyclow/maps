@@ -67,11 +67,11 @@ function findIntersectionPoint(c1, c2, coordLists) {
   })
 }
 
-const outsideBorders = (x, y) =>
-  x < L + BORDER_PADDING ||
-  x > R - BORDER_PADDING ||
-  y < T + BORDER_PADDING ||
-  y > B - BORDER_PADDING
+const createBorderFn = padding => (x, y) =>
+  x < L + padding ||
+  x > R - padding ||
+  y < T + padding ||
+  y > B - padding
 
 function dotLine(x1, y1, x2, y2, dotFn, ignoreFn=noop) {
   const { d, angle } = lineStats(x1, y1, x2, y2)

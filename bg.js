@@ -8,6 +8,7 @@ function drawBackground(t, b, l, r) {
   const baseLayer = LAYERS[0]
   background(baseLayer.colors.bg)
 
+  const outsideBorders = createBorderFn(BORDER_PADDING)
   const baseStrokeSize = 2/SCALE
 
   const strokeParams = LAYERS.map((layer, ix) => {

@@ -302,7 +302,6 @@ function setup() {
   R = width/(2*sizeADJ)
   T = -height/(2*sizeADJ)
   B = height/(2*sizeADJ)
-  console.log(width, W)
 
   // chaos budget
     // turbulence
