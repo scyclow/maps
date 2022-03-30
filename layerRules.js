@@ -119,7 +119,7 @@ function setLayers(layerN, baseRule, hueDiff, thresholdAdj=1, lightenDarks, forc
 
 
 const rules = (layerN, baseRule, COLOR_RULE, hueDiff, lightenDarks, forceGradient, invertStreets) => {
-  const black = color(0,0,8)
+  const black = color(0,0,10)
   const whiteBg = color(0, 0, 90)
   const whiteStroke = color(0, 0, 85)
 

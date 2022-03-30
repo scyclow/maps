@@ -19,9 +19,19 @@ const setC = (x, y, c, g) => {
     stroke(c)
     fill(c)
   }
+}
+
+const noop = () => {}
 
 
-
+function scaleModifier(mn, mx) {
+  return map(
+    max(0, 0.35 - SCALE),
+    0,
+    0.15,
+    mn,
+    mx
+  )
 }
 
 const coordToTuple = ({ x, y }) => [x, y]
@@ -57,16 +67,30 @@ function findIntersectionPoint(c1, c2, coordLists) {
   })
 }
 
-function dotLine(x1, y1, x2, y2, dotFn) {
+const outsideBorders = (x, y) =>
+  x < L + BORDER_PADDING ||
+  x > R - BORDER_PADDING ||
+  y < T + BORDER_PADDING ||
+  y > B - BORDER_PADDING
+
+function dotLine(x1, y1, x2, y2, dotFn, ignoreFn=noop) {
   const { d, angle } = lineStats(x1, y1, x2, y2)
 
   let x = x1
   let y = y1
   for (let i = 0; i <= d; i++) {
+    if (ignoreFn(x, y)) return
     dotFn(x, y, i/d, angle);
 
     ([x, y] = getXYRotation(angle, 1, x, y))
   }
+}
+
+function dotRect(x, y, w, h, dotFn) {
+  dotLine(x-w/2, y-h/2, x+w/2, y-h/2, dotFn)
+  dotLine(x-w/2, y+h/2, x+w/2, y+h/2, dotFn)
+  dotLine(x-w/2, y-h/2, x-w/2, y+h/2, dotFn)
+  dotLine(x+w/2, y-h/2, x+w/2, y+h/2, dotFn)
 }
 
 
@@ -162,6 +186,8 @@ function hshrnd(h) {
 }
 
 const prb = x => rnd() < x
+const nsrnd = (x, y, mn, mx) => mn + noise(x/15, y/15) * (mx-mn) + rnd(-0.25, 0.25)
+
 
 const posOrNeg = () => prb(0.5) ? 1 : -1
 

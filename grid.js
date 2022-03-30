@@ -4,8 +4,9 @@
 function drawStreetGrid(startX=0, startY=0) {
   push()
   translate(startX, startY)
-  MIN_ST_W = 0.7
-  MAX_ST_W = 1.3
+  const scaleMultiplier = scaleModifier(1, 1.6)
+  MIN_ST_W = 0.7 * scaleMultiplier
+  MAX_ST_W = 1.3 * scaleMultiplier
 
   const {
     primaryAveCoords,
@@ -17,10 +18,6 @@ function drawStreetGrid(startX=0, startY=0) {
 
   const t = TURBULENCE ? 1.75 : 0.5 // 0.5
   const d = TURBULENCE ? 1.25 : 0
-
-  const nsrnd = (x, y, mn, mx) =>
-  mn + noise(x/15, y/15) * (mx-mn) + rnd(-0.25, 0.25)
-  // rnd(mn, mx)
 
   streetCoords.forEach(coords => drawCoords(coords.coords, (x, y, progress, angle) => {
     const streetT = t * 0.7
@@ -94,22 +91,22 @@ function drawStreetGrid(startX=0, startY=0) {
 }
 
 function drawCoords(coords, dotFn) {
-
   coords.forEach((coord, i) => {
     const { x: x0, y: y0 } = coord
 
     if (i > 0) {
       const { x: x1, y: y1 } = coords[i-1]
-      dotLine(x0, y0, x1, y1, dotFn)
+      dotLine(x0, y0, x1, y1, dotFn, outsideBorders)
     }
 
+    if (outsideBorders(x0, y0)) return
     if (i === coords.length-1 && !IGNORE_STREET_CAP && !STREET_TURBULENCE) {
       push()
+
 
       const layer = findActiveLayer(x0, y0)
       if (layer.hideStreets) return
       setC(x0, y0, layer.colors.circle, layer.gradient)
-      noStroke()
 
       const trb = TURBULENCE
       times(10, i => {
@@ -155,14 +152,9 @@ function generateAllCoords() {
 
 
   const minDrift =
-    STRAIGHT_STREETS ? 100 :
-    17 + map(
-      max(0, 0.35 - SCALE),
-      0,
-      0.15,
-      0,
-      7,
-    )
+    STRAIGHT_STREETS ? 100 : scaleModifier(17, 24)
+
+    console.log('min drift', minDrift)
 
   PRIMARY_DRIFT = HALF_PI/minDrift
   SECONDARY_DRIFT = HALF_PI/rnd(minDrift, minDrift*2)
@@ -342,74 +334,3 @@ function generateStreetCoords(startX, startY, startAngle, params={}) {
   }
 }
 
-
-
-// function drawGrid() {
-//   TURBULENCE = rnd() < 0.85
-//   SIMPLE = true
-
-
-
-//   MIN_ST_W = 0.8
-//   MAX_ST_W = 1.2
-
-//   const t = TURBULENCE ? 0.5 : 1.75 // 0.5
-//   const d = TURBULENCE ? 0 : 1.25
-
-//   fill(0)
-//   stroke(0)
-
-//   const setC = (x, y, c, g) => {
-//     if (g) {
-//       console.log('.')
-//       const d =
-//         dist(x, y, g.focalPoint.x, g.focalPoint.y)
-//         / dist(L, B, R, T)
-
-//       const _c = color(
-//         hfix(hue(c) + map(d, 0, 1, 0, g.hue)),
-//         saturation(c) + map(d, 0, 1, 0, g.sat),
-//         brightness(c) + map(d, 0, 1, 0, g.brt),
-//       )
-//       stroke(_c)
-//       fill(_c)
-
-
-//     } else {
-//       stroke(c)
-//       fill(c)
-//     }
-
-//   }
-
-//   const gridStep = rnd(5, 80)
-
-//   for (let x=L; x<W; x+=rnd(5, 80)) {
-//     const _x = SIMPLE ? x : rnd(L, R)
-//     dotLine(_x, T, _x, B, (x, y, prg, angle) => {
-//       const _x = x+rnd(-t, t)
-//       const _y = y+rnd(-t, t)
-//       const layer = findActiveLayer(_x, _y)
-//       if (layer.hideStreets) return
-
-//       setC(_x, _y, layer.colors.primary, layer.gradient)
-
-//       circle(_x, _y, rnd(2*MIN_ST_W, 2*MAX_ST_W) + d)
-//     })
-//   }
-
-//   for (let y=T; y<H; y+=rnd(5, 80)) {
-//     const _y = SIMPLE ? y : rnd(T, H)
-//     dotLine(L, _y, R, _y, (x, y, prg, angle) => {
-//       const _x = x+rnd(-t, t)
-//       const _y = y+rnd(-t, t)
-//       const layer = findActiveLayer(_x, _y)
-
-//       if (layer.hideStreets) return
-
-//       setC(_x, _y, layer.colors.primary, layer.gradient)
-
-//       circle(_x, _y, rnd(2*MIN_ST_W, 2*MAX_ST_W) + d)
-//     })
-//   }
-// }

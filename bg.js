@@ -3,7 +3,7 @@ const Q_PI = Math.PI/4
 const NEG_Q_PI = -Math.PI/4
 
 
-function drawBackground() {
+function drawBackground(t, b, l, r) {
   push()
   const baseLayer = LAYERS[0]
   background(baseLayer.colors.bg)
@@ -11,21 +11,21 @@ function drawBackground() {
   const strokeSize = 2/SCALE
 
   const strokeParams = LAYERS.map((layer, ix) => {
-    const colorMismatch = (
-      (layer.isColor && baseLayer.isDark) ||
-      (baseLayer.isColor && layer.isDark)
-    )
-    const colorMismatchIffy = (baseLayer.isLight && layer.isDark)
+    const colorOnDark = layer.isColor && baseLayer.isDark
+    const darkOnColor = baseLayer.isColor && layer.isDark
+    const colorMismatch = colorOnDark || darkOnColor
+
+    const darkOnLight = (baseLayer.isLight && layer.isDark)
     const largeLayer = (ix === 0 || ix === LAYERS.length - 1)
 
     return {
-      potentialMismatch: colorMismatch || colorMismatchIffy,
+      potentialMismatch: colorMismatch || darkOnLight,
       multiplier: (
         largeLayer && layer.gradient ? map(SCALE, 0.2, 1.2, 1.75, 1) :
-        // min(2,max(1, 0.5/SCALE)) :
-        largeLayer && colorMismatch ? 1.25/SCALE :
-        largeLayer && colorMismatchIffy ? max(1, 0.75/SCALE) :
-        colorMismatchIffy ? max(1, 0.45/SCALE) :
+        largeLayer && darkOnColor ? max(1, 0.75/SCALE) :
+        largeLayer && colorOnDark ? max(1, 0.5/SCALE) :
+        largeLayer && darkOnLight ? max(1, 0.8/SCALE) :
+        darkOnLight ? max(1, 0.45/SCALE) :
         colorMismatch ? 1.1 :
         1
       ),
@@ -34,9 +34,11 @@ function drawBackground() {
   })
 
 
-  for (let y = T-50; y < B+50; y += strokeSize) {
-    for (let x = L-50; x < R+50; x += strokeSize) {
-      const layer = findActiveLayer(x, y)
+  for (let y = t; y < b; y += strokeSize) {
+    for (let x = l; x < r; x += strokeSize) {
+      const layer = !BORDER_BLEED && BORDER_PADDING > 0 && outsideBorders(x, y)
+        ? LAYERS[0]
+        : findActiveLayer(x, y)
       drawBackgroundStroke(x, y, layer, strokeSize, strokeParams[layer.ix])
     }
   }
@@ -75,7 +77,7 @@ function drawBackgroundStroke(x, y, layer, strokeSize, strokeParams) {
     saturation(layer.colors.bg) + sAdj + rnd(-sGrain, sGrain),
     brightness(layer.colors.bg) + bAdj + rnd(-10 - bGrain, 0) ,
   )
-  const angle = noise(x+W, y+H)
+  const angle = noise(x+NOISE_OFFSET, y+NOISE_OFFSET)
 
   const [x0, y0] = getXYRotation(PI+angle+rnd(NEG_Q_PI, Q_PI), 5, x, y)
   const [x1, y1] = getXYRotation(angle+rnd(NEG_Q_PI, Q_PI), 5, x, y)

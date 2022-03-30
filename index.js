@@ -235,6 +235,12 @@ from output to output, with some having degraded substantially.
 
 2-19 notes
   - paper gradient looks pretty bad
+
+
+
+2-20 notes
+  - zoomed out streets are too thin. maybe make them either less common or increase probability of turbulence
+  - instead of 180, 120, etc hue shift, do warm/cold color palettes
 */
 
 
@@ -248,7 +254,8 @@ function keyPressed() {
 
 
 let NOISE_DIVISOR, TURBULENCE, IGNORE_STREET_CAP, STREET_TURBULENCE, HARD_CURVES, DENSITY,
-    COLOR_RULE, STRAIGHT_STREETS, SECONDARY_ANGLE_ADJ, DOUBLE_STREETS, KINKED_STREET_FACTOR
+    COLOR_RULE, STRAIGHT_STREETS, SECONDARY_ANGLE_ADJ, DOUBLE_STREETS, KINKED_STREET_FACTOR,
+    BORDER_PADDING, BORDER_BLEED
 let LAYERS = []
 
 const NOISE_OFFSET = 100000
@@ -286,6 +293,7 @@ function setup() {
   R = width/(2*sizeADJ)
   T = -height/(2*sizeADJ)
   B = height/(2*sizeADJ)
+  console.log(width, W)
 
   // chaos budget
     // turbulence
@@ -300,10 +308,11 @@ function setup() {
   STREET_TURBULENCE = rnd() < 0.1
   IGNORE_STREET_CAP = rnd() < 0.1
   HARD_CURVES = rnd() < 0.05
-  STRAIGHT_STREETS = rnd() < 0.05
+  STRAIGHT_STREETS = rnd() < scaleModifier(0.05, 0.1)
+
   KINKED_STREET_FACTOR =
     rnd() < 0.15
-      ? random(QUARTER_PI/2, QUARTER_PI) * posOrNeg()
+      ? rnd(QUARTER_PI/2, QUARTER_PI) * posOrNeg()
       : 0
 
 
@@ -459,6 +468,25 @@ function setup() {
   console.log(hueDiff)
 
   LAYERS = setLayers(layerN, baseRule, hueDiff, thresholdAdj, lightenDarks, forceGradients, invertStreets)
+
+  borderType = chance(
+    [15, 0], // no borders
+    [45, 1], // borders
+    [40, 2], // bleeding
+  )
+
+  BORDER_PADDING =
+    borderType === 0 ? 0 :
+    prb(0.1) ? rnd(150, 200)/SCALE :
+    rnd(12.5, 25)/SCALE
+
+  BORDER_BLEED = borderType === 2
+  HARD_BORDER =
+    borderType === 0 ? false :
+    borderType === 2 ? true :
+    prb(0.9)
+
+  // console.log(BORDER_PADDING)
 }
 
 
@@ -472,11 +500,20 @@ function draw() {
 
   const START = Date.now()
 
-  drawBackground()
+  drawBackground(T-50, B+50, L-50, R+50)
   drawStreetGrid(0,0)
 
   if (DOUBLE_STREETS) drawStreetGrid(0,0)
 
+  if (HARD_BORDER) {
+    const space = rnd(1.7, 2.1)
+    dotRect(0,0, W-(BORDER_PADDING*space), H-(BORDER_PADDING*space), (x, y) => {
+      const layer = BORDER_BLEED ? findActiveLayer(x, y) : LAYERS[0]
+      if (layer.hideStreets) return
+      setC(x, y, layer.colors.circle, layer.gradient)
+      circle(x, y, nsrnd(x, y, 1/SCALE, 2.5/SCALE))
+    })
+  }
 
   // translate(5, 5)
   // drawStreetGrid()
