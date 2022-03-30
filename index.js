@@ -59,6 +59,15 @@ They appear to have been taken off the market immediately because they were frau
 Very little information has survived
 
 
+
+
+
+Shares a lot of themes and motifs with FIM: particularly around fakeness, representation, digital<>paper relationship, and misprints
+
+
+
+
+
 The
 
 
@@ -255,7 +264,7 @@ function keyPressed() {
 
 let NOISE_DIVISOR, TURBULENCE, IGNORE_STREET_CAP, STREET_TURBULENCE, HARD_CURVES, DENSITY,
     COLOR_RULE, STRAIGHT_STREETS, SECONDARY_ANGLE_ADJ, DOUBLE_STREETS, KINKED_STREET_FACTOR,
-    BORDER_PADDING, BORDER_BLEED
+    BORDER_PADDING, BORDER_BLEED, BORDER_THICKNESS, HARD_BORDER, ROTATION, LAYER_BUFFER
 let LAYERS = []
 
 const NOISE_OFFSET = 100000
@@ -475,16 +484,26 @@ function setup() {
     [40, 2], // bleeding
   )
 
-  BORDER_PADDING =
-    borderType === 0 ? 0 :
-    prb(0.1) ? rnd(150, 200)/SCALE :
-    rnd(12.5, 25)/SCALE
+  if (borderType === 0) {
+    BORDER_PADDING = 0
+    HARD_BORDER = false
+    BORDER_BLEED = false
+    BORDER_THICKNESS = 0
+    LAYER_BUFFER = rnd(-2, 2)/SCALE
+    ROTATION = 0
+  } else {
+    HARD_BORDER = borderType === 2 || prb(0.85)
 
-  BORDER_BLEED = borderType === 2
-  HARD_BORDER =
-    borderType === 0 ? false :
-    borderType === 2 ? true :
-    prb(0.9)
+    BORDER_PADDING =
+      prb(0.05) ? rnd(150, 200)/SCALE :
+      !HARD_BORDER ? rnd(20, 40)/SCALE :
+      rnd(12.5, 25)/SCALE
+    console.log(BORDER_PADDING)
+    BORDER_BLEED = borderType === 2
+    BORDER_THICKNESS = rnd(1, 3)
+    LAYER_BUFFER = 0
+    ROTATION = rnd(-0.008, 0.008)
+  }
 
   // console.log(BORDER_PADDING)
 }
@@ -500,23 +519,26 @@ function draw() {
 
   const START = Date.now()
 
-  drawBackground(T-50, B+50, L-50, R+50)
+  drawBackground(T-LAYER_BUFFER, B+LAYER_BUFFER, L-LAYER_BUFFER, R+LAYER_BUFFER)
+
+  rotate(ROTATION)
   drawStreetGrid(0,0)
 
   if (DOUBLE_STREETS) drawStreetGrid(0,0)
 
   if (HARD_BORDER) {
-    const space = rnd(1.7, 2.1)
+    const space =
+      BORDER_PADDING < 50
+        ? rnd(1.7, 2.1)
+        : rnd(1.98, 2.02)
+
     dotRect(0,0, W-(BORDER_PADDING*space), H-(BORDER_PADDING*space), (x, y) => {
       const layer = BORDER_BLEED ? findActiveLayer(x, y) : LAYERS[0]
       if (layer.hideStreets) return
       setC(x, y, layer.colors.circle, layer.gradient)
-      circle(x, y, nsrnd(x, y, 1/SCALE, 2.5/SCALE))
+      circle(x, y, nsrnd(x, y, BORDER_THICKNESS/SCALE, BORDER_THICKNESS*2.5/SCALE))
     })
   }
-
-  // translate(5, 5)
-  // drawStreetGrid()
 
   console.log(Date.now() - START)
 }

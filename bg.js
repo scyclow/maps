@@ -8,7 +8,7 @@ function drawBackground(t, b, l, r) {
   const baseLayer = LAYERS[0]
   background(baseLayer.colors.bg)
 
-  const strokeSize = 2/SCALE
+  const baseStrokeSize = 2/SCALE
 
   const strokeParams = LAYERS.map((layer, ix) => {
     const colorOnDark = layer.isColor && baseLayer.isDark
@@ -21,12 +21,11 @@ function drawBackground(t, b, l, r) {
     return {
       potentialMismatch: colorMismatch || darkOnLight,
       multiplier: (
-        largeLayer && layer.gradient ? map(SCALE, 0.2, 1.2, 1.75, 1) :
-        largeLayer && darkOnColor ? max(1, 0.75/SCALE) :
-        largeLayer && colorOnDark ? max(1, 0.5/SCALE) :
-        largeLayer && darkOnLight ? max(1, 0.8/SCALE) :
-        darkOnLight ? max(1, 0.45/SCALE) :
-        colorMismatch ? 1.1 :
+        largeLayer && layer.gradient ? map(SCALE, 0.2, 1.2, 2.6, 1.5) :
+        largeLayer && darkOnColor ? max(1, 1.1/SCALE) :
+        largeLayer && colorOnDark ? max(1, 0.75/SCALE) :
+        colorMismatch || (largeLayer && darkOnLight) ? max(1, 1.5/SCALE) :
+        darkOnLight ? max(1, 0.7/SCALE) :
         1
       ),
 
@@ -34,11 +33,13 @@ function drawBackground(t, b, l, r) {
   })
 
 
-  for (let y = t; y < b; y += strokeSize) {
+  for (let y = t; y < b; y += baseStrokeSize) {
+    let strokeSize = baseStrokeSize
     for (let x = l; x < r; x += strokeSize) {
       const layer = !BORDER_BLEED && BORDER_PADDING > 0 && outsideBorders(x, y)
         ? LAYERS[0]
         : findActiveLayer(x, y)
+      strokeSize = baseStrokeSize/strokeParams[layer.ix].multiplier
       drawBackgroundStroke(x, y, layer, strokeSize, strokeParams[layer.ix])
     }
   }
@@ -46,8 +47,6 @@ function drawBackground(t, b, l, r) {
 }
 
 function drawBackgroundStroke(x, y, layer, strokeSize, strokeParams) {
-
-
   let diam = rnd(strokeSize, strokeSize*2) * strokeParams.multiplier
   let offset = strokeSize/2
 
