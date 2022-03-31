@@ -357,9 +357,9 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, lightenDarks, forceGradien
     paper: (h, gradientMax, ix) => {
       const c1 = color(hfix(h), 8, 91)
 
-      const c2 = invertStreetColor(h + 180*d, 60, 30, c1)
-      const c3 = invertStreetColor(h + 170*d, 40, 35, c1)
-      const c4 = invertStreetColor(h + 160*d, 40, 35, c1)
+      const c2 = invertStreetColor(h + hueDiff, 60, 30, c1)
+      const c3 = invertStreetColor(h + hueDiff - 10, 40, 35, c1)
+      const c4 = invertStreetColor(h + hueDiff - 20, 40, 35, c1)
 
       let key
       if ([1, 3].includes(COLOR_RULE)) key = 'dark'
@@ -416,9 +416,9 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, lightenDarks, forceGradien
 
     faded: (h, gradientMax, ix) => {
       const c1 = adjColor(h, 35, 95)
-      const c2 = invertStreetColor(h+180*d, 85, 30, c1)
-      const c3 = invertStreetColor(h+150*d, 85, 30, c1)
-      const c4 = invertStreetColor(h+120*d, 85, 30, c1)
+      const c2 = invertStreetColor(h+hueDiff, 85, 30, c1)
+      const c3 = invertStreetColor(h+hueDiff-10, 85, 30, c1)
+      const c4 = invertStreetColor(h+hueDiff-20, 85, 30, c1)
 
       let key
       if ([1, 3].includes(COLOR_RULE)) key = 'dark'
@@ -476,9 +476,9 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, lightenDarks, forceGradien
     burnt: (h, gradientMax, ix) => {
       const c1 = color(hfix(h), 35, lightenDarks ? 17 : 15)
 
-      const c2 = color(hfix(h + 180*d), 50, 85)
-      const c3 = color(hfix(h + 150*d), 50, 85)
-      const c4 = color(hfix(h + 120*d), 50, 85)
+      const c2 = color(hfix(h + hueDiff), 50, 85)
+      const c3 = color(hfix(h + hueDiff-30), 50, 85)
+      const c4 = color(hfix(h + hueDiff-60), 50, 85)
 
       let key
       if ([1, 2].includes(COLOR_RULE)) key = 'light'

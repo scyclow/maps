@@ -25,11 +25,11 @@ function drawBackground(t, b, l, r) {
         largeLayer && layer.gradient ? map(SCALE, 0.2, 1.2, 2.6, 1.5) :
         largeLayer && darkOnColor ? max(1, 1.1/SCALE) :
         largeLayer && colorOnDark ? max(1, 0.75/SCALE) :
-        colorMismatch || (largeLayer && darkOnLight) ? max(1, 1.5/SCALE) :
+        largeLayer && darkOnLight ? max(1, 1.5/SCALE) :
+        colorMismatch ? max(1, 1/SCALE) :
         darkOnLight ? max(1, 0.7/SCALE) :
         1
-      ),
-
+      )
     }
   })
 

@@ -68,19 +68,22 @@ function findIntersectionPoint(c1, c2, coordLists) {
 }
 
 const createBorderFn = padding => (x, y) =>
-  x < L + padding ||
-  x > R - padding ||
-  y < T + padding ||
-  y > B - padding
+  x < L + padding + rnd(-BORDER_DRIFT, BORDER_DRIFT) ||
+  x > R - padding + rnd(-BORDER_DRIFT, BORDER_DRIFT) ||
+  y < T + padding + rnd(-BORDER_DRIFT, BORDER_DRIFT) ||
+  y > B - padding + rnd(-BORDER_DRIFT, BORDER_DRIFT)
 
-function dotLine(x1, y1, x2, y2, dotFn, ignoreFn=noop) {
+function dotLine(x1, y1, x2, y2, dotFn, ignoreFn=noop, dash=false) {
   const { d, angle } = lineStats(x1, y1, x2, y2)
 
   let x = x1
   let y = y1
   for (let i = 0; i <= d; i++) {
-    if (ignoreFn(x, y)) return
-    dotFn(x, y, i/d, angle);
+    if (dash && i >= d*0.6) return
+
+    if (!ignoreFn(x, y)) {
+      dotFn(x, y, i/d, angle);
+    }
 
     ([x, y] = getXYRotation(angle, 1, x, y))
   }

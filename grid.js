@@ -86,35 +86,36 @@ function drawStreetGrid(startX=0, startY=0) {
 
     setC(_x, _y, layer.colors.primary, layer.gradient)
     circle(_x, _y, nsrnd(_x, _y, 6.25*MIN_ST_W, 6.25*MAX_ST_W) + d)
-  }, 1/SCALE)
+  })
   pop()
 }
 
-function drawCoords(coords, dotFn, extend=0) {
+function drawCoords(coords, dotFn) {
   const outsideBorders = BORDER_PADDING
-    ? createBorderFn(BORDER_PADDING-extend)
+    ? createBorderFn(BORDER_PADDING)
     : createBorderFn(-20/SCALE)
 
+  const dashLine = prb(DASH_RATE)
   coords.forEach((coord, i) => {
-    const { x: x0, y: y0 } = coord
+    const { x: x1, y: y1 } = coord
 
     if (i > 0) {
-      const { x: x1, y: y1 } = coords[i-1]
-      dotLine(x0, y0, x1, y1, dotFn, outsideBorders)
+      const { x: x0, y: y0 } = coords[i-1]
+      dotLine(x0, y0, x1, y1, dotFn, outsideBorders, dashLine)
     }
 
-    if (outsideBorders(x0, y0)) return
+    if (outsideBorders(x1, y1)) return
     if (i === coords.length-1 && !IGNORE_STREET_CAP && !STREET_TURBULENCE) {
       push()
 
 
-      const layer = findActiveLayer(x0, y0)
+      const layer = findActiveLayer(x1, y1)
       if (layer.hideStreets) return
-      setC(x0, y0, layer.colors.circle, layer.gradient)
+      setC(x1, y1, layer.colors.circle, layer.gradient)
 
       const trb = TURBULENCE
       times(10, i => {
-        circle(x0+rnd(-trb, trb), y0+rnd(-trb, trb), 8)
+        circle(x1+rnd(-trb, trb), y1+rnd(-trb, trb), 8)
       })
 
       pop()
