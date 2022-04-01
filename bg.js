@@ -33,10 +33,10 @@ function drawBackground(t, b, l, r) {
     }
   })
 
-
-  for (let y = t; y < b; y += baseStrokeSize) {
+  const buffer = 5/SCALE
+  for (let y = t-buffer; y < b+buffer; y += baseStrokeSize) {
     let strokeSize = baseStrokeSize
-    for (let x = l; x < r; x += strokeSize) {
+    for (let x = l-buffer; x < r+buffer; x += strokeSize) {
       const layer = !BORDER_BLEED && BORDER_PADDING > 0 && outsideBorders(x, y)
         ? LAYERS[0]
         : findActiveLayer(x, y)
@@ -84,60 +84,3 @@ function drawBackgroundStroke(x, y, layer, strokeSize, strokeParams) {
 
   line(x0, y0, x1, y1)
 }
-
-
-
-
-
-
-
-
-
-// function drawBackground() {
-//   const adjustedDotSize = 2/SCALE
-
-
-//   for (let x = L; x < W; x += adjustedDotSize) {
-//     for (let y = T; y < H; y += adjustedDotSize) {
-//       const activeLayer = findActiveLayer(x, y)
-//       let bgC
-//       let diam = rnd(adjustedDotSize, adjustedDotSize*2)
-//       let offset = adjustedDotSize/2
-//       if (activeLayer === 1) {
-//         bgC = C.layer1.bg
-//         if (layer1Dark) {
-//           diam *= 1.5
-//         }
-//       } else if (activeLayer >= 2) {
-//         bgC = C.layer2.bg
-//         if (layer2Dark) {
-//           diam *= 1.5
-//         }
-//       } else {
-//         bgC = C.base.bg
-//         offset *= 3
-//       }
-//       // fill(
-//       //   hue(bgC),
-//       //   saturation(bgC),
-//       //   brightness(bgC) + rnd(-10, 0),
-//       // )
-
-
-//       // circle(x+rnd(-offset, offset), y+rnd(-offset, offset), diam)
-
-//       const adj = dist(x, y, FOCAL_POINT.x, FOCAL_POINT.y)/dist(L, BOTTOM, FOCAL_POINT.x, FOCAL_POINT.y)
-
-//       strokeWeight(diam/3.5)
-//       stroke(
-//         hfix(hue(bgC) + map(adj, 0, 1, 0, HUE_SHIFT)),
-//         saturation(bgC) * map(adj, 0, 1, SAT_SHIFT, 1),
-//         (brightness(bgC) + rnd(-10, 0)) * map(adj, 0, 1, BRT_SHIFT, 1),
-//       )
-//       const angle = noise(x, y)
-//       const [x0, y0] = getXYRotation(PI+angle+rnd(-HALF_PI/2, HALF_PI/2), 5, x, y)
-//       const [x1, y1] = getXYRotation(angle+rnd(-HALF_PI/2, HALF_PI/2), 5, x, y)
-//       line(x0, y0, x1, y1)
-//     }
-//   }
-// }

@@ -262,6 +262,9 @@ from output to output, with some having degraded substantially.
   - force topological pattern to be always subtle colors
   - dotted lines with dotLine (0% - 50%)
   - keep tweaking borderType 0
+
+2-24
+  - should main burnt hue apply to street colors as well as bg?
 */
 
 
@@ -276,7 +279,8 @@ function keyPressed() {
 
 let NOISE_DIVISOR, TURBULENCE, IGNORE_STREET_CAP, STREET_TURBULENCE, HARD_CURVES, DENSITY,
     COLOR_RULE, STRAIGHT_STREETS, SECONDARY_ANGLE_ADJ, DOUBLE_STREETS, KINKED_STREET_FACTOR,
-    BORDER_PADDING, BORDER_BLEED, BORDER_THICKNESS, HARD_BORDER, ROTATION, BORDER_DRIFT, DASH_RATE
+    BORDER_PADDING, BORDER_BLEED, BORDER_THICKNESS, HARD_BORDER, ROTATION, BORDER_DRIFT, DASH_RATE,
+    X_OFF, Y_OFF
 let LAYERS = []
 
 const NOISE_OFFSET = 100000
@@ -310,10 +314,10 @@ function setup() {
 
   W = width/sizeADJ
   H = height/sizeADJ
-  L = -width/(2*sizeADJ)
-  R = width/(2*sizeADJ)
-  T = -height/(2*sizeADJ)
-  B = height/(2*sizeADJ)
+  L = round(-width/(2*sizeADJ), 4)
+  R = round(width/(2*sizeADJ), 4)
+  T = round(-height/(2*sizeADJ), 4)
+  B = round(height/(2*sizeADJ), 4)
 
   // chaos budget
     // turbulence
@@ -489,21 +493,27 @@ function setup() {
   console.log(COLOR_RULE)
   console.log(hueDiff)
 
-  LAYERS = setLayers(layerN, baseRule, hueDiff, thresholdAdj, lightenDarks, forceGradients, invertStreets)
 
   borderType = chance(
     [10, 0], // no borders
     [45, 1], // borders
     [45, 2], // bleeding
+    // [0.5, 3], // misprint
   )
 
+  X_OFF = 0
+  Y_OFF = 0
+
   if (borderType === 0) {
-    BORDER_PADDING = rnd(5, 12.5)/SCALE
+    const bFactor = rnd(15, 45)
+    BORDER_PADDING = (bFactor+5)/SCALE
+
     HARD_BORDER = false
-    BORDER_BLEED = prb(0.25)
+    BORDER_BLEED = false
     BORDER_THICKNESS = 0
-    BORDER_DRIFT = prb(0.25) ? 0 : rnd(BORDER_PADDING)/SCALE
+    BORDER_DRIFT = bFactor/SCALE
     ROTATION = 0
+
   } else {
     HARD_BORDER = borderType === 2 || prb(0.85)
 
@@ -512,7 +522,7 @@ function setup() {
       !HARD_BORDER ? rnd(25, 40)/SCALE :
       rnd(15, 25)/SCALE
     BORDER_BLEED = borderType === 2
-    BORDER_THICKNESS = rnd(1, 3)
+    BORDER_THICKNESS = rnd(1.4, 3)
     BORDER_DRIFT = chance(
       [5, 0],
       [3, rnd(3)/SCALE],
@@ -520,6 +530,17 @@ function setup() {
     )
     ROTATION = rnd(-0.008, 0.008)
   }
+
+  // if (borderType === 3) {
+  //   X_OFF = rnd(-150, 150)
+  //   Y_OFF = rnd(-150, 150)
+  //   ROTATION = rnd(-0.008, 0.008)*2
+
+  //   HARD_BORDER = true
+  //   BORDER_THICKNESS = rnd(1, 3)
+  // }
+
+  LAYERS = setLayers(layerN, baseRule, hueDiff, thresholdAdj, lightenDarks, forceGradients, invertStreets)
 
   console.log(borderType, BORDER_DRIFT, BORDER_PADDING)
 }
@@ -535,12 +556,12 @@ function draw() {
 
   const START = Date.now()
 
-  drawBackground(T, B, L, R)
+  drawBackground(T+Y_OFF, B+Y_OFF, L+X_OFF, R+X_OFF)
 
   rotate(ROTATION)
-  drawStreetGrid(0,0)
+  drawStreetGrid(X_OFF, Y_OFF)
 
-  if (DOUBLE_STREETS) drawStreetGrid(0,0)
+  if (DOUBLE_STREETS) drawStreetGrid(X_OFF, Y_OFF)
 
   if (HARD_BORDER) {
     const space =
@@ -548,10 +569,10 @@ function draw() {
         ? rnd(1.7, 2.1)
         : rnd(1.98, 2.02)
 
-    dotRect(0,0, W-(BORDER_PADDING*space), H-(BORDER_PADDING*space), (x, y) => {
+    dotRect(X_OFF, Y_OFF, W-(BORDER_PADDING*space), H-(BORDER_PADDING*space), (x, y) => {
       const layer = BORDER_BLEED ? findActiveLayer(x, y) : LAYERS[0]
       if (layer.hideStreets) return
-      setC(x, y, layer.colors.circle, layer.gradient)
+      setC(x+X_OFF, y+Y_OFF, layer.colors.circle, layer.gradient)
       circle(x, y, nsrnd(x, y, BORDER_THICKNESS/SCALE, BORDER_THICKNESS*2.5/SCALE))
     })
   }

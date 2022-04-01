@@ -3,7 +3,7 @@
 
 function drawStreetGrid(startX=0, startY=0) {
   push()
-  translate(startX, startY)
+  // translate(startX, startY)
   const scaleMultiplier = scaleModifier(1, 1.6)
   MIN_ST_W = 0.7 * scaleMultiplier
   MAX_ST_W = 1.3 * scaleMultiplier
@@ -18,12 +18,14 @@ function drawStreetGrid(startX=0, startY=0) {
 
   const t = TURBULENCE ? 1.75 : 0.5 // 0.5
   const d = TURBULENCE ? 1.25 : 0
+  const streetT = t * 0.7
+  const streetD = d * 1.3
+  const qT = t * 0.9
+  const qD = d * 1.1
 
-  streetCoords.forEach(coords => drawCoords(coords.coords, (x, y, progress, angle) => {
-    const streetT = t * 0.7
-    const streetD = d * 1.3
-    const _x = x+rnd(-streetT, streetT)
-    const _y = y+rnd(-streetT, streetT)
+  streetCoords.forEach((coords, i) => drawCoords(coords.coords, (x, y, progress, angle) => {
+    const _x = x+rnd(-streetT, streetT)+startX
+    const _y = y+rnd(-streetT, streetT)+startY
     const layer = findActiveLayer(_x, _y)
     if (layer.hideStreets) return
 
@@ -31,66 +33,62 @@ function drawStreetGrid(startX=0, startY=0) {
 
     if (STREET_TURBULENCE) {
       times(5, () => {
-        circle(x+rnd(-10, 10), y+rnd(-10, 10), rnd(1*MIN_ST_W, 1*MAX_ST_W))
+        circle(_x+rnd(-10, 10), _y+rnd(-10, 10), rnd(1*MIN_ST_W, 1*MAX_ST_W))
       })
     } else {
       circle(_x, _y, nsrnd(_x, _y, MIN_ST_W, MAX_ST_W) + streetD)
-
     }
-  }))
+  }, startX, startY))
 
 
   quarternaryAveCoords.forEach(coords => drawCoords(coords.coords, (x, y, p, angle) => {
-    const qT = t * 0.9
-    const qD = d * 1.1
-    const _x = x+rnd(-qT, qT)
-    const _y = y+rnd(-qT, qT)
+    const _x = x+rnd(-qT, qT)+startX
+    const _y = y+rnd(-qT, qT)+startY
     const layer = findActiveLayer(_x, _y)
     if (layer.hideStreets) return
 
     setC(_x, _y, layer.colors.quarternary, layer.gradient)
     circle(_x, _y, nsrnd(_x, _y, 2*MIN_ST_W, 2*MAX_ST_W) + qD)
-  }))
-
+  }, startX, startY))
 
 
 
   tertiaryAveCoords.forEach(coords => drawCoords(coords.coords, (x, y, p, angle) => {
-    const _x = x+rnd(-t, t)
-    const _y = y+rnd(-t, t)
+    const _x = x+rnd(-t, t)+startX
+    const _y = y+rnd(-t, t)+startY
     const layer = findActiveLayer(_x, _y)
     if (layer.hideStreets) return
 
     setC(_x, _y, layer.colors.tertiary, layer.gradient)
     circle(_x, _y, nsrnd(_x, _y, 3.5*MIN_ST_W, 3.5*MAX_ST_W) + d)
-  }))
+  }, startX, startY))
 
 
 
   secondaryAveCoords.forEach(coords => drawCoords(coords.coords, (x, y, p, angle) => {
-    const _x = x+rnd(-t, t)
-    const _y = y+rnd(-t, t)
+    const _x = x+rnd(-t, t)+startX
+    const _y = y+rnd(-t, t)+startY
     const layer = findActiveLayer(_x, _y)
     if (layer.hideStreets) return
 
     setC(_x, _y, layer.colors.secondary, layer.gradient)
     circle(_x, _y, nsrnd(_x, _y, 5*MIN_ST_W, 5*MAX_ST_W) + d)
-  }))
+  }, startX, startY))
 
 
   drawCoords(primaryAveCoords.coords, (x, y, progress, angle) => {
-    const _x = x+rnd(-t, t)
-    const _y = y+rnd(-t, t)
+    const _x = x+rnd(-t, t)+startX
+    const _y = y+rnd(-t, t)+startY
     const layer = findActiveLayer(_x, _y)
     if (layer.hideStreets) return
 
     setC(_x, _y, layer.colors.primary, layer.gradient)
     circle(_x, _y, nsrnd(_x, _y, 6.25*MIN_ST_W, 6.25*MAX_ST_W) + d)
-  })
+  }, startX, startY)
   pop()
 }
 
-function drawCoords(coords, dotFn) {
+function drawCoords(coords, dotFn, xOff=0, yOff=0) {
   const outsideBorders = BORDER_PADDING
     ? createBorderFn(BORDER_PADDING)
     : createBorderFn(-20/SCALE)
@@ -109,13 +107,13 @@ function drawCoords(coords, dotFn) {
       push()
 
 
-      const layer = findActiveLayer(x1, y1)
+      const layer = findActiveLayer(x1+xOff, y1+yOff)
       if (layer.hideStreets) return
-      setC(x1, y1, layer.colors.circle, layer.gradient)
+      setC(x1+xOff, y1+yOff, layer.colors.circle, layer.gradient)
 
       const trb = TURBULENCE
       times(10, i => {
-        circle(x1+rnd(-trb, trb), y1+rnd(-trb, trb), 8)
+        circle(x1+rnd(-trb, trb)+xOff, y1+rnd(-trb, trb)+yOff, 8)
       })
 
       pop()
@@ -289,7 +287,6 @@ function generateStreetCoords(startX, startY, startAngle, params={}) {
   const length = params.maxLen || 150
   const borderFn = createBorderFn(-150/SCALE)
 
-
   let x = startX
   let y = startY
   let angle = startAngle
@@ -315,7 +312,6 @@ function generateStreetCoords(startX, startY, startAngle, params={}) {
         break
       }
     }
-
 
     x = nextX
     y = nextY
