@@ -280,7 +280,7 @@ function keyPressed() {
 let NOISE_DIVISOR, TURBULENCE, IGNORE_STREET_CAP, STREET_TURBULENCE, HARD_CURVES, DENSITY,
     COLOR_RULE, STRAIGHT_STREETS, SECONDARY_ANGLE_ADJ, DOUBLE_STREETS, KINKED_STREET_FACTOR,
     BORDER_PADDING, BORDER_BLEED, BORDER_THICKNESS, HARD_BORDER, ROTATION, BORDER_DRIFT, DASH_RATE,
-    X_OFF, Y_OFF
+    X_OFF, Y_OFF, MISPRINT_ROTATION
 let LAYERS = []
 
 const NOISE_OFFSET = 100000
@@ -503,6 +503,7 @@ function setup() {
 
   X_OFF = 0
   Y_OFF = 0
+  MISPRINT_ROTATION = 0
 
   if (borderType === 0) {
     const bFactor = rnd(15, 45)
@@ -513,6 +514,21 @@ function setup() {
     BORDER_THICKNESS = 0
     BORDER_DRIFT = bFactor/SCALE
     ROTATION = 0
+
+  } else if (prb(0.01)) {
+    HARD_BORDER = true
+    BORDER_PADDING = rnd(15, 25)/SCALE
+    BORDER_BLEED = true
+    BORDER_THICKNESS = rnd(1.4, 3)
+    BORDER_DRIFT = chance(
+      [5, 0],
+      [3, rnd(3)/SCALE],
+      [1, rnd(3, BORDER_PADDING/2)/SCALE]
+    )
+    ROTATION = rnd(-0.008, 0.008)
+    X_OFF = rnd(-250, 250)
+    Y_OFF = rnd(-250, 250)
+    MISPRINT_ROTATION = rnd(-QUARTER_PI, QUARTER_PI)/4
 
   } else {
     HARD_BORDER = borderType === 2 || prb(0.85)
@@ -531,14 +547,6 @@ function setup() {
     ROTATION = rnd(-0.008, 0.008)
   }
 
-  // if (borderType === 3) {
-  //   X_OFF = rnd(-150, 150)
-  //   Y_OFF = rnd(-150, 150)
-  //   ROTATION = rnd(-0.008, 0.008)*2
-
-  //   HARD_BORDER = true
-  //   BORDER_THICKNESS = rnd(1, 3)
-  // }
 
   LAYERS = setLayers(layerN, baseRule, hueDiff, thresholdAdj, lightenDarks, forceGradients, invertStreets)
 
@@ -556,7 +564,9 @@ function draw() {
 
   const START = Date.now()
 
-  drawBackground(T+Y_OFF, B+Y_OFF, L+X_OFF, R+X_OFF)
+  rotate(MISPRINT_ROTATION)
+  const bgBuffer = max(abs(X_OFF), abs(Y_OFF))
+  drawBackground(T-bgBuffer, B+bgBuffer, L-bgBuffer, R+bgBuffer)
 
   rotate(ROTATION)
   drawStreetGrid(X_OFF, Y_OFF)

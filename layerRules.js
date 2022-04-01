@@ -71,7 +71,7 @@ function setLayers(layerN, baseRule, hueDiff, thresholdAdj=1, lightenDarks, forc
   )
 
   const newLayer = (previousLayer, threshold, ix) => {
-    const hideStreets = rnd() < 0.2
+    const hideStreets = prb(0.2) && !(X_OFF || Y_OFF)
     const mxGrd = ix === layerN-1 ? maxGradient/3 : maxGradient
 
     let nextLayer
