@@ -305,7 +305,7 @@ function setup() {
 
   SIZE = min(window.innerWidth, window.innerHeight)
   __canvas = createCanvas(SIZE, SIZE)
-  noiseSeed(int(rnd(10000000000000000)))
+  noiseSeed(rnd(1000000) + rnd(1000000) + rnd(1000))
   colorMode(HSB, 360, 100, 100, 100)
 
   SCALE = rnd(0.2, 1.2)
@@ -487,11 +487,6 @@ function setup() {
     thresholdAdj = 0.01
   }
 
-  console.log(layerN, NOISE_DIVISOR*SCALE)
-
-
-  console.log(COLOR_RULE)
-  console.log(hueDiff)
 
 
   borderType = chance(
@@ -542,13 +537,20 @@ function setup() {
     BORDER_DRIFT = chance(
       [5, 0],
       [3, rnd(3)/SCALE],
-      [1, rnd(3, BORDER_PADDING/2)/SCALE]
+      [1, min(180, rnd(3, BORDER_PADDING/2))/SCALE]
     )
     ROTATION = rnd(-0.008, 0.008)
   }
 
+  console.log('>>>>',BORDER_PADDING*SCALE, BORDER_DRIFT*SCALE)
+
 
   LAYERS = setLayers(layerN, baseRule, hueDiff, thresholdAdj, lightenDarks, forceGradients, invertStreets)
+  console.log(layerN, NOISE_DIVISOR*SCALE)
+
+
+  console.log(COLOR_RULE)
+  console.log(hueDiff)
 
   console.log(borderType, BORDER_DRIFT, BORDER_PADDING)
 }
