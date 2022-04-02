@@ -154,8 +154,8 @@ function generateAllCoords() {
   STREET_BLOCK_HEIGHT = 20 // can go up to maybe 200?
 
 
-  const minDrift =
-    STRAIGHT_STREETS ? 100 : scaleModifier(17, 24)
+  const minDrift = STRAIGHT_STREETS ? 100 : scaleModifier(17, 24)
+  // const minDrift = STRAIGHT_STREETS ? 100 : scaleModifier2(17, 24)
 
     console.log('min drift', minDrift)
 

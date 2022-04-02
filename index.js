@@ -353,7 +353,7 @@ function setup() {
     [0.02, 2],
   )
 
-  DOUBLE_STREETS = DENSITY === 1 && !HARD_CURVES && rnd() < 0.01
+  // DOUBLE_STREETS = DENSITY === 1 && !HARD_CURVES && rnd() < 0.01
   DASH_RATE = prb(0.1) ? rnd(0.05, 0.2) : 0
 
   console.log(DENSITY, SCALE)
@@ -571,7 +571,7 @@ function draw() {
   rotate(ROTATION)
   drawStreetGrid(X_OFF, Y_OFF)
 
-  if (DOUBLE_STREETS) drawStreetGrid(X_OFF, Y_OFF)
+  // if (DOUBLE_STREETS) drawStreetGrid(X_OFF, Y_OFF)
 
   if (HARD_BORDER) {
     const space =

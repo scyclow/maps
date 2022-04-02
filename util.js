@@ -25,14 +25,22 @@ const noop = () => {}
 
 
 function scaleModifier(mn, mx) {
-  return map(
-    max(0, 0.35 - SCALE),
-    0,
-    0.15,
-    mn,
-    mx
-  )
+  const s =
+    SCALE < 0.4 && SCALE >= 0.3 ? 0.05 :
+    SCALE < 0.3 ? 0.35 - SCALE :
+    0
+
+  return map(s, 0, 0.15, mn, mx)
 }
+
+// function scaleModifier2(mn, mx) {
+//   const s =
+//     SCALE < 0.4 && SCALE >= 0.3 ? 0.05 :
+//     SCALE < 0.3 ? 0.35 - SCALE :
+//     0
+
+//   return map(0.35 - SCALE, 0, 0.15, mn, mx)
+// }
 
 const coordToTuple = ({ x, y }) => [x, y]
 
