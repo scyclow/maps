@@ -128,9 +128,9 @@ const posOrNeg = () => prb(0.5) ? 1 : -1
 
 
   let baseRule = chance(
-    [layerN <= 4 ? 25 : 0, 'paper'],
-    [layerN <= 4 ? 25 : 0, 'burnt'],
-    [layerN <= 4 ? 25 : 0, 'faded'],
+    [layerN <= 4 ? 20 : 0, 'paper'],
+    [layerN <= 4 ? 20 : 0, 'burnt'],
+    [layerN <= 4 ? 20 : 0, 'faded'],
 
     [layerN <= 4 ? 10 : 5, 'bright'],
     [5, 'whiteAndBlack'],
@@ -294,6 +294,7 @@ const posOrNeg = () => prb(0.5) ? 1 : -1
     LAYER_N: layerN,
     BASE_RULE: baseRule,
     HUE_DIFF: hueDiff,
+    FORCE_GRADIENTS: forceGradients,
     HARD_CURVES,
     DASH_RATE,
     STREET_TURBULENCE,

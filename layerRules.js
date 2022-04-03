@@ -125,7 +125,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, lightenDarks, forceGradien
 
   const grain = rnd() < 0.5 ? 0 : rnd(0.2, 1)
 
-  const GRADIENT_PRB = 0.1
+  const GRADIENT_PRB = 0.09
   const getGradient = (force, mx=360) => {
     return rnd() < GRADIENT_PRB || force
       ? {

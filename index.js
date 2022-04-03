@@ -265,6 +265,12 @@ from output to output, with some having degraded substantially.
 
 2-24
   - should main burnt hue apply to street colors as well as bg?
+
+
+
+2-27
+  - lower gradient/faded prob a bit? maybe lower gradient from 75
+  - increase border bleed prob
 */
 
 
@@ -318,14 +324,6 @@ function setup() {
   R = round(width/(2*sizeADJ), 4)
   T = round(-height/(2*sizeADJ), 4)
   B = round(height/(2*sizeADJ), 4)
-
-  // chaos budget
-    // turbulence
-    // street turbulence
-    // zoom
-    // hard curves
-    // noise divisor
-    // # layers
 
 
   TURBULENCE = rnd() < 0.15
@@ -382,9 +380,9 @@ function setup() {
 
 
   let baseRule = chance(
-    [layerN <= 4 ? 25 : 0, 'paper'],
-    [layerN <= 4 ? 25 : 0, 'burnt'],
-    [layerN <= 4 ? 25 : 0, 'faded'],
+    [layerN <= 4 ? 20 : 0, 'paper'],
+    [layerN <= 4 ? 20 : 0, 'burnt'],
+    [layerN <= 4 ? 20 : 0, 'faded'],
 
     [layerN <= 4 ? 10 : 5, 'bright'],
     [5, 'whiteAndBlack'],
@@ -567,7 +565,7 @@ function draw() {
   const START = Date.now()
 
   rotate(MISPRINT_ROTATION)
-  const bgBuffer = max(abs(X_OFF), abs(Y_OFF))
+  const bgBuffer = max(abs(X_OFF), abs(Y_OFF))*1.5
   drawBackground(T-bgBuffer, B+bgBuffer, L-bgBuffer, R+bgBuffer)
 
   rotate(ROTATION)
