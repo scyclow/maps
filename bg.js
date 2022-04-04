@@ -48,6 +48,7 @@ function drawBackground(t, b, l, r) {
 }
 
 function drawBackgroundStroke(x, y, layer, strokeSize, strokeParams) {
+  if (LOW_INK && prb(0.5)) return
   let diam = rnd(strokeSize, strokeSize*2) * strokeParams.multiplier
   let offset = strokeSize/2
 

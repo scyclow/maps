@@ -4,7 +4,7 @@
 function drawStreetGrid(startX=0, startY=0) {
   push()
   // translate(startX, startY)
-  const scaleMultiplier = scaleModifier(1, 1.6)
+  const scaleMultiplier = scaleModifier(1, 1.6) * (LOW_INK ? 0.7 : 1)
   MIN_ST_W = 0.7 * scaleMultiplier
   MAX_ST_W = 1.3 * scaleMultiplier
 
@@ -32,7 +32,7 @@ function drawStreetGrid(startX=0, startY=0) {
     setC(_x, _y, layer.colors.street, layer.gradient)
 
     if (STREET_TURBULENCE) {
-      times(5, () => {
+      times(LOW_INK ? 2 : 5, () => {
         circle(_x+rnd(-10, 10), _y+rnd(-10, 10), rnd(1*MIN_ST_W, 1*MAX_ST_W))
       })
     } else {
@@ -106,14 +106,15 @@ function drawCoords(coords, dotFn, xOff=0, yOff=0) {
     if (i === coords.length-1 && !IGNORE_STREET_CAP && !STREET_TURBULENCE) {
       push()
 
-
       const layer = findActiveLayer(x1+xOff, y1+yOff)
-      if (layer.hideStreets) return
+      if (layer.hideStreets || (LOW_INK && prb(0.8))) return
       setC(x1+xOff, y1+yOff, layer.colors.circle, layer.gradient)
 
       const trb = TURBULENCE
       times(10, i => {
-        circle(x1+rnd(-trb, trb)+xOff, y1+rnd(-trb, trb)+yOff, 8)
+        const fn = STAR_MAP && prb(0.001) ? drawStar : circle
+        const d = LOW_INK ? rnd(1, 6) : 8
+        fn(x1+rnd(-trb, trb)+xOff, y1+rnd(-trb, trb)+yOff, d)
       })
 
       pop()
@@ -327,5 +328,19 @@ function generateStreetCoords(startX, startY, startAngle, params={}) {
     direction: params.direction || 0,
     branch: params.branch || 0,
   }
+}
+
+const drawStar = (x, y, d) => {
+  push()
+
+
+  const getXY = i => getXYRotation(i*TWO_PI/10, i % 2 === 0 ? d/2 : d, x, y)
+  beginShape()
+  curveVertex(...getXY(-1))
+  times(12, p => {
+    curveVertex(...getXY(p))
+  })
+  endShape()
+  pop()
 }
 

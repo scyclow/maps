@@ -50,6 +50,9 @@ Conflations
 Reifications
 Unconscionable Maps
 
+Maps of Something Unknown
+Maps of Nothing
+
 
 980/720
 
@@ -271,6 +274,30 @@ from output to output, with some having degraded substantially.
 2-27
   - lower gradient/faded prob a bit? maybe lower gradient from 75
   - increase border bleed prob
+
+
+
+2-29
+  - think about color directions. it starts somewhere and moves through color space.
+  - hide stars in some of them
+  - white/black should have a subtle saturation tint
+
+
+  - more high border drift w/o borders
+  - b/w + w/b gradients based on brightness
+  - reduce street turbulence by a tad (2-29/402)
+  - hue diff -> choose randomly from a hue range
+  - maybe make misprints more common, but also generally more subtle
+
+  - need to find a way to have more zoomed out 1-layers
+  - many layers, zoomed out with hard curves doesn't look great
+
+  - need to rethink layer distribution
+    - right now 2, 3, 4 make up 80%. that feels like a lot
+  - too many 4-layers
+  - too many 12 layers
+
+  - maybe too much white bg?
 */
 
 
@@ -286,7 +313,7 @@ function keyPressed() {
 let NOISE_DIVISOR, TURBULENCE, IGNORE_STREET_CAP, STREET_TURBULENCE, HARD_CURVES, DENSITY,
     COLOR_RULE, STRAIGHT_STREETS, SECONDARY_ANGLE_ADJ, DOUBLE_STREETS, KINKED_STREET_FACTOR,
     BORDER_PADDING, BORDER_BLEED, BORDER_THICKNESS, HARD_BORDER, ROTATION, BORDER_DRIFT, DASH_RATE,
-    X_OFF, Y_OFF, MISPRINT_ROTATION
+    X_OFF, Y_OFF, MISPRINT_ROTATION, STAR_MAP, LOW_INK
 let LAYERS = []
 
 const NOISE_OFFSET = 100000
@@ -326,11 +353,13 @@ function setup() {
   B = round(height/(2*sizeADJ), 4)
 
 
-  TURBULENCE = rnd() < 0.15
-  STREET_TURBULENCE = rnd() < 0.1
-  IGNORE_STREET_CAP = rnd() < 0.1
-  HARD_CURVES = rnd() < 0.05
-  STRAIGHT_STREETS = rnd() < scaleModifier(0.05, 0.1)
+  TURBULENCE = prb(0.15)
+  STREET_TURBULENCE = prb(0.1)
+  IGNORE_STREET_CAP = prb(0.1)
+  HARD_CURVES = prb(0.05)
+  STRAIGHT_STREETS = prb(scaleModifier(0.05, 0.1))
+  STAR_MAP = prb(0.01)
+  LOW_INK = prb(0.015)
 
   KINKED_STREET_FACTOR =
     rnd() < 0.15
@@ -365,14 +394,19 @@ function setup() {
     [3, 5], // topographic
   )
 
+  const layerNScaleAdj =
+    STREET_TURBULENCE || HARD_CURVES
+      ? 10
+      : map(SCALE, 1.2, 0.2, 1, 15)
   let layerN = chance(
-    [SCALE > 1 ? 1 : 5, 1],
-    [8, 2], // todo don't include if all light?
-    [37, 3],
-    [35, 4],
-    [10, 8], // more likely if alternate
-    [4, 12], // more likely if alternate
-    [1, 30], // more likely if alternate
+    [layerNScaleAdj, 1],
+    [6, 2],
+    [36, 3],
+    [34, rndint(4, 7)],
+    [10, rndint(7, 10)],
+    [4, rndint(10, 15)],
+    [1, rndint(15, 30)],
+    [1, 30],
   )
 
 
@@ -419,7 +453,7 @@ function setup() {
   } else if (COLOR_RULE === 4) {
 
     baseRule = chance(
-      [10, 'faded'],
+      [20, 'faded'],
       [30, 'bright'],
       [10, 'paper'],
       [30, 'whiteAndBlack'],
@@ -488,9 +522,9 @@ function setup() {
 
 
   borderType = chance(
-    [10, 0], // no borders
-    [45, 1], // borders
-    [45, 2], // bleeding
+    [1, 0], // no borders
+    [4, 1], // borders
+    [5, 2], // bleeding
     // [0.5, 3], // misprint
   )
 
@@ -503,12 +537,12 @@ function setup() {
     BORDER_PADDING = (bFactor+5)/SCALE
 
     HARD_BORDER = false
-    BORDER_BLEED = false
+    BORDER_BLEED = prb(0.05)
     BORDER_THICKNESS = 0
     BORDER_DRIFT = bFactor/SCALE
     ROTATION = 0
 
-  } else if (prb(0.01)) {
+  } else if (prb(0.015)) {
     HARD_BORDER = true
     BORDER_PADDING = rnd(15, 25)/SCALE
     BORDER_BLEED = true
@@ -519,9 +553,13 @@ function setup() {
       [1, rnd(3, BORDER_PADDING/2)/SCALE]
     )
     ROTATION = rnd(-0.008, 0.008)
-    X_OFF = rnd(-250, 250)
-    Y_OFF = rnd(-250, 250)
-    MISPRINT_ROTATION = rnd(-QUARTER_PI, QUARTER_PI)/4
+
+    const div = prb(0.333) ? 2 : 1
+
+    X_OFF = rnd(-250, 250)/div
+    Y_OFF = rnd(-250, 250)/div
+    MISPRINT_ROTATION = rnd(-QUARTER_PI, QUARTER_PI)/(4*div)
+
 
   } else {
     HARD_BORDER = borderType === 2 || prb(0.85)
@@ -586,6 +624,11 @@ function draw() {
       circle(x, y, nsrnd(x, y, BORDER_THICKNESS/SCALE, BORDER_THICKNESS*2.5/SCALE))
     })
   }
+
+  // stroke(LAYERS[0])
+
+
+
 
   console.log(Date.now() - START)
 }

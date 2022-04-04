@@ -89,7 +89,11 @@ function dotLine(x1, y1, x2, y2, dotFn, ignoreFn=noop, dash=false) {
   for (let i = 0; i <= d; i++) {
     if (dash && i >= d*0.6) return
 
-    if (!ignoreFn(x, y)) {
+    if (
+      !ignoreFn(x, y)
+      && !(LOW_INK && prb(0.7))
+      && !(TURBULENCE && prb(.2))
+    ) {
       dotFn(x, y, i/d, angle);
     }
 
