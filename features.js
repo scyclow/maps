@@ -75,12 +75,18 @@ const posOrNeg = () => prb(0.5) ? 1 : -1
   rnd()
   rnd()
 
+
   SCALE = rnd(0.2, 1.2)
-  TURBULENCE = rnd() < 0.15
-  STREET_TURBULENCE = rnd() < 0.1
-  IGNORE_STREET_CAP = rnd() < 0.1
-  HARD_CURVES = rnd() < 0.05
-  STRAIGHT_STREETS = rnd() < scaleModifier(0.05, 0.1)
+
+
+  TURBULENCE = prb(0.15)
+  STREET_TURBULENCE = prb(0.1)
+  IGNORE_STREET_CAP = prb(0.1)
+  HARD_CURVES = prb(0.05)
+  STRAIGHT_STREETS = prb(scaleModifier(0.05, 0.1))
+  STAR_MAP = prb(0.01)
+  LOW_INK = prb(0.015)
+  SMUDGE = prb(0.01) ? rnd(30, 100) : 0
 
   KINKED_STREET_FACTOR =
     rnd() < 0.15
@@ -101,26 +107,32 @@ const posOrNeg = () => prb(0.5) ? 1 : -1
     [0.02, 2],
   )
 
+  // DOUBLE_STREETS = DENSITY === 1 && !HARD_CURVES && rnd() < 0.01
   DASH_RATE = prb(0.1) ? rnd(0.05, 0.2) : 0
 
+  console.log(DENSITY, SCALE)
 
   COLOR_RULE = chance(
-    [30, 0], // anything goes
-    [37, 1], // high contrast
-    [5, 2], // all light
-    [5, 3], // all dark
-    [20, 4], // all color
-    [3, 5], // topographic
+    [34, 0], // anything goes
+    [35, 1], // contrast
+    // [5, 2], // all light
+    [7, 3], // all dark
+    [22, 4], // all color
+    [2, 5], // topographic
   )
 
+  const layerNScaleAdj =
+    STREET_TURBULENCE || HARD_CURVES
+      ? 10
+      : map(SCALE, 1.2, 0.2, 1, 15)
   let layerN = chance(
-    [SCALE > 1 ? 1 : 5, 1],
-    [8, 2], // todo don't include if all light?
-    [37, 3],
-    [35, 4],
-    [10, 8], // more likely if alternate
-    [4, 12], // more likely if alternate
-    [1, 30], // more likely if alternate
+    [layerNScaleAdj, 1],
+    [6, 2],
+    [36, 3],
+    [34, rndint(4, 7)],
+    [!HARD_CURVES ? 10 : 0, rndint(7, 10)],
+    [!HARD_CURVES ? 5 : 0, rndint(10, 15)],
+    [!HARD_CURVES ? 1 : 0, 30],
   )
 
 
@@ -149,10 +161,19 @@ const posOrNeg = () => prb(0.5) ? 1 : -1
 
 
   let forceGradients = rnd() < 0.02
+  const maxGradient = rnd() < 0.025 ? rnd(720, 3000) : 200
   let invertStreets = false
   let lightenDarks = false
 
-  if (COLOR_RULE === 3) {
+  if (COLOR_RULE === 1) {
+    baseRule = chance(
+      [10, 'whiteAndBlack'],
+      [10, 'bright'],
+      [5, 'blackAndWhite'],
+      [SCALE <= 0.3 ? 0 : 5, 'neon'],
+    )
+  }
+  else if (COLOR_RULE === 3) {
     baseRule = chance(
       [20, 'burnt'],
       [5, 'blackAndWhite'],
@@ -167,7 +188,7 @@ const posOrNeg = () => prb(0.5) ? 1 : -1
   } else if (COLOR_RULE === 4) {
 
     baseRule = chance(
-      [10, 'faded'],
+      [20, 'faded'],
       [30, 'bright'],
       [10, 'paper'],
       [30, 'whiteAndBlack'],
@@ -177,8 +198,8 @@ const posOrNeg = () => prb(0.5) ? 1 : -1
       [25, 3],
       [35, rndint(4,6)],
       [25, rndint(6,9)],
-      [10, rndint(9, 15)],
-      [5, rndint(15, 30)],
+      [!HARD_CURVES ? 10 : 0, rndint(9, 15)],
+      [!HARD_CURVES ? 5 : 0, rndint(15, 30)],
     )
 
     hueDiff = chance(
@@ -200,7 +221,7 @@ const posOrNeg = () => prb(0.5) ? 1 : -1
   } else if (5 === COLOR_RULE) {
     NOISE_DIVISOR = rnd(350, 1000) / SCALE
 
-    layerN = 50
+    layerN = hideStreetsOverride({ix: 1}) ? 30 : 50
 
     baseRule = chance(
       [25, 'paper'],
@@ -231,13 +252,23 @@ const posOrNeg = () => prb(0.5) ? 1 : -1
 
   if (layerN >= 30) {
     thresholdAdj = 0.01
+  } else if (layerN === 2 && ['neon', 'burnt'].includes(baseRule)) {
+    hueDiff = chance(
+      [5, 0],
+      [1, 100],
+      [1, 120],
+      [1, 150],
+      [1, 180],
+    ) * posOrNeg()
   }
+
+  const grain = rnd() < 0.5 || ['blackAndWhite', 'neon', 'burnt'].includes(baseRule) ? 0 : rnd(0.2, 0.7)
 
 
   borderType = chance(
-    [10, 0], // no borders
-    [45, 1], // borders
-    [45, 2], // bleeding
+    [1, 0], // no borders
+    [4, 1], // borders
+    [5, 2], // bleeding
     // [0.5, 3], // misprint
   )
 
@@ -250,12 +281,12 @@ const posOrNeg = () => prb(0.5) ? 1 : -1
     BORDER_PADDING = (bFactor+5)/SCALE
 
     HARD_BORDER = false
-    BORDER_BLEED = false
+    BORDER_BLEED = prb(0.05)
     BORDER_THICKNESS = 0
     BORDER_DRIFT = bFactor/SCALE
     ROTATION = 0
 
-  } else if (prb(0.01)) {
+  } else if (prb(0.015)) {
     HARD_BORDER = true
     BORDER_PADDING = rnd(15, 25)/SCALE
     BORDER_BLEED = true
@@ -266,9 +297,13 @@ const posOrNeg = () => prb(0.5) ? 1 : -1
       [1, rnd(3, BORDER_PADDING/2)/SCALE]
     )
     ROTATION = rnd(-0.008, 0.008)
-    X_OFF = rnd(-250, 250)
-    Y_OFF = rnd(-250, 250)
-    MISPRINT_ROTATION = rnd(-QUARTER_PI, QUARTER_PI)/4
+
+    const div = prb(0.333) ? 2 : 1
+
+    X_OFF = rnd(-250, 250)/(div*SCALE)
+    Y_OFF = rnd(-250, 250)/(div*SCALE)
+    MISPRINT_ROTATION = rnd(-QUARTER_PI, QUARTER_PI)/(4*div)
+
 
   } else {
     HARD_BORDER = borderType === 2 || prb(0.85)
@@ -284,9 +319,13 @@ const posOrNeg = () => prb(0.5) ? 1 : -1
       [3, rnd(3)/SCALE],
       [1, min(180, rnd(3, BORDER_PADDING/2))/SCALE]
     )
-    ROTATION = rnd(-0.008, 0.008)
+    ROTATION = rnd(-0.0005, 0.0005)
+    X_OFF = rnd(-2, 2)/SCALE
+    Y_OFF = rnd(-2, 2)/SCALE
   }
 
+
+  // LAYERS = setLayers(layerN, baseRule, hueDiff, thresholdAdj, lightenDarks, forceGradients, maxGradient, grain, invertStreets)
 
   return {
     SCALE,
@@ -295,6 +334,7 @@ const posOrNeg = () => prb(0.5) ? 1 : -1
     BASE_RULE: baseRule,
     HUE_DIFF: hueDiff,
     FORCE_GRADIENTS: forceGradients,
+    GRAIN: grain,
     HARD_CURVES,
     DASH_RATE,
     STREET_TURBULENCE,
@@ -313,7 +353,8 @@ const posOrNeg = () => prb(0.5) ? 1 : -1
     SECONDARY_ANGLE_ADJ,
     X_OFF,
     Y_OFF,
-    MISPRINT_ROTATION
+    MISPRINT_ROTATION,
+    // LAYERS
   }
 }
 

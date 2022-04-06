@@ -298,6 +298,24 @@ from output to output, with some having degraded substantially.
   - too many 12 layers
 
   - maybe too much white bg?
+
+2-30
+  - lower 12layer, unless high noise divisor
+  - for close up turbulence, increase threshold diff or have fewer layers. the dots in the line really come through when street colors change
+    - actually, all close ups don't look great
+    - only increase threhshold diff if street is visible and changing colors dramatically
+    - 350 is sort of on the cusp of looking bad at 0.987
+  - maybe always lighten neon (or, lighten neon when paired with b/w)
+  - force gradient rate is too high
+  - for single layers, much lower rate of gradient, or remove base gradient all together
+  - 2 level color on black doesn't really seem to work. does any 2 level black work?
+    - really, neon/burnt, unless it's the same color
+  - in general, bring gradient level down for top and bottom. rainbows are good once in a while, but they're too frequent
+  - graininess doesn't look great when its the only color in a b/w
+  - need to evaluate high contrast
+  - need to evaluate anything goes default rule shifts
+  - look at 15-50 layerN
+
 */
 
 
@@ -313,7 +331,7 @@ function keyPressed() {
 let NOISE_DIVISOR, TURBULENCE, IGNORE_STREET_CAP, STREET_TURBULENCE, HARD_CURVES, DENSITY,
     COLOR_RULE, STRAIGHT_STREETS, SECONDARY_ANGLE_ADJ, DOUBLE_STREETS, KINKED_STREET_FACTOR,
     BORDER_PADDING, BORDER_BLEED, BORDER_THICKNESS, HARD_BORDER, ROTATION, BORDER_DRIFT, DASH_RATE,
-    X_OFF, Y_OFF, MISPRINT_ROTATION, STAR_MAP, LOW_INK
+    X_OFF, Y_OFF, MISPRINT_ROTATION, STAR_MAP, LOW_INK, SMUDGE
 let LAYERS = []
 
 const NOISE_OFFSET = 100000
@@ -360,6 +378,7 @@ function setup() {
   STRAIGHT_STREETS = prb(scaleModifier(0.05, 0.1))
   STAR_MAP = prb(0.01)
   LOW_INK = prb(0.015)
+  SMUDGE = prb(0.01) ? rnd(30, 100) : 0
 
   KINKED_STREET_FACTOR =
     rnd() < 0.15
@@ -386,12 +405,12 @@ function setup() {
   console.log(DENSITY, SCALE)
 
   COLOR_RULE = chance(
-    [30, 0], // anything goes
-    [37, 1], // high contrast
-    [5, 2], // all light
-    [5, 3], // all dark
-    [20, 4], // all color
-    [3, 5], // topographic
+    [34, 0], // anything goes
+    [35, 1], // contrast
+    // [5, 2], // all light
+    [7, 3], // all dark
+    [22, 4], // all color
+    [2, 5], // topographic
   )
 
   const layerNScaleAdj =
@@ -403,10 +422,9 @@ function setup() {
     [6, 2],
     [36, 3],
     [34, rndint(4, 7)],
-    [10, rndint(7, 10)],
-    [4, rndint(10, 15)],
-    [1, rndint(15, 30)],
-    [1, 30],
+    [!HARD_CURVES ? 10 : 0, rndint(7, 10)],
+    [!HARD_CURVES ? 5 : 0, rndint(10, 15)],
+    [!HARD_CURVES ? 1 : 0, 30],
   )
 
 
@@ -435,10 +453,19 @@ function setup() {
 
 
   let forceGradients = rnd() < 0.02
+  const maxGradient = rnd() < 0.025 ? rnd(720, 3000) : 200
   let invertStreets = false
   let lightenDarks = false
 
-  if (COLOR_RULE === 3) {
+  if (COLOR_RULE === 1) {
+    baseRule = chance(
+      [10, 'whiteAndBlack'],
+      [10, 'bright'],
+      [5, 'blackAndWhite'],
+      [SCALE <= 0.3 ? 0 : 5, 'neon'],
+    )
+  }
+  else if (COLOR_RULE === 3) {
     baseRule = chance(
       [20, 'burnt'],
       [5, 'blackAndWhite'],
@@ -463,8 +490,8 @@ function setup() {
       [25, 3],
       [35, rndint(4,6)],
       [25, rndint(6,9)],
-      [10, rndint(9, 15)],
-      [5, rndint(15, 30)],
+      [!HARD_CURVES ? 10 : 0, rndint(9, 15)],
+      [!HARD_CURVES ? 5 : 0, rndint(15, 30)],
     )
 
     hueDiff = chance(
@@ -486,7 +513,7 @@ function setup() {
   } else if (5 === COLOR_RULE) {
     NOISE_DIVISOR = rnd(350, 1000) / SCALE
 
-    layerN = 50
+    layerN = hideStreetsOverride({ix: 1}) ? 30 : 50
 
     baseRule = chance(
       [25, 'paper'],
@@ -517,8 +544,17 @@ function setup() {
 
   if (layerN >= 30) {
     thresholdAdj = 0.01
+  } else if (layerN === 2 && ['neon', 'burnt'].includes(baseRule)) {
+    hueDiff = chance(
+      [5, 0],
+      [1, 100],
+      [1, 120],
+      [1, 150],
+      [1, 180],
+    ) * posOrNeg()
   }
 
+  const grain = rnd() < 0.5 || ['blackAndWhite', 'neon', 'burnt'].includes(baseRule) ? 0 : rnd(0.2, 0.7)
 
 
   borderType = chance(
@@ -556,8 +592,8 @@ function setup() {
 
     const div = prb(0.333) ? 2 : 1
 
-    X_OFF = rnd(-250, 250)/div
-    Y_OFF = rnd(-250, 250)/div
+    X_OFF = rnd(-250, 250)/(div*SCALE)
+    Y_OFF = rnd(-250, 250)/(div*SCALE)
     MISPRINT_ROTATION = rnd(-QUARTER_PI, QUARTER_PI)/(4*div)
 
 
@@ -575,20 +611,43 @@ function setup() {
       [3, rnd(3)/SCALE],
       [1, min(180, rnd(3, BORDER_PADDING/2))/SCALE]
     )
-    ROTATION = rnd(-0.008, 0.008)
+    ROTATION = rnd(-0.0005, 0.0005)
+    X_OFF = rnd(-2, 2)/SCALE
+    Y_OFF = rnd(-2, 2)/SCALE
   }
 
-  console.log('>>>>',BORDER_PADDING*SCALE, BORDER_DRIFT*SCALE)
 
+  LAYERS = setLayers(layerN, baseRule, hueDiff, thresholdAdj, lightenDarks, forceGradients, maxGradient, grain, invertStreets)
 
-  LAYERS = setLayers(layerN, baseRule, hueDiff, thresholdAdj, lightenDarks, forceGradients, invertStreets)
-  console.log(layerN, NOISE_DIVISOR*SCALE)
-
-
-  console.log(COLOR_RULE)
-  console.log(hueDiff)
-
-  console.log(borderType, BORDER_DRIFT, BORDER_PADDING)
+  console.log({
+    SCALE,
+    COLOR_RULE,
+    LAYER_N: layerN,
+    BASE_RULE: baseRule,
+    HUE_DIFF: hueDiff,
+    FORCE_GRADIENTS: forceGradients,
+    GRAIN: grain,
+    HARD_CURVES,
+    DASH_RATE,
+    STREET_TURBULENCE,
+    NOISE_DIVISOR,
+    DENSITY,
+    TURBULENCE,
+    IGNORE_STREET_CAP,
+    KINKED_STREET_FACTOR,
+    HARD_BORDER,
+    BORDER_BLEED,
+    BORDER_DRIFT,
+    BORDER_THICKNESS,
+    BORDER_PADDING,
+    ROTATION,
+    STRAIGHT_STREETS,
+    SECONDARY_ANGLE_ADJ,
+    X_OFF,
+    Y_OFF,
+    MISPRINT_ROTATION,
+    LAYERS
+  })
 }
 
 
@@ -609,7 +668,6 @@ function draw() {
   rotate(ROTATION)
   drawStreetGrid(X_OFF, Y_OFF)
 
-  // if (DOUBLE_STREETS) drawStreetGrid(X_OFF, Y_OFF)
 
   if (HARD_BORDER) {
     const space =
@@ -618,8 +676,8 @@ function draw() {
         : rnd(1.98, 2.02)
 
     dotRect(X_OFF, Y_OFF, W-(BORDER_PADDING*space), H-(BORDER_PADDING*space), (x, y) => {
-      const layer = BORDER_BLEED ? findActiveLayer(x, y) : LAYERS[0]
-      if (layer.hideStreets) return
+      const layer = BORDER_BLEED ? findActiveLayer(x, y, true) : LAYERS[0]
+      if (layer.hideStreets || hideStreetsOverride(layer)) return
       setC(x+X_OFF, y+Y_OFF, layer.colors.circle, layer.gradient)
       circle(x, y, nsrnd(x, y, BORDER_THICKNESS/SCALE, BORDER_THICKNESS*2.5/SCALE))
     })

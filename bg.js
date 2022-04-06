@@ -49,10 +49,10 @@ function drawBackground(t, b, l, r) {
 
 function drawBackgroundStroke(x, y, layer, strokeSize, strokeParams) {
   if (LOW_INK && prb(0.5)) return
-  let diam = rnd(strokeSize, strokeSize*2) * strokeParams.multiplier
-  let offset = strokeSize/2
+  const diam = rnd(strokeSize, strokeSize*2) * strokeParams.multiplier/3.5
+  const offset = strokeParams.multiplier > 1 ? diam*2 : 0
 
-  strokeWeight(diam/3.5)
+  strokeWeight(diam)
 
   let hAdj = 0
   let sAdj = 0
@@ -64,7 +64,6 @@ function drawBackgroundStroke(x, y, layer, strokeSize, strokeParams) {
         / dist(L, B, R, T)
 
     hAdj = map(d, 0, 1, 0, layer.gradient.hue)
-    // hAdj = layer.gradient.colorChangeFn(d)
     sAdj = map(d, 0, 1, 0, layer.gradient.sat)
     bAdj = map(d, 0, 1, 0, layer.gradient.brt)
 
@@ -80,7 +79,7 @@ function drawBackgroundStroke(x, y, layer, strokeSize, strokeParams) {
   )
   const angle = noise(x+NOISE_OFFSET, y+NOISE_OFFSET)
 
-  const [x0, y0] = getXYRotation(PI+angle+rnd(NEG_Q_PI, Q_PI), 5, x, y)
+  const [x0, y0] = getXYRotation(PI+angle+rnd(NEG_Q_PI, Q_PI), 5, x+rnd(-offset, offset+SMUDGE), y+rnd(-offset, offset))
   const [x1, y1] = getXYRotation(angle+rnd(NEG_Q_PI, Q_PI), 5, x, y)
 
   line(x0, y0, x1, y1)
