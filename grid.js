@@ -27,7 +27,7 @@ function drawStreetGrid(startX=0, startY=0) {
     const _x = x+rnd(-streetT, streetT)+startX
     const _y = y+rnd(-streetT, streetT)+startY
     const layer = findActiveLayer(_x, _y)
-    if (layer.hideStreets || hideStreetsOverride(layer)) return
+    if (layer.hideStreets || hideStreetsOverride(layer.ix, LAYERS.length)) return
 
     setC(_x, _y, layer.colors.street, layer.gradient)
 
@@ -45,7 +45,7 @@ function drawStreetGrid(startX=0, startY=0) {
     const _x = x+rnd(-qT, qT)+startX
     const _y = y+rnd(-qT, qT)+startY
     const layer = findActiveLayer(_x, _y)
-    if (layer.hideStreets || hideStreetsOverride(layer)) return
+    if (layer.hideStreets || hideStreetsOverride(layer.ix, LAYERS.length)) return
 
     setC(_x, _y, layer.colors.quarternary, layer.gradient)
     circle(_x, _y, nsrnd(_x, _y, 2*MIN_ST_W, 2*MAX_ST_W) + qD)
@@ -57,7 +57,7 @@ function drawStreetGrid(startX=0, startY=0) {
     const _x = x+rnd(-t, t)+startX
     const _y = y+rnd(-t, t)+startY
     const layer = findActiveLayer(_x, _y)
-    if (layer.hideStreets || hideStreetsOverride(layer)) return
+    if (layer.hideStreets || hideStreetsOverride(layer.ix, LAYERS.length)) return
 
     setC(_x, _y, layer.colors.tertiary, layer.gradient)
     circle(_x, _y, nsrnd(_x, _y, 3.5*MIN_ST_W, 3.5*MAX_ST_W) + d)
@@ -69,7 +69,7 @@ function drawStreetGrid(startX=0, startY=0) {
     const _x = x+rnd(-t, t)+startX
     const _y = y+rnd(-t, t)+startY
     const layer = findActiveLayer(_x, _y)
-    if (layer.hideStreets || hideStreetsOverride(layer)) return
+    if (layer.hideStreets || hideStreetsOverride(layer.ix, LAYERS.length)) return
 
     setC(_x, _y, layer.colors.secondary, layer.gradient)
     circle(_x, _y, nsrnd(_x, _y, 5*MIN_ST_W, 5*MAX_ST_W) + d)
@@ -80,7 +80,7 @@ function drawStreetGrid(startX=0, startY=0) {
     const _x = x+rnd(-t, t)+startX
     const _y = y+rnd(-t, t)+startY
     const layer = findActiveLayer(_x, _y)
-    if (layer.hideStreets || hideStreetsOverride(layer)) return
+    if (layer.hideStreets || hideStreetsOverride(layer.ix, LAYERS.length)) return
 
     setC(_x, _y, layer.colors.primary, layer.gradient)
     circle(_x, _y, nsrnd(_x, _y, 6.25*MIN_ST_W, 6.25*MAX_ST_W) + d)
@@ -107,7 +107,7 @@ function drawCoords(coords, dotFn, xOff=0, yOff=0) {
       push()
 
       const layer = findActiveLayer(x1+xOff, y1+yOff)
-      if (layer.hideStreets || hideStreetsOverride(layer) || (LOW_INK && prb(0.8))) return
+      if (layer.hideStreets || hideStreetsOverride(layer.ix, LAYERS.length) || (LOW_INK && prb(0.8))) return
       setC(x1+xOff, y1+yOff, layer.colors.circle, layer.gradient)
 
       const trb = TURBULENCE
@@ -154,11 +154,7 @@ function generateAllCoords() {
 
   STREET_BLOCK_HEIGHT = 20 // can go up to maybe 200?
 
-
   const minDrift = STRAIGHT_STREETS ? 100 : scaleModifier(17, 24)
-  // const minDrift = STRAIGHT_STREETS ? 100 : scaleModifier2(17, 24)
-
-    console.log('min drift', minDrift)
 
   PRIMARY_DRIFT = HALF_PI/minDrift
   SECONDARY_DRIFT = HALF_PI/rnd(minDrift, minDrift*2)

@@ -57,6 +57,41 @@ Maps of Nothing
 980/720
 
 
+
+Maps are a projection of reality onto a more abstract surface. By their nature, they are meant to be abstractions of reality.
+They are simplified versions of reality, but meant to provide a level of guidance and predictability.
+If I read the map, then I should be able to traverse the territory that the map represents.
+Maps use different strategies fo representation.
+But the Map is more than just a reflection of the territory. the Map is also a thing in itself.
+and the map has an effect on reality, the territory.
+In postmodern thought, maps are often used as a stand in for other forms of abstract representation
+Maps of Nothing builds off of this dynamic, where even though it proports to be a mpa, it makes it clear that the map itself does not reflect a territory.
+however, the interesting dynamic is that this takes things one level deeper -- it is a simulation of a paper map.
+specifically, it is a simulation of a paper map that itself does not proport to represent anything
+similar to FIM, this is explored through imperfection. the bumps on the paper are visible, the ink bleeds, the printing escapes the borders, the map is printed askew.
+in a bit of a twist, the territory being represented here is itself a map of nothing. and the art being purchased is a map of this territory, which is a map of nothing
+and yet, in looking at a map it's almsot impossible to not let your mind project meaning onto it.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 In 1993, an obscure publication company, Simulacra Publications
 
 published and distributed the following documents.
@@ -316,6 +351,16 @@ from output to output, with some having degraded substantially.
   - need to evaluate anything goes default rule shifts
   - look at 15-50 layerN
 
+
+2-31
+  - maybe take the green saturation down a little bit (60) and magenta (86)
+  - no streets (160, 403)
+  - maybe a slightly more maxGradient
+  - consider higher variability in border thickness. default can probably run a little thicker
+  - 1 layer + no bleed -> more likely to have thinner padding
+  - border should be thicher for more zoomed in maps
+  - misprint is completely broken with padding refactor
+  - rarity: no streets, a lot of layers, border
 */
 
 
@@ -377,7 +422,7 @@ function setup() {
   HARD_CURVES = prb(0.05)
   STRAIGHT_STREETS = prb(scaleModifier(0.05, 0.1))
   STAR_MAP = prb(0.01)
-  LOW_INK = prb(0.015)
+  LOW_INK = prb(0.01)
   SMUDGE = prb(0.01) ? rnd(30, 100) : 0
 
   KINKED_STREET_FACTOR =
@@ -399,10 +444,7 @@ function setup() {
     [0.02, 2],
   )
 
-  // DOUBLE_STREETS = DENSITY === 1 && !HARD_CURVES && rnd() < 0.01
   DASH_RATE = prb(0.1) ? rnd(0.05, 0.2) : 0
-
-  console.log(DENSITY, SCALE)
 
   COLOR_RULE = chance(
     [34, 0], // anything goes
@@ -410,7 +452,7 @@ function setup() {
     // [5, 2], // all light
     [7, 3], // all dark
     [22, 4], // all color
-    [2, 5], // topographic
+    [hideStreetsOverride(1, 50) ? 0 : 2, 5], // topographic
   )
 
   const layerNScaleAdj =
@@ -426,9 +468,6 @@ function setup() {
     [!HARD_CURVES ? 5 : 0, rndint(10, 15)],
     [!HARD_CURVES ? 1 : 0, 30],
   )
-
-
-  let thresholdAdj = 1
 
 
   let baseRule = chance(
@@ -452,7 +491,7 @@ function setup() {
   ) * posOrNeg()
 
 
-  let forceGradients = rnd() < 0.02
+  let forceGradients = rnd() < 0.025
   const maxGradient = rnd() < 0.025 ? rnd(720, 3000) : 200
   let invertStreets = false
   let lightenDarks = false
@@ -513,13 +552,13 @@ function setup() {
   } else if (5 === COLOR_RULE) {
     NOISE_DIVISOR = rnd(350, 1000) / SCALE
 
-    layerN = hideStreetsOverride({ix: 1}) ? 30 : 50
+    layerN = 50
 
     baseRule = chance(
-      [25, 'paper'],
-      [25, 'faded'],
-      [25, 'bright'],
-      [10, 'whiteAndBlack'],
+      [1, 'paper'],
+      [1, 'faded'],
+      [1, 'bright'],
+      [1, 'whiteAndBlack'],
     )
 
 
@@ -529,22 +568,9 @@ function setup() {
       [1, 120],
       [1, 180],
     ) * posOrNeg()
-
-  // } else if (COLOR_RULE === 6) {
-  //   baseRule = 'blackAndWhite'
-  //   forceGradients = true
-  //   layerN = chance(
-  //     [25, 3],
-  //     [35, rndint(4,6)],
-  //     [25, rndint(6,9)],
-  //     [10, rndint(9, 15)],
-  //     [5, rndint(15, 30)],
-  //   )
   }
 
-  if (layerN >= 30) {
-    thresholdAdj = 0.01
-  } else if (layerN === 2 && ['neon', 'burnt'].includes(baseRule)) {
+  if (layerN === 2 && ['neon', 'burnt'].includes(baseRule)) {
     hueDiff = chance(
       [5, 0],
       [1, 100],
@@ -557,30 +583,106 @@ function setup() {
   const grain = rnd() < 0.5 || ['blackAndWhite', 'neon', 'burnt'].includes(baseRule) ? 0 : rnd(0.2, 0.7)
 
 
-  borderType = chance(
-    [1, 0], // no borders
-    [4, 1], // borders
-    [5, 2], // bleeding
-    // [0.5, 3], // misprint
-  )
-
   X_OFF = 0
   Y_OFF = 0
   MISPRINT_ROTATION = 0
 
-  if (borderType === 0) {
-    const bFactor = rnd(15, 45)
-    BORDER_PADDING = (bFactor+5)/SCALE
 
+  // Padding
+    // large 150 - 200
+    // medium 25 - 50
+    // small 15 - 25
+
+  // Border
+    // true
+    // false
+
+  // Drift
+
+
+  // borderType = chance(
+  //   [1, 0], // no borders
+  //   [4, 1], // borders
+  //   [5, 2], // bleeding
+  // )
+
+  // if (borderType === 0) {
+  //   const bFactor = rnd(15, 45)
+  //   BORDER_PADDING = (bFactor+5)/SCALE
+
+  //   HARD_BORDER = false
+  //   BORDER_BLEED = prb(0.05)
+  //   BORDER_THICKNESS = 0
+  //   BORDER_DRIFT = bFactor/SCALE
+  //   ROTATION = 0
+
+  // } else if (prb(0.015)) {
+  //   HARD_BORDER = true
+  //   BORDER_PADDING = rnd(15, 25)/SCALE
+  //   BORDER_BLEED = true
+  //   BORDER_THICKNESS = rnd(1.4, 3)
+  //   BORDER_DRIFT = chance(
+  //     [5, 0],
+  //     [3, rnd(3)/SCALE],
+  //     [1, rnd(3, BORDER_PADDING/2)/SCALE]
+  //   )
+  //   ROTATION = rnd(-0.008, 0.008)
+
+  //   const div = prb(0.333) ? 2 : 1
+
+  //   X_OFF = rnd(-250, 250)/(div*SCALE)
+  //   Y_OFF = rnd(-250, 250)/(div*SCALE)
+  //   MISPRINT_ROTATION = rnd(-QUARTER_PI, QUARTER_PI)/(4*div)
+
+
+  // } else {
+  //   HARD_BORDER = borderType === 2 || prb(0.85)
+
+  //   BORDER_PADDING =
+  //     prb(0.06) ? rnd(150, 200)/SCALE :
+  //     !HARD_BORDER ? rnd(25, 40)/SCALE :
+  //     rnd(15, 25)/SCALE
+  //   BORDER_BLEED = borderType === 2
+  //   BORDER_THICKNESS = rnd(1.4, 3)
+  //   BORDER_DRIFT = chance(
+  //     [5, 0],
+  //     [3, rnd(3)/SCALE],
+  //     [1, min(180, rnd(3, BORDER_PADDING/2))/SCALE]
+  //   )
+  //   ROTATION = rnd(-0.0005, 0.0005)
+  //   X_OFF = rnd(-2, 2)/SCALE
+  //   Y_OFF = rnd(-2, 2)/SCALE
+  // }
+
+  BORDER_BLEED = prb(0.5)
+  HARD_BORDER = BORDER_BLEED || prb(0.8)
+
+  BORDER_PADDING = chance(
+    [5, rnd(150, 200)],
+    [75, rnd(30, 60)],
+    [20, rnd(20, 30)],
+  ) / SCALE
+
+  BORDER_THICKNESS = map(SCALE, 0.2, 1.2, 1.6, 2.8) + rnd(-.2, .2)
+  BORDER_DRIFT = chance(
+    [5, 0],
+    [3, rnd(3)/SCALE],
+    [1, min(180, rnd(3, BORDER_PADDING/2))/SCALE]
+  )
+  ROTATION = rnd(-0.0005, 0.0005)
+  X_OFF = rnd(-2, 2)/SCALE
+  Y_OFF = rnd(-2, 2)/SCALE
+
+  IS_MISPRINT = prb(0.015)
+
+  if (!HARD_BORDER && BORDER_PADDING*SCALE <= 30) {
+    BORDER_DRIFT = BORDER_PADDING - 5/SCALE
     HARD_BORDER = false
-    BORDER_BLEED = prb(0.05)
-    BORDER_THICKNESS = 0
-    BORDER_DRIFT = bFactor/SCALE
-    ROTATION = 0
+    BORDER_BLEED = false
+  }
 
-  } else if (prb(0.015)) {
+  if (IS_MISPRINT) {
     HARD_BORDER = true
-    BORDER_PADDING = rnd(15, 25)/SCALE
     BORDER_BLEED = true
     BORDER_THICKNESS = rnd(1.4, 3)
     BORDER_DRIFT = chance(
@@ -588,66 +690,51 @@ function setup() {
       [3, rnd(3)/SCALE],
       [1, rnd(3, BORDER_PADDING/2)/SCALE]
     )
-    ROTATION = rnd(-0.008, 0.008)
 
     const div = prb(0.333) ? 2 : 1
 
     X_OFF = rnd(-250, 250)/(div*SCALE)
     Y_OFF = rnd(-250, 250)/(div*SCALE)
     MISPRINT_ROTATION = rnd(-QUARTER_PI, QUARTER_PI)/(4*div)
-
-
-  } else {
-    HARD_BORDER = borderType === 2 || prb(0.85)
-
-    BORDER_PADDING =
-      prb(0.06) ? rnd(150, 200)/SCALE :
-      !HARD_BORDER ? rnd(25, 40)/SCALE :
-      rnd(15, 25)/SCALE
-    BORDER_BLEED = borderType === 2
-    BORDER_THICKNESS = rnd(1.4, 3)
-    BORDER_DRIFT = chance(
-      [5, 0],
-      [3, rnd(3)/SCALE],
-      [1, min(180, rnd(3, BORDER_PADDING/2))/SCALE]
-    )
-    ROTATION = rnd(-0.0005, 0.0005)
-    X_OFF = rnd(-2, 2)/SCALE
-    Y_OFF = rnd(-2, 2)/SCALE
   }
 
 
-  LAYERS = setLayers(layerN, baseRule, hueDiff, thresholdAdj, lightenDarks, forceGradients, maxGradient, grain, invertStreets)
+  LAYERS = setLayers(layerN, baseRule, hueDiff, lightenDarks, forceGradients, maxGradient, grain, invertStreets)
 
-  console.log({
+  console.log(JSON.stringify({
+    HASH: tokenData.hash,
     SCALE,
     COLOR_RULE,
     LAYER_N: layerN,
     BASE_RULE: baseRule,
     HUE_DIFF: hueDiff,
     FORCE_GRADIENTS: forceGradients,
-    GRAIN: grain,
     HARD_CURVES,
-    DASH_RATE,
+    DASH_RATE: DASH_RATE.toPrecision(2),
     STREET_TURBULENCE,
-    NOISE_DIVISOR,
+    NOISE_DIVISOR: (NOISE_DIVISOR*SCALE).toPrecision(4),
     DENSITY,
     TURBULENCE,
     IGNORE_STREET_CAP,
     KINKED_STREET_FACTOR,
     HARD_BORDER,
     BORDER_BLEED,
-    BORDER_DRIFT,
-    BORDER_THICKNESS,
-    BORDER_PADDING,
-    ROTATION,
+    BORDER_DRIFT: (BORDER_DRIFT*SCALE).toPrecision(4),
+    BORDER_THICKNESS: BORDER_THICKNESS.toPrecision(2),
+    BORDER_PADDING: (BORDER_PADDING*SCALE).toPrecision(4),
+    ROTATION: ROTATION.toPrecision(2),
     STRAIGHT_STREETS,
-    SECONDARY_ANGLE_ADJ,
+    SECONDARY_ANGLE_ADJ: SECONDARY_ANGLE_ADJ.toPrecision(2),
     X_OFF,
     Y_OFF,
     MISPRINT_ROTATION,
-    LAYERS
-  })
+    MAX_GRADIENT: maxGradient,
+    GRAIN: grain,
+    SMUDGE,
+    STAR_MAP,
+    LOW_INK,
+  }, null, 2))
+  console.log(LAYERS)
 }
 
 
@@ -677,7 +764,7 @@ function draw() {
 
     dotRect(X_OFF, Y_OFF, W-(BORDER_PADDING*space), H-(BORDER_PADDING*space), (x, y) => {
       const layer = BORDER_BLEED ? findActiveLayer(x, y, true) : LAYERS[0]
-      if (layer.hideStreets || hideStreetsOverride(layer)) return
+      if (layer.hideStreets || hideStreetsOverride(layer.ix, LAYERS.length)) return
       setC(x+X_OFF, y+Y_OFF, layer.colors.circle, layer.gradient)
       circle(x, y, nsrnd(x, y, BORDER_THICKNESS/SCALE, BORDER_THICKNESS*2.5/SCALE))
     })

@@ -61,17 +61,17 @@
 
 
 
-function setLayers(layerN, baseRule, hueDiff, thresholdAdj=1, lightenDarks, forceGradient, maxGradient, grain, invertStreets) {
+function setLayers(layerN, baseRule, hueDiff, lightenDarks, forceGradient, maxGradient, grain, invertStreets) {
   const thresholdDiff = 0.02
 
-  const avgElevation = findAvgElevation()
+  const { elevationAverage, elevationMin } = findAvgElevation()
 
   const r = rules(layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, invertStreets)
 
   const baseHue = rnd(360)
   const layers = [{
     ix: 0,
-    threshold: thresholdAdj * avgElevation,
+    threshold: layerN >= 30 ? elevationMin : elevationAverage,
     hideStreets: false,
     ...r[baseRule](baseHue, maxGradient/rnd(3, 15), 0, lightenDarks)
   }]
@@ -624,12 +624,12 @@ function invertStreetColor(_hue, sat, brt, c1) {
 
 
 
-function hideStreetsOverride(layer) {
+function hideStreetsOverride(layerIx, layerN) {
   return (
     SCALE >= 1
     && TURBULENCE
-    && layer.ix < LAYERS.length-1
-    && layer.ix > 0
+    && layerIx < layerN-1
+    && layerIx > 0
   )
 }
 
@@ -655,13 +655,23 @@ function findActiveLayer(x, y) {
 function findAvgElevation() {
   let elevationSum = 0
   let elevationIx = 0
+  let elevationMin = 1
+  let elevationMax = 0
   const step = 30/SCALE
   for (let x = L; x < R; x += step)
   for (let y = T; y < B; y += step) {
-    elevationSum += getElevation(x, y)
+    const elevation = getElevation(x, y)
+    elevationSum += elevation
+    if (elevation < elevationMin) elevationMin = elevation
+    if (elevation > elevationMax) elevationMax = elevation
     elevationIx++
   }
-  return elevationSum/elevationIx
+
+  return {
+    elevationAverage: elevationSum/elevationIx,
+    elevationMin,
+    elevationMax
+  }
 }
 
 function getElevation(x, y) {
