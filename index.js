@@ -1,5 +1,6 @@
 /*
 
+Maps of Nonexistant Places
 Zones
 Abstractions of Nothing
 Maps of Hyperreality
@@ -24,6 +25,7 @@ The Treachery of Cartography
 The Treachery of Maps
 Maps of Distress
 Maps of Nothing
+Maps of Nowhere
 Maps of a Decaying Territory
 Facsimiles of Maps
 Facsimiles
@@ -49,9 +51,11 @@ Mataphores
 Conflations
 Reifications
 Unconscionable Maps
-
 Maps of Something Unknown
-Maps of Nothing
+Deconstructed Maps
+Maps of Deconstruction
+The Deconstruction of Maps
+M.A.P.S.
 
 
 980/720
@@ -73,7 +77,13 @@ in a bit of a twist, the territory being represented here is itself a map of not
 and yet, in looking at a map it's almsot impossible to not let your mind project meaning onto it.
 
 
-
+in a similar way that FIM was about the deconstruction of money, this is about the deconstruction of maps.
+often we're given maps, and we assume that they're a reflection of reality
+this applies to not only literal maps, but all abstract representations of things
+it's too easy to reify the abstraction
+here, the misprints and splotches all serve to break the illusion that the map is an accurate reflection of reality.
+not only is it not accurately reflecting reality, but it's not even trying to reflect reality
+a street that goes off in a weird direction doesn't mean that a real street goes off in that direction. it doesn't even mean that that street exists
 
 
 
@@ -361,6 +371,13 @@ from output to output, with some having degraded substantially.
   - border should be thicher for more zoomed in maps
   - misprint is completely broken with padding refactor
   - rarity: no streets, a lot of layers, border
+
+
+2-32
+  - lower prob for 7 - 30. maybe even eliminate 30
+  - maybe keep probability for fatter pads
+  - maybe make lower density more likely -- or, at least something between avg and low density
+    - (but not for fat padding + zoomed in)
 */
 
 
@@ -465,7 +482,7 @@ function setup() {
     [36, 3],
     [34, rndint(4, 7)],
     [!HARD_CURVES ? 10 : 0, rndint(7, 10)],
-    [!HARD_CURVES ? 5 : 0, rndint(10, 15)],
+    [!HARD_CURVES ? 4 : 0, rndint(10, 15)],
     [!HARD_CURVES ? 1 : 0, 30],
   )
 
@@ -658,7 +675,7 @@ function setup() {
   HARD_BORDER = BORDER_BLEED || prb(0.8)
 
   BORDER_PADDING = chance(
-    [5, rnd(150, 200)],
+    [5, rnd(175, 200)],
     [75, rnd(30, 60)],
     [20, rnd(20, 30)],
   ) / SCALE
@@ -667,7 +684,7 @@ function setup() {
   BORDER_DRIFT = chance(
     [5, 0],
     [3, rnd(3)/SCALE],
-    [1, min(180, rnd(3, BORDER_PADDING/2))/SCALE]
+    [1, rnd(3, BORDER_PADDING/2)/SCALE]
   )
   ROTATION = rnd(-0.0005, 0.0005)
   X_OFF = rnd(-2, 2)/SCALE
@@ -697,6 +714,8 @@ function setup() {
     Y_OFF = rnd(-250, 250)/(div*SCALE)
     MISPRINT_ROTATION = rnd(-QUARTER_PI, QUARTER_PI)/(4*div)
   }
+
+  BORDER_DRIFT = min(180/SCALE, BORDER_DRIFT)
 
 
   LAYERS = setLayers(layerN, baseRule, hueDiff, lightenDarks, forceGradients, maxGradient, grain, invertStreets)

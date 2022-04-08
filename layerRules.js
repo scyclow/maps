@@ -176,8 +176,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
   return {
     blackAndWhite: (h, _, ix, __) => {
       let key
-      if (COLOR_RULE === 1) key = 'contrast'
-      else if ([2, 4].includes(COLOR_RULE)) key = 'light'
+      if ([2, 4].includes(COLOR_RULE)) key = 'light'
       else if ([3].includes(COLOR_RULE)) key = 'dark'
       else if (COLOR_RULE === 4) key = 'color'
       else key = 'all'

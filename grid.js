@@ -89,9 +89,7 @@ function drawStreetGrid(startX=0, startY=0) {
 }
 
 function drawCoords(coords, dotFn, xOff=0, yOff=0) {
-  const outsideBorders = BORDER_PADDING
-    ? createBorderFn(BORDER_PADDING)
-    : createBorderFn(-20/SCALE)
+  const outsideBorders = createBorderFn(BORDER_PADDING)
 
   const dashLine = prb(DASH_RATE)
   coords.forEach((coord, i) => {
@@ -282,7 +280,7 @@ function generateStreetCoords(startX, startY, startAngle, params={}) {
   const driftAmt = params.driftAmt || HALF_PI/16
   const stopAtIntersections = params.stopAtIntersections || []
   const length = params.maxLen || 150
-  const borderFn = createBorderFn(-150/SCALE)
+  const borderFn = createBorderFn(-180/SCALE)
 
   let x = startX
   let y = startY
@@ -299,7 +297,9 @@ function generateStreetCoords(startX, startY, startAngle, params={}) {
       angle + driftAmt,
     )
     const a = KINKED_STREET_FACTOR && findActiveLayer(x, y).ix > 0 ? KINKED_STREET_FACTOR : 0
-    const [nextX, nextY] = getXYRotation(angle+a, STREET_BLOCK_HEIGHT, x, y)
+    const _next = getXYRotation(angle+a, STREET_BLOCK_HEIGHT, x, y)
+    const nextX = _next[0]
+    const nextY = _next[1]
 
     if (i) {
       const c1 = { x, y }

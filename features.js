@@ -135,7 +135,7 @@ function hideStreetsOverride(layer, layerN) {
     [36, 3],
     [34, rndint(4, 7)],
     [!HARD_CURVES ? 10 : 0, rndint(7, 10)],
-    [!HARD_CURVES ? 5 : 0, rndint(10, 15)],
+    [!HARD_CURVES ? 4 : 0, rndint(10, 15)],
     [!HARD_CURVES ? 1 : 0, 30],
   )
 
@@ -260,7 +260,7 @@ function hideStreetsOverride(layer, layerN) {
   HARD_BORDER = BORDER_BLEED || prb(0.8)
 
   BORDER_PADDING = chance(
-    [5, rnd(150, 200)],
+    [5, rnd(175, 200)],
     [75, rnd(30, 60)],
     [20, rnd(20, 30)],
   ) / SCALE
@@ -269,7 +269,7 @@ function hideStreetsOverride(layer, layerN) {
   BORDER_DRIFT = chance(
     [5, 0],
     [3, rnd(3)/SCALE],
-    [1, min(180, rnd(3, BORDER_PADDING/2))/SCALE]
+    [1, rnd(3, BORDER_PADDING/2)/SCALE]
   )
   ROTATION = rnd(-0.0005, 0.0005)
   X_OFF = rnd(-2, 2)/SCALE
@@ -300,6 +300,7 @@ function hideStreetsOverride(layer, layerN) {
     MISPRINT_ROTATION = rnd(-QUARTER_PI, QUARTER_PI)/(4*div)
   }
 
+  BORDER_DRIFT = min(180/SCALE, BORDER_DRIFT)
 
 
 
