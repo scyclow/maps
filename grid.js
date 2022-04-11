@@ -33,7 +33,8 @@ function drawStreetGrid(startX=0, startY=0) {
 
     if (STREET_TURBULENCE) {
       times(LOW_INK ? 2 : 5, () => {
-        circle(_x+rnd(-10, 10), _y+rnd(-10, 10), rnd(1*MIN_ST_W, 1*MAX_ST_W))
+        const trb = nsrnd(_x, _y, 0, 20)
+        circle(_x+rnd(-trb, trb), _y+rnd(-trb, trb), rnd(1*MIN_ST_W, 1*MAX_ST_W))
       })
     } else {
       circle(_x, _y, nsrnd(_x, _y, MIN_ST_W, MAX_ST_W) + streetD)
@@ -191,7 +192,7 @@ function generateAllCoords() {
       if (lastIx[direction] && lastIx[direction] + 3 > i) return
 
       lastIx[direction] = i
-      const angleAdj = (direction === -1 ? HALF_PI : PI+HALF_PI) + rnd(-SECONDARY_ANGLE_ADJ, SECONDARY_ANGLE_ADJ)
+      const angleAdj = (direction === -1 ? HALF_PI : PI+HALF_PI) //+ rnd(-SECONDARY_ANGLE_ADJ, SECONDARY_ANGLE_ADJ)
       return generateStreetCoords(coord.x, coord.y, coord.angle + angleAdj, {
         direction,
         branch,

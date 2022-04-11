@@ -443,6 +443,16 @@ from output to output, with some having degraded substantially.
   - need to thicken ones that are zoomed out less
   - maybe don't randomly choose hue -- probabilistically choose hue based on layerN and rule
 
+2-34
+  - maybe nix the diaganal streets
+
+2-35
+  - darken the colors ("darker lighting") when dark bg
+  - maybe change base rule back to:
+        [5, 'whiteAndBlack'],
+        [5, 'blackAndWhite'],
+        [SCALE <= 0.3 ? 0 : 5, 'neon'],
+
 */
 
 
@@ -513,10 +523,10 @@ function setup() {
       : 0
 
 
-  SECONDARY_ANGLE_ADJ = chance(
-    [1, 0],
-    [STRAIGHT_STREETS ? 0 : 0.15, HALF_PI/3],
-  )
+  // SECONDARY_ANGLE_ADJ = chance(
+  //   [1, 0],
+  //   [STRAIGHT_STREETS ? 0 : 0.15, HALF_PI/3],
+  // )
 
   NOISE_DIVISOR = rnd(150, 750) / SCALE
 
@@ -526,12 +536,12 @@ function setup() {
     [0.02, 2],
   )
 
-  DASH_RATE = prb(0.1) ? rnd(0.05, 0.2) : 0
+  DASH_RATE = prb(0.125) ? rnd(0.05, 0.2) : 0
 
   COLOR_RULE = chance(
     [34, 0], // anything goes
     [35, 1], // contrast
-    // [5, 2], // all light
+    [5, 2], // all light
     [7, 3], // all dark
     [22, 4], // all color
     [hideStreetsOverride(1, 50) ? 0 : 2, 5], // topographic
@@ -554,27 +564,27 @@ function setup() {
 
   let baseRule = chance(
     [layerN <= 4 ? 20 : 0, 'paper'],
-    [layerN <= 4 ? 20 : 0, 'burnt'],
     [layerN <= 4 ? 20 : 0, 'faded'],
+    [layerN <= 4 ? 15 : 0, 'burnt'],
 
     [layerN <= 4 ? 10 : 5, 'bright'],
-    [5, 'whiteAndBlack'],
-    [5, 'blackAndWhite'],
-    [SCALE <= 0.3 ? 0 : 5, 'neon'],
+    [6, 'whiteAndBlack'],
+    [4, 'blackAndWhite'],
+    [SCALE <= 0.3 ? 0 : 4, 'neon'],
   )
 
   let hueDiff = chance(
-    [1, 0],
+    [3, 0],
     [2, 20],
     [1, 100],
-    [3, 120],
+    [2, 120],
     [1, 150],
-    [2, 180],
+    [3, 180],
   ) * posOrNeg()
 
 
-  let forceGradients = rnd() < 0.025
-  const maxGradient = rnd() < 0.025 ? rnd(720, 3000) : 200
+  let forceGradients = prb(0.02)
+  const maxGradient = prb(0.025) ? rnd(720, 3000) : 200
   let invertStreets = false
   let lightenDarks = false
 
@@ -583,15 +593,7 @@ function setup() {
     [1, 'preset'],
   )
 
-  if (COLOR_RULE === 1) {
-    baseRule = chance(
-      [10, 'whiteAndBlack'],
-      [10, 'bright'],
-      [5, 'blackAndWhite'],
-      [SCALE <= 0.3 ? 0 : 5, 'neon'],
-    )
-  }
-  else if (COLOR_RULE === 3) {
+  if (COLOR_RULE === 3) {
     baseRule = chance(
       [20, 'burnt'],
       [5, 'blackAndWhite'],
@@ -632,8 +634,8 @@ function setup() {
     if (rnd() < 0.05) {
       forceGradients = true
       invertStreets = true
-    } else {
-      invertStreets = 0.5
+    } else if (prb(0.5) && layerN <= 4) {
+      invertStreets = true
     }
 
   } else if (5 === COLOR_RULE) {
@@ -820,7 +822,7 @@ function setup() {
     BORDER_PADDING: (BORDER_PADDING*SCALE).toPrecision(4),
     ROTATION: ROTATION.toPrecision(2),
     STRAIGHT_STREETS,
-    SECONDARY_ANGLE_ADJ: SECONDARY_ANGLE_ADJ.toPrecision(2),
+    // SECONDARY_ANGLE_ADJ: SECONDARY_ANGLE_ADJ.toPrecision(2),
     X_OFF,
     Y_OFF,
     MISPRINT_ROTATION,

@@ -68,10 +68,7 @@ function setLayers(layerN, baseRule, hueDiff, lightenDarks, forceGradient, maxGr
 
   const r = rules(layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, invertStreets)
 
-  const baseHue = chance(
-    [250, rnd(0, 250)],
-    [55, rnd(250, 360)],
-  )
+  const baseHue = rnd(360)
   const layers = [{
     ix: 0,
     threshold: layerN >= 30 ? elevationMin : elevationAverage,
@@ -99,7 +96,7 @@ function setLayers(layerN, baseRule, hueDiff, lightenDarks, forceGradient, maxGr
   }
 
   const newLayer = (previousLayer, threshold, ix) => {
-    const hideStreets = prb(0.2) && !(X_OFF || Y_OFF)
+    const hideStreets = prb(0.2) && !MISPRINT_ROTATION
     const mxGrd = ix === layerN-1 ? maxGradient/rnd(3, 8) : maxGradient
 
     let nextLayer
@@ -170,8 +167,8 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
 
         // },
         hue: rnd(mx/4, mx) * posOrNeg(),
-        sat: 3,
-        brt: 2,
+        sat: 2,
+        brt: 1,
       }
       : null
   }
@@ -644,6 +641,7 @@ function findActiveLayer(x, y) {
 function getHuePresets(baseHue, hueDiff) {
   switch (abs(hueDiff)) {
     case 0: return [baseHue]
+    case 10: return [baseHue, baseHue+10, baseHue+20, baseHue+30, baseHue+40, baseHue+50, baseHue+60]
     case 20: return [baseHue, baseHue + 20, baseHue - 20]
     case 100: return [baseHue, baseHue + 120, baseHue + 180]
     case 120: return [baseHue, baseHue + 120, baseHue - 120]
