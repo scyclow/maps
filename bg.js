@@ -13,6 +13,7 @@ function drawBackground(t, b, l, r) {
 
   const strokeParams = LAYERS.map((layer, ix) => {
     const colorOnDark = layer.isColor && baseLayer.isDark
+    const lightOnDark = layer.isLight && baseLayer.isDark
     const darkOnColor = baseLayer.isColor && layer.isDark
     const colorMismatch = colorOnDark || darkOnColor
 
@@ -28,6 +29,7 @@ function drawBackground(t, b, l, r) {
         largeLayer && darkOnLight ? max(1, 1.5/SCALE) :
         colorMismatch ? max(1, 1/SCALE) :
         darkOnLight ? max(1, 0.7/SCALE) :
+        lightOnDark ? max(1, 0.7/SCALE) :
         1
       )
     }

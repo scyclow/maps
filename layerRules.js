@@ -68,7 +68,10 @@ function setLayers(layerN, baseRule, hueDiff, lightenDarks, forceGradient, maxGr
 
   const r = rules(layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, invertStreets)
 
-  const baseHue = rnd(360)
+  const baseHue = chance(
+    [250, rnd(0, 250)],
+    [55, rnd(250, 360)],
+  )
   const layers = [{
     ix: 0,
     threshold: layerN >= 30 ? elevationMin : elevationAverage,
@@ -85,6 +88,15 @@ function setLayers(layerN, baseRule, hueDiff, lightenDarks, forceGradient, maxGr
     COLOR_RULE === 5 && baseIsLight ? 'bright' :
     false
 
+
+  let hueIx = 0
+  const huePresets = getHuePresets(baseHue, hueDiff)
+  const nextHue = (previousHue) => {
+    if (HUE_RULE === 'path') return previousHue + hueDiff
+
+    return huePresets[hueIx++ % huePresets.length]
+
+  }
 
   const newLayer = (previousLayer, threshold, ix) => {
     const hideStreets = prb(0.2) && !(X_OFF || Y_OFF)
@@ -107,9 +119,9 @@ function setLayers(layerN, baseRule, hueDiff, lightenDarks, forceGradient, maxGr
 
     } else {
       const nextRule = chance(...previousLayer.neighbors)
-      const hue = nextRule === 'neon' || nextRule === 'bright'
-        ? previousLayer.baseHue + hueDiff
-        : previousLayer.baseHue
+      const hue = nextRule === 'blackAndWhite' || nextRule === 'whiteAndBlack'
+        ? previousLayer.baseHue
+        : nextHue(previousLayer.baseHue)
       nextLayer = r[nextRule](hue, mxGrd, ix, previousLayer.isDark)
     }
 
@@ -391,6 +403,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
           circle: c2,
         },
         neighbors,
+        invertStreets: invertStreets && ix,
         gradient: getGradient(forceGradient, gradientMax),
         isDark: false,
         isColor: true,
@@ -598,25 +611,10 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
 }
 
 
-function adjColor(hue, sat, brt, b) {
-  hue = hfix(hue)
-
-  let amt = 0
-  if (hue >= 90 && hue <= 150) {
-    amt = 1 - abs(120 - hue) / 30
-
-  } else if (hue >= 270 && hue <= 330) {
-    amt = 1 - abs(300 - hue) / 30
-  }
-
-  sat = map(amt, 0, 1, sat, sat*.666)
-
-  return color(hue, sat, brt)
-}
 
 function invertStreetColor(_hue, sat, brt, c1) {
   const h = hfix(_hue)
-  let c = 0.7
+  let c = isBrightColor(hue) ? 0.9 : 0.7
   return setContrastC2(c1, color(h, sat, brt), c)
 }
 
@@ -643,6 +641,16 @@ function findActiveLayer(x, y) {
 }
 
 
+function getHuePresets(baseHue, hueDiff) {
+  switch (abs(hueDiff)) {
+    case 0: return [baseHue]
+    case 20: return [baseHue, baseHue + 20, baseHue - 20]
+    case 100: return [baseHue, baseHue + 120, baseHue + 180]
+    case 120: return [baseHue, baseHue + 120, baseHue - 120]
+    case 150: return [baseHue, baseHue + 150, baseHue + 210]
+    case 180: return [baseHue, baseHue + 180]
+  }
+}
 
 
 

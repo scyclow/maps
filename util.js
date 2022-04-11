@@ -6,7 +6,7 @@ const setC = (x, y, c, g) => {
       : dist(x, y, g.focalPoint.x, g.focalPoint.y)
         / dist(L, B, R, T)
 
-    const _c = color(
+    const _c = adjColor(
       hfix(hue(c) + map(d, 0, 1, 0, g.hue)),
       saturation(c) + map(d, 0, 1, 0, g.sat),
       brightness(c) + map(d, 0, 1, 0, g.brt),
@@ -19,6 +19,21 @@ const setC = (x, y, c, g) => {
     stroke(c)
     fill(c)
   }
+}
+
+const isBrightColor = h => (h >= 90 && h <= 150) || (h >= 270 && h <= 330)
+
+function adjColor(hue, sat, brt, b) {
+  hue = hfix(hue)
+
+  let amt = 0
+  if (isBrightColor(hue)) {
+    amt = 1 - abs(120 - (hue%180)) / 30
+  }
+
+  sat = map(amt, 0, 1, sat, sat*.65)
+
+  return color(hue, sat, brt)
 }
 
 const noop = () => {}

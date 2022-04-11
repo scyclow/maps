@@ -56,9 +56,46 @@ Deconstructed Maps
 Maps of Deconstruction
 The Deconstruction of Maps
 M.A.P.S.
+Generated Maps
+
 
 
 980/720
+
+
+
+
+NFTs don't have to be things that you own
+
+
+
+Generated Map
+  LEGAL DISCLAIMER:
+    - These maps were generated according to a set of rules and conditions.
+    - These are NOT REAL MAPS
+    - The Maps should not be considered real documents that convey information of any sort, and should not be relied upon as a reflection of reality
+    - The Artist shall not be held responsible for
+    - The Artist does not imply that these maps represent anyhting whatsoever.
+    - All markings should not be interpreted as symbols of any kind. Their purpose is purely aesthetit in nature.
+    - This Map is licensef under CC-NC 4.0, and ownership of The Map does not give anyone any sort of rights over anything that the owner believes The Map represents
+    - The Map does not physically exist. Despite artistic choices made to give it the look and feel of a paper map, it is, in fact a digital representation fo a paper map.
+
+  These maps
+
+features:
+  colors used: [#00F022, #FB55232, ...]
+  noise seed: 103920234320
+  curls: false
+  layer estimate: 4
+  borders: true
+  padding: 120%
+  printing quality: medium
+
+
+
+
+
+
 
 
 
@@ -378,6 +415,34 @@ from output to output, with some having degraded substantially.
   - maybe keep probability for fatter pads
   - maybe make lower density more likely -- or, at least something between avg and low density
     - (but not for fat padding + zoomed in)
+
+  - maybe keep color path for rule 4, but otherwise pick a hue palatte at beginning, shuffle it, and cycle through it
+
+
+2-33
+  - make turbulence a spectrum. maybe street turbulence as well
+  - make more 1-layers, paper or w/b.
+  - should maybe make paper more w/b-like
+  - density should be more of a spectrum
+  - more low density, more 1-layer w/b; the empty look is pretty nice
+  - need more instances of kinked only dark, street turb
+  - make street turbulence width noise based
+  - other street types should have turbulence
+  - street turbulence -> air brush
+  - airbrush prob for each street
+  - street caps shouldn't be true circles. either draw with vertex or draw a bunch with some turbulence
+  - add inverted color scheme
+  - color rule where bright/faded = adjColor(h, 65, 65)/adjColor(h, 55, 65)
+    - maybe apply more frequently to middle layers
+    - maybe dont' apply to dark color rule
+    - need to tweak on only color color rule
+    - maybe middle layer is one lighting rule, and top/bottom  is the other lighting rule
+      - maybe this is with higher N
+      - all of them same lighting level looks better on lower N
+      - maybe keep middle and top/bottom layers same level of luminance
+  - need to thicken ones that are zoomed out less
+  - maybe don't randomly choose hue -- probabilistically choose hue based on layerN and rule
+
 */
 
 
@@ -393,7 +458,7 @@ function keyPressed() {
 let NOISE_DIVISOR, TURBULENCE, IGNORE_STREET_CAP, STREET_TURBULENCE, HARD_CURVES, DENSITY,
     COLOR_RULE, STRAIGHT_STREETS, SECONDARY_ANGLE_ADJ, DOUBLE_STREETS, KINKED_STREET_FACTOR,
     BORDER_PADDING, BORDER_BLEED, BORDER_THICKNESS, HARD_BORDER, ROTATION, BORDER_DRIFT, DASH_RATE,
-    X_OFF, Y_OFF, MISPRINT_ROTATION, STAR_MAP, LOW_INK, SMUDGE
+    X_OFF, Y_OFF, MISPRINT_ROTATION, STAR_MAP, LOW_INK, SMUDGE, HUE_RULE
 let LAYERS = []
 
 const NOISE_OFFSET = 100000
@@ -513,6 +578,11 @@ function setup() {
   let invertStreets = false
   let lightenDarks = false
 
+  HUE_RULE = chance(
+    [1, 'path'],
+    [1, 'preset'],
+  )
+
   if (COLOR_RULE === 1) {
     baseRule = chance(
       [10, 'whiteAndBlack'],
@@ -585,6 +655,13 @@ function setup() {
       [1, 120],
       [1, 180],
     ) * posOrNeg()
+  }
+
+  if (baseRule === 'blackAndWhite' || baseRule === 'neon' && layerN > 2 && COLOR_RULE !== 3) {
+    hueDiff = chance(
+        [1, 0],
+        [2, 180],
+      ) * posOrNeg()
   }
 
   if (layerN === 2 && ['neon', 'burnt'].includes(baseRule)) {
@@ -752,6 +829,7 @@ function setup() {
     SMUDGE,
     STAR_MAP,
     LOW_INK,
+    HUE_RULE
   }, null, 2))
   console.log(LAYERS)
 }
@@ -781,12 +859,22 @@ function draw() {
         ? rnd(1.7, 2.1)
         : rnd(1.98, 2.02)
 
-    dotRect(X_OFF, Y_OFF, W-(BORDER_PADDING*space), H-(BORDER_PADDING*space), (x, y) => {
-      const layer = BORDER_BLEED ? findActiveLayer(x, y, true) : LAYERS[0]
-      if (layer.hideStreets || hideStreetsOverride(layer.ix, LAYERS.length)) return
-      setC(x+X_OFF, y+Y_OFF, layer.colors.circle, layer.gradient)
-      circle(x, y, nsrnd(x, y, BORDER_THICKNESS/SCALE, BORDER_THICKNESS*2.5/SCALE))
-    })
+    let borderDotsDisplayed = 0
+    const drawBorder = (ignoreHide) => {
+      console.log(ignoreHide)
+      dotRect(X_OFF, Y_OFF, W-(BORDER_PADDING*space), H-(BORDER_PADDING*space), (x, y) => {
+        const layer = BORDER_BLEED ? findActiveLayer(x, y, true) : LAYERS[0]
+        if (!ignoreHide && (layer.hideStreets || hideStreetsOverride(layer.ix, LAYERS.length))) return
+        borderDotsDisplayed++
+        setC(x+X_OFF, y+Y_OFF, layer.colors.circle, layer.gradient)
+        circle(x, y, nsrnd(x, y, BORDER_THICKNESS/SCALE, BORDER_THICKNESS*2.5/SCALE))
+      })
+    }
+
+    drawBorder()
+    // console.log(borderDisplayed)
+    if (borderDotsDisplayed < 30) drawBorder(true)
+
   }
 
   // stroke(LAYERS[0])
