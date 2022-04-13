@@ -91,7 +91,7 @@ function hideStreetsOverride(layer, layerN) {
   IGNORE_STREET_CAP = prb(0.1)
   HARD_CURVES = prb(0.05)
   STRAIGHT_STREETS = prb(scaleModifier(0.05, 0.1))
-  STAR_MAP = prb(0.01)
+  STAR_MAP = prb(0.02)
   LOW_INK = prb(0.01)
   SMUDGE = prb(0.01) ? rnd(30, 100) : 0
 
@@ -109,7 +109,7 @@ function hideStreetsOverride(layer, layerN) {
   NOISE_DIVISOR = rnd(150, 750) / SCALE
 
   DENSITY = chance(
-    [SCALE >= 0.8 ? 0.0025 : 0.01, 0],
+    [SCALE >= 0.8 ? 0.0025 : 0.015, 0],
     [0.97, 1],
     [0.02, 2],
   )

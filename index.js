@@ -57,6 +57,8 @@ Maps of Deconstruction
 The Deconstruction of Maps
 M.A.P.S.
 Generated Maps
+Machine Generated Maps
+Maps of Meaninglessness
 
 
 
@@ -71,14 +73,41 @@ NFTs don't have to be things that you own
 
 Generated Map
   LEGAL DISCLAIMER:
-    - These maps were generated according to a set of rules and conditions.
+    - These maps were generated according to a pre defined set of rules, combined with a pseudo entropic seed defined by the blockchain, and are therefore not meant to be depictions of real-life locations or processes.
     - These are NOT REAL MAPS
     - The Maps should not be considered real documents that convey information of any sort, and should not be relied upon as a reflection of reality
-    - The Artist shall not be held responsible for
+    - The Artist shall not be held responsible for any false interpretations of reality that are based on The Maps.
+    - All maps are sold AS IS, and refunds will not be given for any misprints, miscolorations, inacuracies, or inprecisions
     - The Artist does not imply that these maps represent anyhting whatsoever.
-    - All markings should not be interpreted as symbols of any kind. Their purpose is purely aesthetit in nature.
-    - This Map is licensef under CC-NC 4.0, and ownership of The Map does not give anyone any sort of rights over anything that the owner believes The Map represents
-    - The Map does not physically exist. Despite artistic choices made to give it the look and feel of a paper map, it is, in fact a digital representation fo a paper map.
+
+    - All markings should not be interpreted as symbols of any kind. Nothing appearing on The Map is meant to depict geographic, topologic, meteorogic, economic, sociologic, or political phenomena.
+    - The Map does not physically exist, and all textures, imperfections, and marks of damage are digital simulations of paper.
+
+    - This Map does not physically exist, and ownership of the token does not imply ownership over . All textures, imperfections, and
+
+    Despite artistic choices made to give it the look and feel of a paper map, it is, in fact a digital representation fo a paper map.
+
+    Their purpose is purely aesthetic in nature.
+    - This Map is licensed under CC-NC 4.0, and ownership of The Map does not give anyone any sort of rights over anything that the owner believes The Map represents
+    - is NOT to be construed or used as a "legal description".
+
+
+    https://unece.org/map-disclaimer-0
+    This map is provided without any warranty of any kind whatsoever, either express or implied.
+
+
+    http://gis.clark.wa.gov/custom52/mapsonline/includes/legal.html
+    These maps are presented for public use as-is, with no guarantee of accuracy or completeness. The geographic information contained on this site is not to be construed or used as a "legal description".
+    Clark County assumes no liability for either any errors, omissions, or inaccuracies in the information provided regardless of their cause, or for any decision made, action taken, or action not taken by the user in reliance upon any maps or information provided. These maps are for information purposes only and may not represent actual conditions.
+
+
+
+    https://www.mass.gov/service-details/disclaimers-for-maps-and-data
+    "
+      Map for Reference Only
+      NOT A LEGAL DOCUMENT
+    "
+    " The Town of Concord makes no warranty, representation or guaranty as to the content, sequence, accuracy, timeliness or completeness of any of the database information provided herein. The reader should not rely on the data provided herein for any reason. Map information is believed to be accurate but accuracy is not guaranteed, and the information contained in WebGIS is NOT to be construed or used as a "legal description". "
 
   These maps
 
@@ -513,7 +542,7 @@ function setup() {
   IGNORE_STREET_CAP = prb(0.1)
   HARD_CURVES = prb(0.05)
   STRAIGHT_STREETS = prb(scaleModifier(0.05, 0.1))
-  STAR_MAP = prb(0.01)
+  STAR_MAP = prb(0.02)
   LOW_INK = prb(0.01)
   SMUDGE = prb(0.01) ? rnd(30, 100) : 0
 
@@ -531,7 +560,7 @@ function setup() {
   NOISE_DIVISOR = rnd(150, 750) / SCALE
 
   DENSITY = chance(
-    [SCALE >= 0.8 ? 0.0025 : 0.01, 0],
+    [SCALE >= 0.8 ? 0.0025 : 0.015, 0],
     [0.97, 1],
     [0.02, 2],
   )
@@ -874,8 +903,7 @@ function draw() {
     }
 
     drawBorder()
-    // console.log(borderDisplayed)
-    if (borderDotsDisplayed < 30) drawBorder(true)
+    if (borderDotsDisplayed < 100) drawBorder(true)
 
   }
 

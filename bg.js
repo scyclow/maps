@@ -78,7 +78,7 @@ function drawBackgroundStroke(x, y, layer, strokeSize, strokeParams) {
     adjColor(
       hfix(hue(layer.colors.bg) + hAdj + rnd(-hGrain, hGrain)),
       saturation(layer.colors.bg) + sAdj + rnd(-sGrain, sGrain),
-      brightness(layer.colors.bg) + bAdj + rnd(-10 - bGrain, 0) ,
+      brightness(layer.colors.bg) + bAdj + rnd(-10 - bGrain, 0),
     )
   )
   const angle = noise(x+NOISE_OFFSET, y+NOISE_OFFSET)
