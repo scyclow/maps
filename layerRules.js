@@ -192,8 +192,8 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
 
       const neighbors = {
         contrast: [
-          [7, 'whiteAndBlack'],
-          [3, 'neon']
+          [1, 'whiteAndBlack'],
+          [1, 'bright']
         ],
         light: [
           [8, 'whiteAndBlack'],
@@ -248,9 +248,8 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
 
       const neighbors = {
         contrast: [
-          [7, 'bright'],
-          [5, 'blackAndWhite'],
-          [5, 'neon']
+          [layerN > 3 ? 1 : 0, 'bright'],
+          [3, 'blackAndWhite'],
         ],
         dark: [
           [5, 'blackAndWhite'],
@@ -260,7 +259,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
           [1, 'bright']
         ],
         all: [
-          [5, 'blackAndWhite'],
+          [6, 'blackAndWhite'],
           [5, 'neon'],
           [5, 'bright']
         ],
@@ -305,10 +304,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
 
       const neighbors = {
         contrast: [
-          [6, 'bright'],
-          [5, 'blackAndWhite'],
-          [2, 'whiteAndBlack'],
-          [2, 'neon']
+          [1, 'bright'],
         ],
         dark: [
           [2, 'blackAndWhite'],
@@ -322,10 +318,10 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
           [1, 'bright']
         ],
         all: [
-          [4, 'blackAndWhite'],
-          [4, 'whiteAndBlack'],
+          [4, 'bright'],
+          [5, 'blackAndWhite'],
+          [3, 'whiteAndBlack'],
           [2, 'neon'],
-          [2, 'bright']
         ],
       }[key]
 
@@ -365,9 +361,9 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
 
       const neighbors = {
         contrast: [
-          [11, 'blackAndWhite'],
-          [4, 'whiteAndBlack'],
-          [4, 'neon'],
+          [3, 'blackAndWhite'],
+          [layerN > 3 ? 1 : 0, 'whiteAndBlack'],
+          [3, 'neon'],
         ],
         dark: [
           [2, 'blackAndWhite'],
@@ -380,7 +376,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
           [1, 'bright'],
         ],
         all: [
-          [2, 'blackAndWhite'],
+          [4, 'blackAndWhite'],
           [2, 'whiteAndBlack'],
           [1, 'neon'],
         ],
@@ -416,18 +412,13 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
       const c4 = invertStreetColor(h + hueDiff - 20, 40, 35, c1)
 
       let key
-      if (COLOR_RULE === 1) key = 'contrast'
-      else if (COLOR_RULE === 3) key = 'dark'
+      if (COLOR_RULE === 3) key = 'dark'
       else if ([2].includes(COLOR_RULE)) key = 'light'
       else if ([4].includes(COLOR_RULE)) key = 'color'
       else key = 'all'
 
       const neighbors = {
-        contrast: [
-          [7, 'bright'],
-          [5, 'blackAndWhite'],
-          [5, 'neon']
-        ],
+
         dark: [
           [1, 'blackAndWhite'],
           [layerN > 2 ? 1 : 0, 'neon'],
@@ -443,9 +434,9 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
           [1, 'faded'],
         ],
         all: [
-          [1, 'blackAndWhite'],
-          [layerN > 2 ? 1 : 0, 'neon'],
-          [1, 'burnt'],
+          [6, 'blackAndWhite'],
+          [layerN > 2 ? 6 : 0, 'neon'],
+          [7, 'burnt'],
           [1, 'whiteAndBlack'],
           [1, 'bright'],
           [2, 'faded'],
@@ -481,18 +472,12 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
       const c4 = invertStreetColor(h+hueDiff-20, 85, 30, c1)
 
       let key
-      if (COLOR_RULE === 1) key = 'contrast'
-      else if (COLOR_RULE === 3) key = 'dark'
+      if (COLOR_RULE === 3) key = 'dark'
       else if ([2].includes(COLOR_RULE)) key = 'light'
       else if ([4].includes(COLOR_RULE)) key = 'color'
       else key = 'all'
 
       const neighbors = {
-        contrast: [
-          [11, 'blackAndWhite'],
-          [4, 'whiteAndBlack'],
-          [4, 'neon'],
-        ],
         dark: [
           [1, 'blackAndWhite'],
           [1, 'neon'],
@@ -509,9 +494,9 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
         all: [
           [2, 'burnt'],
           [2, 'paper'],
-          [1, 'blackAndWhite'],
-          [1, 'neon'],
-          [1, 'whiteAndBlack'],
+          [12, 'blackAndWhite'],
+          [5, 'neon'],
+          [5, 'whiteAndBlack'],
           [1, 'bright'],
         ],
       }[key]
@@ -549,19 +534,12 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
 
       let key
       if (layerN === 2) key = 'color'
-      if (COLOR_RULE === 1) key = 'contrast'
       else if (COLOR_RULE === 2) key = 'light'
       else if ([3].includes(COLOR_RULE)) key = 'dark'
       else if (COLOR_RULE === 4) key = 'color'
       else key = 'all'
 
       const neighbors = {
-        contrast: [
-          [6, 'bright'],
-          [5, 'blackAndWhite'],
-          [2, 'whiteAndBlack'],
-          [2, 'neon']
-        ],
         dark: [
           [3, 'blackAndWhite'],
           [2, 'neon'],
@@ -576,11 +554,11 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
           [2, 'faded'],
         ],
         all: [
-          [4, 'whiteAndBlack'],
+          [6, 'whiteAndBlack'],
           [4, 'faded'],
-          [3, 'blackAndWhite'],
-          [2, 'neon'],
-          [1, 'bright'],
+          [8, 'blackAndWhite'],
+          [4, 'neon'],
+          [7, 'bright'],
         ],
       }[key]
 

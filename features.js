@@ -85,7 +85,6 @@ function hideStreetsOverride(layer, layerN) {
 
   SCALE = rnd(0.2, 1.2)
 
-
   TURBULENCE = prb(0.15)
   STREET_TURBULENCE = prb(0.1)
   IGNORE_STREET_CAP = prb(0.1)
@@ -117,11 +116,11 @@ function hideStreetsOverride(layer, layerN) {
   DASH_RATE = prb(0.125) ? rnd(0.05, 0.2) : 0
 
   COLOR_RULE = chance(
-    [34, 0], // anything goes
-    [35, 1], // contrast
+    [40, 0], // anything goes
+    [15, 1], // contrast
     [5, 2], // all light
-    [7, 3], // all dark
-    [22, 4], // all color
+    [11, 3], // all dark
+    [27, 4], // all color
     [hideStreetsOverride(1, 50) ? 0 : 2, 5], // topographic
   )
 
@@ -171,7 +170,21 @@ function hideStreetsOverride(layer, layerN) {
     [1, 'preset'],
   )
 
-  if (COLOR_RULE === 3) {
+  if (COLOR_RULE === 1) {
+    hueDiff = 0
+    layerN = chance(
+      [6, 3],
+      [1, 4],
+      [1, 5],
+    )
+
+    baseRule = chance(
+      [7, 'bright'],
+      [3, 'whiteAndBlack'],
+      [5, 'blackAndWhite'],
+      [5, 'neon'],
+    )
+  } else if (COLOR_RULE === 3) {
     baseRule = chance(
       [20, 'burnt'],
       [5, 'blackAndWhite'],
@@ -261,73 +274,6 @@ function hideStreetsOverride(layer, layerN) {
   Y_OFF = 0
   MISPRINT_ROTATION = 0
 
-
-  // Padding
-    // large 150 - 200
-    // medium 25 - 50
-    // small 15 - 25
-
-  // Border
-    // true
-    // false
-
-  // Drift
-
-
-  // borderType = chance(
-  //   [1, 0], // no borders
-  //   [4, 1], // borders
-  //   [5, 2], // bleeding
-  // )
-
-  // if (borderType === 0) {
-  //   const bFactor = rnd(15, 45)
-  //   BORDER_PADDING = (bFactor+5)/SCALE
-
-  //   HARD_BORDER = false
-  //   BORDER_BLEED = prb(0.05)
-  //   BORDER_THICKNESS = 0
-  //   BORDER_DRIFT = bFactor/SCALE
-  //   ROTATION = 0
-
-  // } else if (prb(0.015)) {
-  //   HARD_BORDER = true
-  //   BORDER_PADDING = rnd(15, 25)/SCALE
-  //   BORDER_BLEED = true
-  //   BORDER_THICKNESS = rnd(1.4, 3)
-  //   BORDER_DRIFT = chance(
-  //     [5, 0],
-  //     [3, rnd(3)/SCALE],
-  //     [1, rnd(3, BORDER_PADDING/2)/SCALE]
-  //   )
-  //   ROTATION = rnd(-0.008, 0.008)
-
-  //   const div = prb(0.333) ? 2 : 1
-
-  //   X_OFF = rnd(-250, 250)/(div*SCALE)
-  //   Y_OFF = rnd(-250, 250)/(div*SCALE)
-  //   MISPRINT_ROTATION = rnd(-QUARTER_PI, QUARTER_PI)/(4*div)
-
-
-  // } else {
-  //   HARD_BORDER = borderType === 2 || prb(0.85)
-
-  //   BORDER_PADDING =
-  //     prb(0.06) ? rnd(150, 200)/SCALE :
-  //     !HARD_BORDER ? rnd(25, 40)/SCALE :
-  //     rnd(15, 25)/SCALE
-  //   BORDER_BLEED = borderType === 2
-  //   BORDER_THICKNESS = rnd(1.4, 3)
-  //   BORDER_DRIFT = chance(
-  //     [5, 0],
-  //     [3, rnd(3)/SCALE],
-  //     [1, min(180, rnd(3, BORDER_PADDING/2))/SCALE]
-  //   )
-  //   ROTATION = rnd(-0.0005, 0.0005)
-  //   X_OFF = rnd(-2, 2)/SCALE
-  //   Y_OFF = rnd(-2, 2)/SCALE
-  // }
-
   BORDER_BLEED = prb(0.5)
   HARD_BORDER = BORDER_BLEED || prb(0.8)
 
@@ -373,7 +319,6 @@ function hideStreetsOverride(layer, layerN) {
   }
 
   BORDER_DRIFT = min(180/SCALE, BORDER_DRIFT)
-
 
 
   return {

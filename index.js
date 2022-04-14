@@ -568,11 +568,11 @@ function setup() {
   DASH_RATE = prb(0.125) ? rnd(0.05, 0.2) : 0
 
   COLOR_RULE = chance(
-    [34, 0], // anything goes
-    [35, 1], // contrast
+    [40, 0], // anything goes
+    [15, 1], // contrast
     [5, 2], // all light
-    [7, 3], // all dark
-    [22, 4], // all color
+    [11, 3], // all dark
+    [27, 4], // all color
     [hideStreetsOverride(1, 50) ? 0 : 2, 5], // topographic
   )
 
@@ -622,7 +622,21 @@ function setup() {
     [1, 'preset'],
   )
 
-  if (COLOR_RULE === 3) {
+  if (COLOR_RULE === 1) {
+    hueDiff = 0
+    layerN = chance(
+      [6, 3],
+      [1, 4],
+      [1, 5],
+    )
+
+    baseRule = chance(
+      [7, 'bright'],
+      [3, 'whiteAndBlack'],
+      [5, 'blackAndWhite'],
+      [5, 'neon'],
+    )
+  } else if (COLOR_RULE === 3) {
     baseRule = chance(
       [20, 'burnt'],
       [5, 'blackAndWhite'],
