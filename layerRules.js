@@ -61,47 +61,40 @@
 
 
 
-function setLayers(layerN, baseRule, hueDiff, lightenDarks, forceGradient, maxGradient, grain, invertStreets) {
-  const thresholdDiff = 0.02
-
+function setLayers() {
   const { elevationAverage, elevationMin } = findAvgElevation()
-
-  const r = rules(layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, invertStreets)
+  const r = rules()
 
   const baseHue = rnd(360)
-  const layers = [{
+  LAYERS = [{
     ix: 0,
-    threshold: layerN >= 30 ? elevationMin : elevationAverage,
+    threshold: LAYER_N >= 30 ? elevationMin : elevationAverage,
     hideStreets: false,
-    ...r[baseRule](baseHue, maxGradient/rnd(3, 15), 0, lightenDarks)
+    ...r[BASE_RULE](baseHue, MAX_GRADIENT/rnd(3, 15), 0, LIGHTEN_DARKS)
   }]
 
-  const baseIsDark = ['blackAndWhite', 'neon', 'burnt'].includes(baseRule)
-  const baseIsLight = ['whiteAndBlack', 'paper'].includes(baseRule)
-  const baseIsColor = ['bright', 'faded'].includes(baseRule)
+  const baseIsLight = ['whiteAndBlack', 'paper'].includes(BASE_RULE)
+  const baseIsColor = ['bright', 'faded'].includes(BASE_RULE)
 
   const alternateRule =
     COLOR_RULE === 5 && baseIsColor ? sample(['bright', 'whiteAndBlack']) :
     COLOR_RULE === 5 && baseIsLight ? 'bright' :
     false
 
-
   let hueIx = 0
-  const huePresets = getHuePresets(baseHue, hueDiff)
-  const nextHue = (previousHue) => {
-    if (HUE_RULE === 'path') return previousHue + hueDiff
+  const huePresets = getHuePresets(baseHue)
+  const nextHue = (previousHue) => HUE_RULE === 'path'
+    ? previousHue + HUE_DIFF
+    : huePresets[hueIx++ % huePresets.length]
 
-    return huePresets[hueIx++ % huePresets.length]
-
-  }
 
   const newLayer = (previousLayer, threshold, ix) => {
     const hideStreets = prb(0.2) && !MISPRINT_ROTATION
-    const mxGrd = ix === layerN-1 ? maxGradient/rnd(3, 8) : maxGradient
+    const maxGrad = ix === LAYER_N-1 ? MAX_GRADIENT/rnd(3, 8) : MAX_GRADIENT
 
     let nextLayer
     if (COLOR_RULE === 5 && !(ix % 2)) {
-      nextLayer = layers[0]
+      nextLayer = LAYERS[0]
 
     } else if (COLOR_RULE === 5 && ix % 2) {
       const altHueDiff = chance(
@@ -110,18 +103,16 @@ function setLayers(layerN, baseRule, hueDiff, lightenDarks, forceGradient, maxGr
         [1, 180],
       )
 
-      const altHue = hfix(previousLayer.baseHue + 20)
-
-      nextLayer = r[alternateRule](altHue, mxGrd, ix, previousLayer.isDark)
+      const h = hfix(previousLayer.baseHue + 20)
+      nextLayer = r[alternateRule](h, maxGrad, ix, previousLayer.isDark)
 
     } else {
       const nextRule = chance(...previousLayer.neighbors)
-      const hue = nextRule === 'blackAndWhite' || nextRule === 'whiteAndBlack'
+      const h = nextRule === 'blackAndWhite' || nextRule === 'whiteAndBlack'
         ? previousLayer.baseHue
         : nextHue(previousLayer.baseHue)
-      nextLayer = r[nextRule](hue, mxGrd, ix, previousLayer.isDark)
+      nextLayer = r[nextRule](h, maxGrad, ix, previousLayer.isDark)
     }
-
 
     return {
       hideStreets,
@@ -131,28 +122,21 @@ function setLayers(layerN, baseRule, hueDiff, lightenDarks, forceGradient, maxGr
     }
   }
 
-  for (let i = 1; i < layerN; i++) {
-    const previousLayer = layers[i-1]
-    const threshold = i === layerN - 1
+  for (let i = 1; i < LAYER_N; i++) {
+    const previousLayer = LAYERS[i-1]
+    const threshold = i === LAYER_N - 1
       ? 1
-      : previousLayer.threshold + thresholdDiff
+      : previousLayer.threshold + 0.02
 
-    layers.push(newLayer(previousLayer, threshold, i))
+    LAYERS.push(newLayer(previousLayer, threshold, i))
   }
-
-
-  return layers
 }
 
 
-
-
-
-const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, invertStreets) => {
-  const black = color(0,0,10)
+const rules = () => {
+  const black = color(0, 0, 10)
   const whiteBg = color(0, 0, 90)
   const whiteStroke = color(0, 0, 85)
-
 
   const GRADIENT_PRB = 0.09
   const getGradient = (force, mx=360) => {
@@ -163,9 +147,6 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
           y: rnd(T, B)
         },
         useElevation: rnd() < 0.9,
-        // colorChangeFn(d) {
-
-        // },
         hue: rnd(mx/4, mx) * posOrNeg(),
         sat: 2,
         brt: 1,
@@ -173,20 +154,11 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
       : null
   }
 
-  const canShowLight = isLight => {
-    return [0, 2, 4, isLight ? 0 : 1].includes(COLOR_RULE)
-  }
-
-  const canShowDark = isDark => {
-    return [0, 3, isDark ? 0 : 1].includes(COLOR_RULE)
-  }
-
-  const d = hueDiff < 0 ? -1 : 1
   return {
-    blackAndWhite: (h, _, ix, __) => {
+    blackAndWhite: (baseHue, _, ix, __) => {
       let key
       if ([2, 4].includes(COLOR_RULE)) key = 'light'
-      else if ([3].includes(COLOR_RULE)) key = 'dark'
+      else if (COLOR_RULE === 3) key = 'dark'
       else if (COLOR_RULE === 4) key = 'color'
       else key = 'all'
 
@@ -212,16 +184,9 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
         ]
       }[key]
 
-        // [
-        //   [canShowLight(false) ? 0.7 : 0, 'whiteAndBlack'],
-        //   [canShowDark(true) ? 0.3 : 0, 'neon'],
-        //   [canShowLight(false) ? 0.3 : 0, 'bright'],
-        // ]
-
       return {
         name: 'blackAndWhite',
-        baseHue: h,
-        grain,
+        baseHue,
         colors: {
           bg: black,
           primary: whiteStroke,
@@ -239,7 +204,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
       }
     },
 
-    whiteAndBlack: (h, _, ix, __) => {
+    whiteAndBlack: (baseHue, _, ix, __) => {
       let key
       if (COLOR_RULE === 1) key = 'contrast'
       else if (COLOR_RULE === 3) key = 'dark'
@@ -248,7 +213,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
 
       const neighbors = {
         contrast: [
-          [layerN > 3 ? 1 : 0, 'bright'],
+          [LAYER_N > 3 ? 1 : 0, 'bright'],
           [3, 'blackAndWhite'],
         ],
         dark: [
@@ -267,8 +232,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
 
       return {
         name: 'whiteAndBlack',
-        baseHue: h,
-        grain,
+        baseHue,
         colors: {
           bg: whiteBg,
           primary: black,
@@ -286,19 +250,19 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
       }
     },
 
-    neon: (h, gradientMax, ix, lightenDarks) => {
-      const bg = adjColor(h, 30, lightenDarks ? 22 : 12)
-      let c = adjColor(h, 55, 92)
+    neon: (baseHue, gradientMax, ix, lightenDarks) => {
+      const bg = adjColor(baseHue, 30, lightenDarks ? 22 : 12)
+      let c = adjColor(baseHue, 55, 92)
 
       if (contrast(bg, c) > -0.5) {
         c = setContrastC2(bg, c, -0.5)
       }
 
       let key
-      if (layerN === 2) key = 'color'
+      if (LAYER_N === 2) key = 'color'
       else if (COLOR_RULE === 1) key = 'contrast'
       else if (COLOR_RULE === 2) key = 'light'
-      else if ([3].includes(COLOR_RULE)) key = 'dark'
+      else if (COLOR_RULE === 3) key = 'dark'
       else if (COLOR_RULE === 4) key = 'color'
       else key = 'all'
 
@@ -327,8 +291,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
 
       return {
         name: 'neon',
-        baseHue: h,
-        grain,
+        baseHue,
         colors: {
           bg,
           primary: c,
@@ -339,30 +302,31 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
           circle: c,
         },
         neighbors,
-        gradient: getGradient(forceGradient, gradientMax),
+        gradient: getGradient(FORCE_GRADIENTS, gradientMax),
         isDark: true,
         isColor: false,
         isLight: false,
       }
     },
 
-    bright: (h, gradientMax, ix, __) => {
-      const c1 = adjColor(h, 55, 95)
-      const c2 = invertStreets && ix > 0
-        ? invertStreetColor(h+180, 50, 85, c1)
-        : color(hfix(h + 180), 30, 15)
+    bright: (baseHue, gradientMax, ix, __) => {
+      const invertStreets = INVERT_STREETS && ix
+      const c1 = adjColor(baseHue, 55, 95)
+      const c2 = invertStreets > 0
+        ? invertStreetColor(baseHue+180, 50, 85, c1)
+        : color(hfix(baseHue + 180), 30, 15)
 
       let key
       if (COLOR_RULE === 1) key = 'contrast'
+      else if (COLOR_RULE === 2) key = 'light'
       else if (COLOR_RULE === 3) key = 'dark'
-      else if ([2].includes(COLOR_RULE)) key = 'light'
       else if (COLOR_RULE === 4) key = 'color'
       else key = 'all'
 
       const neighbors = {
         contrast: [
           [3, 'blackAndWhite'],
-          [layerN > 3 ? 1 : 0, 'whiteAndBlack'],
+          [LAYER_N > 3 ? 1 : 0, 'whiteAndBlack'],
           [3, 'neon'],
         ],
         dark: [
@@ -384,8 +348,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
 
       return {
         name: 'bright',
-        baseHue: h,
-        grain,
+        baseHue,
         colors: {
           bg: c1,
           primary: c2,
@@ -396,32 +359,32 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
           circle: c2,
         },
         neighbors,
-        invertStreets: invertStreets && ix,
-        gradient: getGradient(forceGradient, gradientMax),
+        invertStreets,
+        gradient: getGradient(FORCE_GRADIENTS, gradientMax),
         isDark: false,
         isColor: true,
         isLight: false,
       }
     },
 
-    paper: (h, gradientMax, ix, __) => {
-      const c1 = color(hfix(h), 8, 91)
+    paper: (baseHue, gradientMax, ix, __) => {
+      const c1 = color(hfix(baseHue), 8, 91)
 
-      const c2 = invertStreetColor(h + hueDiff, 60, 30, c1)
-      const c3 = invertStreetColor(h + hueDiff - 10, 40, 35, c1)
-      const c4 = invertStreetColor(h + hueDiff - 20, 40, 35, c1)
+      const c2 = invertStreetColor(baseHue + HUE_DIFF, 60, 30, c1)
+      const c3 = invertStreetColor(baseHue + HUE_DIFF - 10, 40, 35, c1)
+      const c4 = invertStreetColor(baseHue + HUE_DIFF - 20, 40, 35, c1)
 
       let key
-      if (COLOR_RULE === 3) key = 'dark'
-      else if ([2].includes(COLOR_RULE)) key = 'light'
-      else if ([4].includes(COLOR_RULE)) key = 'color'
+      if (COLOR_RULE === 2) key = 'light'
+      else if (COLOR_RULE === 3) key = 'dark'
+      else if (COLOR_RULE === 4) key = 'color'
       else key = 'all'
 
       const neighbors = {
 
         dark: [
           [1, 'blackAndWhite'],
-          [layerN > 2 ? 1 : 0, 'neon'],
+          [LAYER_N > 2 ? 1 : 0, 'neon'],
           [1, 'burnt'],
         ],
         light: [
@@ -435,7 +398,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
         ],
         all: [
           [6, 'blackAndWhite'],
-          [layerN > 2 ? 6 : 0, 'neon'],
+          [LAYER_N > 2 ? 6 : 0, 'neon'],
           [7, 'burnt'],
           [1, 'whiteAndBlack'],
           [1, 'bright'],
@@ -443,11 +406,9 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
         ],
       }[key]
 
-      const g = forceGradient ? gradientMax : rnd(90)
       return {
         name: 'paper',
-        baseHue: h,
-        grain,
+        baseHue,
         colors: {
           bg: c1,
           primary: c2,
@@ -458,23 +419,23 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
           circle: c4,
         },
         neighbors,
-        gradient: getGradient(true, g),
+        gradient: getGradient(true, FORCE_GRADIENTS ? gradientMax : rnd(90)),
         isDark: false,
         isColor: false,
         isLight: true,
       }
     },
 
-    faded: (h, gradientMax, ix, __) => {
-      const c1 = adjColor(h, 35, 95)
-      const c2 = invertStreetColor(h+hueDiff, 85, 30, c1)
-      const c3 = invertStreetColor(h+hueDiff-10, 85, 30, c1)
-      const c4 = invertStreetColor(h+hueDiff-20, 85, 30, c1)
+    faded: (baseHue, gradientMax, ix, __) => {
+      const c1 = adjColor(baseHue, 35, 95)
+      const c2 = invertStreetColor(baseHue+HUE_DIFF, 85, 30, c1)
+      const c3 = invertStreetColor(baseHue+HUE_DIFF-10, 85, 30, c1)
+      const c4 = invertStreetColor(baseHue+HUE_DIFF-20, 85, 30, c1)
 
       let key
-      if (COLOR_RULE === 3) key = 'dark'
-      else if ([2].includes(COLOR_RULE)) key = 'light'
-      else if ([4].includes(COLOR_RULE)) key = 'color'
+      if (COLOR_RULE === 2) key = 'light'
+      else if (COLOR_RULE === 3) key = 'dark'
+      else if (COLOR_RULE === 4) key = 'color'
       else key = 'all'
 
       const neighbors = {
@@ -501,12 +462,9 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
         ],
       }[key]
 
-      const g = forceGradient ? gradientMax : rnd(75)
-
       return {
         name: 'faded',
-        baseHue: h,
-        grain,
+        baseHue,
         colors: {
           bg: c1,
           primary: c2,
@@ -517,25 +475,25 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
           circle: c4,
         },
         neighbors,
-        gradient: getGradient(forceGradient, g),
+        gradient: getGradient(FORCE_GRADIENTS, FORCE_GRADIENTS ? gradientMax : rnd(75)),
         isDark: false,
         isColor: true,
         isLight: false,
       }
     },
 
-    burnt: (h, gradientMax, ix, lightenDarks) => {
-      const c1 = color(hfix(h), 35, lightenDarks ? 17 : 15)
-      const d = hueDiff > 0 ? 1 : -1
+    burnt: (baseHue, gradientMax, ix, lightenDarks) => {
+      const c1 = color(hfix(baseHue), 35, lightenDarks ? 17 : 15)
+      const d = HUE_DIFF > 0 ? 1 : -1
 
-      const c2 = color(hfix(h + hueDiff), 50, 85)
-      const c3 = color(hfix(h + hueDiff-30*d), 50, 85)
-      const c4 = color(hfix(h + hueDiff-60*d), 50, 85)
+      const c2 = color(hfix(baseHue + HUE_DIFF), 50, 85)
+      const c3 = color(hfix(baseHue + HUE_DIFF-30*d), 50, 85)
+      const c4 = color(hfix(baseHue + HUE_DIFF-60*d), 50, 85)
 
       let key
-      if (layerN === 2) key = 'color'
+      if (LAYER_N === 2) key = 'color'
       else if (COLOR_RULE === 2) key = 'light'
-      else if ([3].includes(COLOR_RULE)) key = 'dark'
+      else if (COLOR_RULE === 3) key = 'dark'
       else if (COLOR_RULE === 4) key = 'color'
       else key = 'all'
 
@@ -564,8 +522,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
 
       return {
         name: 'burnt',
-        baseHue: h,
-        grain,
+        baseHue,
         colors: {
           bg: c1,
           primary: c2,
@@ -576,7 +533,7 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
           circle: c4,
         },
         neighbors,
-        gradient: getGradient(forceGradient, gradientMax),
+        gradient: getGradient(FORCE_GRADIENTS, gradientMax),
         isDark: true,
         isColor: false,
         isLight: false,
@@ -589,18 +546,16 @@ const rules = (layerN, baseRule, COLOR_RULE, hueDiff, forceGradient, grain, inve
 
 function invertStreetColor(_hue, sat, brt, c1) {
   const h = hfix(_hue)
-  let c = isBrightColor(hue) ? 0.9 : 0.7
+  const c = isBrightColor(hue) ? 0.9 : 0.7
   return setContrastC2(c1, color(h, sat, brt), c)
 }
 
 
-
-
-function hideStreetsOverride(layerIx, layerN) {
+function hideStreetsOverride(layerIx) {
   return (
     SCALE >= 1
     && TURBULENCE
-    && layerIx < layerN-1
+    && layerIx < LAYER_N-1
     && layerIx > 0
   )
 }
@@ -612,12 +567,13 @@ function findActiveLayer(x, y) {
   for (let i = 0; i < LAYERS.length; i++) {
     if (n < LAYERS[i].threshold) return LAYERS[i]
   }
+
   return LAYERS[LAYERS.length - 1]
 }
 
 
-function getHuePresets(baseHue, hueDiff) {
-  switch (abs(hueDiff)) {
+function getHuePresets(baseHue) {
+  switch (abs(HUE_DIFF)) {
     case 0: return [baseHue]
     case 10: return [baseHue, baseHue+10, baseHue+20, baseHue+30, baseHue+40, baseHue+50, baseHue+60]
     case 20: return [baseHue, baseHue + 20, baseHue - 20]
@@ -627,12 +583,6 @@ function getHuePresets(baseHue, hueDiff) {
     case 180: return [baseHue, baseHue + 180]
   }
 }
-
-
-
-
-
-
 
 
 function findAvgElevation() {

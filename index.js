@@ -71,6 +71,31 @@ NFTs don't have to be things that you own
 
 
 
+
+Maps of Nothing are presented for display purposes only, with no
+
+All maps were generated according to a predefined set of rules given a pseudoentropic seed, and are in no way meant to be interpreted as an accurate reflection of reality.
+Any resemblence to real locations or biological processes is purely coincidental.
+Ownership
+
+
+
+All markings, symbols, patterns, and other visual elements exist purely for aesthetic purposes, and are not to be construed or used as a "legal description", or as an attempt to convey meaning of any kind.
+
+
+Erroneous interpretations of these visual elements include, but not limited to: geographic, topologic, meteorogic, economic, sociologic, and political phenomena.
+The Maps exist in a purely digital form; all perceived textures, imperfections, and marks of damage act as a simulation of physical paper, and in no way imply that a corresponding physical paper map exists.
+
+All maps are sold AS IS, and are provided without warranty of any kind. All sales are final, and refunds will not be given for any misprints, miscolorations, inacuracies, inprecisions, or unintended features of any kind.
+
+
+All code is licensed under a Creative Commons Attribution-NonCommercial 4.0 License, and is provided without warranty of any kind.
+Ownership of a Map does not imply ownership over
+
+
+
+
+
 Generated Map
   LEGAL DISCLAIMER:
     - These maps were generated according to a pre defined set of rules, combined with a pseudo entropic seed defined by the blockchain, and are therefore not meant to be depictions of real-life locations or processes.
@@ -425,7 +450,7 @@ from output to output, with some having degraded substantially.
   - graininess doesn't look great when its the only color in a b/w
   - need to evaluate high contrast
   - need to evaluate anything goes default rule shifts
-  - look at 15-50 layerN
+  - look at 15-50 LAYER_N
 
 
 2-31
@@ -470,7 +495,7 @@ from output to output, with some having degraded substantially.
       - all of them same lighting level looks better on lower N
       - maybe keep middle and top/bottom layers same level of luminance
   - need to thicken ones that are zoomed out less
-  - maybe don't randomly choose hue -- probabilistically choose hue based on layerN and rule
+  - maybe don't randomly choose hue -- probabilistically choose hue based on LAYER_N and rule
 
 2-34
   - maybe nix the diaganal streets
@@ -485,47 +510,25 @@ from output to output, with some having degraded substantially.
 */
 
 
-let SIZE, SCALE, L, R, T, B, W, H
-
 function keyPressed() {
   if (keyCode === 83) {
     saveCanvas(__canvas, 'maps-' + Date.now(), 'png');
   }
 }
 
+const Q_PI = Math.PI/4
+const NEG_Q_PI = -Math.PI/4
 
-let NOISE_DIVISOR, TURBULENCE, IGNORE_STREET_CAP, STREET_TURBULENCE, HARD_CURVES, DENSITY,
-    COLOR_RULE, STRAIGHT_STREETS, SECONDARY_ANGLE_ADJ, DOUBLE_STREETS, KINKED_STREET_FACTOR,
-    BORDER_PADDING, BORDER_BLEED, BORDER_THICKNESS, HARD_BORDER, ROTATION, BORDER_DRIFT, DASH_RATE,
-    X_OFF, Y_OFF, MISPRINT_ROTATION, STAR_MAP, LOW_INK, SMUDGE, HUE_RULE
-let LAYERS = []
-
-const NOISE_OFFSET = 100000
+LAYERS = []
+NOISE_OFFSET = 100000
 
 function setup() {
-  // W_H_RATIO = 1.25
-  // const windowRatio = window.innerWidth/window.innerHeight
-  // SIZE = min(window.innerWidth, window.innerHeight)
-
-  // if (W_H_RATIO < windowRatio) {
-  //   __canvas = createCanvas(window.innerHeight * W_H_RATIO, window.innerHeight)
-  //   SCALE = window.innerHeight/H
-
-  // } else if (W_H_RATIO > windowRatio) {
-  //   __canvas = createCanvas(window.innerWidth, window.innerWidth /W_H_RATIO)
-  //   SCALE = window.innerWidth/W
-
-  // } else {
-  //   __canvas = createCanvas(window.innerWidth, window.innerHeight)
-  //   SCALE = window.innerWidth/W
-  // }
-
   SIZE = min(window.innerWidth, window.innerHeight)
   __canvas = createCanvas(SIZE, SIZE)
   noiseSeed(rnd(1000000) + rnd(1000000) + rnd(1000))
-  colorMode(HSB, 360, 100, 100, 100)
+  colorMode(HSB, 360, 100, 100)
 
-  SCALE = rnd(0.2, 1.2)
+  SCALE = rnd() + 0.2
   SCALE_ADJ = SIZE/800
   const sizeADJ = SCALE*SCALE_ADJ
 
@@ -536,7 +539,70 @@ function setup() {
   T = round(-height/(2*sizeADJ), 4)
   B = round(height/(2*sizeADJ), 4)
 
+  setFeatures()
+  setLayers()
 
+  console.log(JSON.stringify({
+    HASH: tokenData.hash,
+    SCALE,
+    COLOR_RULE,
+    LAYER_N,
+    BASE_RULE,
+    HUE_DIFF,
+    FORCE_GRADIENTS,
+    HARD_CURVES,
+    DASH_RATE: DASH_RATE.toPrecision(2),
+    STREET_TURBULENCE,
+    NOISE_DIVISOR: (NOISE_DIVISOR*SCALE).toPrecision(4),
+    DENSITY,
+    TURBULENCE,
+    IGNORE_STREET_CAP,
+    KINKED_STREET_FACTOR,
+    HARD_BORDER,
+    BORDER_BLEED,
+    BORDER_DRIFT: (BORDER_DRIFT*SCALE).toPrecision(4),
+    BORDER_THICKNESS: BORDER_THICKNESS.toPrecision(2),
+    BORDER_PADDING: (BORDER_PADDING*SCALE).toPrecision(4),
+    ROTATION: ROTATION.toPrecision(2),
+    STRAIGHT_STREETS,
+    X_OFF,
+    Y_OFF,
+    MISPRINT_ROTATION,
+    MAX_GRADIENT,
+    GRAIN,
+    SMUDGE,
+    STAR_MAP,
+    LOW_INK,
+    HUE_RULE
+  }, null, 2))
+  console.log(LAYERS)
+}
+
+
+function draw() {
+  noLoop()
+  const START = Date.now()
+
+  translate(width/2, height/2)
+  scale(SCALE * SCALE_ADJ)
+
+  const bgBuffer = max(abs(X_OFF), abs(Y_OFF))*1.5
+  rotate(MISPRINT_ROTATION)
+  drawBackground(T-bgBuffer, B+bgBuffer, L-bgBuffer, R+bgBuffer)
+
+  rotate(ROTATION)
+  drawStreetGrid(X_OFF, Y_OFF)
+
+  drawBorder()
+
+  console.log(Date.now() - START)
+}
+
+function setSize() {
+
+}
+
+function setFeatures() {
   TURBULENCE = prb(0.15)
   STREET_TURBULENCE = prb(0.1)
   IGNORE_STREET_CAP = prb(0.1)
@@ -547,15 +613,9 @@ function setup() {
   SMUDGE = prb(0.01) ? rnd(30, 100) : 0
 
   KINKED_STREET_FACTOR =
-    rnd() < 0.15
+    prb(0.15)
       ? rnd(QUARTER_PI/2, QUARTER_PI) * posOrNeg()
       : 0
-
-
-  // SECONDARY_ANGLE_ADJ = chance(
-  //   [1, 0],
-  //   [STRAIGHT_STREETS ? 0 : 0.15, HALF_PI/3],
-  // )
 
   NOISE_DIVISOR = rnd(150, 750) / SCALE
 
@@ -573,14 +633,15 @@ function setup() {
     [5, 2], // all light
     [11, 3], // all dark
     [27, 4], // all color
-    [hideStreetsOverride(1, 50) ? 0 : 2, 5], // topographic
+    [SCALE >= 1 && TURBULENCE ? 0 : 2, 5], // topographic
   )
 
   const layerNScaleAdj =
     STREET_TURBULENCE || HARD_CURVES
       ? 10
       : map(SCALE, 1.2, 0.2, 1, 15)
-  let layerN = chance(
+
+  LAYER_N = chance(
     [layerNScaleAdj, 1],
     [6, 2],
     [36, 3],
@@ -591,18 +652,18 @@ function setup() {
   )
 
 
-  let baseRule = chance(
-    [layerN <= 4 ? 20 : 0, 'paper'],
-    [layerN <= 4 ? 20 : 0, 'faded'],
-    [layerN <= 4 ? 15 : 0, 'burnt'],
+  BASE_RULE = chance(
+    [LAYER_N <= 4 ? 20 : 0, 'paper'],
+    [LAYER_N <= 4 ? 20 : 0, 'faded'],
+    [LAYER_N <= 4 ? 15 : 0, 'burnt'],
 
-    [layerN <= 4 ? 10 : 5, 'bright'],
+    [LAYER_N <= 4 ? 10 : 5, 'bright'],
     [6, 'whiteAndBlack'],
     [4, 'blackAndWhite'],
     [SCALE <= 0.3 ? 0 : 4, 'neon'],
   )
 
-  let hueDiff = chance(
+  HUE_DIFF = chance(
     [3, 0],
     [2, 20],
     [1, 100],
@@ -612,10 +673,10 @@ function setup() {
   ) * posOrNeg()
 
 
-  let forceGradients = prb(0.02)
-  const maxGradient = prb(0.025) ? rnd(720, 3000) : 200
-  let invertStreets = false
-  let lightenDarks = false
+  FORCE_GRADIENTS = prb(0.02)
+  MAX_GRADIENT = prb(0.025) ? rnd(720, 3000) : 200
+  INVERT_STREETS = false
+  LIGHTEN_DARKS = false
 
   HUE_RULE = chance(
     [1, 'path'],
@@ -623,21 +684,22 @@ function setup() {
   )
 
   if (COLOR_RULE === 1) {
-    hueDiff = 0
-    layerN = chance(
+    HUE_DIFF = 0
+    LAYER_N = chance(
       [6, 3],
       [1, 4],
       [1, 5],
     )
 
-    baseRule = chance(
+    BASE_RULE = chance(
       [7, 'bright'],
       [3, 'whiteAndBlack'],
       [5, 'blackAndWhite'],
       [5, 'neon'],
     )
+
   } else if (COLOR_RULE === 3) {
-    baseRule = chance(
+    BASE_RULE = chance(
       [20, 'burnt'],
       [5, 'blackAndWhite'],
       [5, 'neon'],
@@ -645,19 +707,18 @@ function setup() {
 
     TURBULENCE = rnd() < 0.4
     STREET_TURBULENCE = rnd() < 0.3
-    lightenDarks = true
-
+    LIGHTEN_DARKS = true
 
   } else if (COLOR_RULE === 4) {
 
-    baseRule = chance(
+    BASE_RULE = chance(
       [20, 'faded'],
       [30, 'bright'],
       [10, 'paper'],
       [30, 'whiteAndBlack'],
     )
 
-    layerN = chance(
+    LAYER_N = chance(
       [25, 3],
       [35, rndint(4,6)],
       [25, rndint(6,9)],
@@ -665,36 +726,35 @@ function setup() {
       [!HARD_CURVES ? 5 : 0, rndint(15, 30)],
     )
 
-    hueDiff = chance(
-      [layerN >= 12 ? 2 : 1, 10],
+    HUE_DIFF = chance(
+      [LAYER_N >= 12 ? 2 : 1, 10],
       [4, 20],
-      [layerN >= 12 ? 1 : 2, 100],
+      [LAYER_N >= 12 ? 1 : 2, 100],
       [3, 120],
-      [layerN >= 12 ? 1 : 3, 150],
+      [LAYER_N >= 12 ? 1 : 3, 150],
       [3, 180],
     ) * posOrNeg()
 
-    if (rnd() < 0.05) {
-      forceGradients = true
-      invertStreets = true
-    } else if (prb(0.5) && layerN <= 4) {
-      invertStreets = true
+    if (prb(0.05)) {
+      FORCE_GRADIENTS = true
+      INVERT_STREETS = true
+    } else if (prb(0.5) && LAYER_N <= 4) {
+      INVERT_STREETS = true
     }
 
   } else if (5 === COLOR_RULE) {
     NOISE_DIVISOR = rnd(350, 1000) / SCALE
 
-    layerN = 50
+    LAYER_N = 50
 
-    baseRule = chance(
+    BASE_RULE = chance(
       [1, 'paper'],
       [1, 'faded'],
       [1, 'bright'],
       [1, 'whiteAndBlack'],
     )
 
-
-    hueDiff = chance(
+    HUE_DIFF = chance(
       [6, 0],
       [2, 20],
       [1, 120],
@@ -702,15 +762,15 @@ function setup() {
     ) * posOrNeg()
   }
 
-  if (baseRule === 'blackAndWhite' || baseRule === 'neon' && layerN > 2 && COLOR_RULE !== 3) {
-    hueDiff = chance(
+  if (BASE_RULE === 'blackAndWhite' || BASE_RULE === 'neon' && LAYER_N > 2 && COLOR_RULE !== 3) {
+    HUE_DIFF = chance(
         [1, 0],
         [2, 180],
       ) * posOrNeg()
   }
 
-  if (layerN === 2 && ['neon', 'burnt'].includes(baseRule)) {
-    hueDiff = chance(
+  if (LAYER_N === 2 && ['neon', 'burnt'].includes(BASE_RULE)) {
+    HUE_DIFF = chance(
       [5, 0],
       [1, 100],
       [1, 120],
@@ -719,79 +779,16 @@ function setup() {
     ) * posOrNeg()
   }
 
-  const grain = rnd() < 0.5 || ['blackAndWhite', 'neon', 'burnt'].includes(baseRule) ? 0 : rnd(0.2, 0.7)
+  const scaleMultiplier = scaleModifier(1, 1.6) * (LOW_INK ? 0.7 : 1)
+  MIN_ST_W = 0.7 * scaleMultiplier
+  MAX_ST_W = 1.3 * scaleMultiplier
 
+  GRAIN = rnd() < 0.5 || ['blackAndWhite', 'neon', 'burnt'].includes(BASE_RULE) ? 0 : rnd(0.2, 0.7)
 
   X_OFF = 0
   Y_OFF = 0
   MISPRINT_ROTATION = 0
 
-
-  // Padding
-    // large 150 - 200
-    // medium 25 - 50
-    // small 15 - 25
-
-  // Border
-    // true
-    // false
-
-  // Drift
-
-
-  // borderType = chance(
-  //   [1, 0], // no borders
-  //   [4, 1], // borders
-  //   [5, 2], // bleeding
-  // )
-
-  // if (borderType === 0) {
-  //   const bFactor = rnd(15, 45)
-  //   BORDER_PADDING = (bFactor+5)/SCALE
-
-  //   HARD_BORDER = false
-  //   BORDER_BLEED = prb(0.05)
-  //   BORDER_THICKNESS = 0
-  //   BORDER_DRIFT = bFactor/SCALE
-  //   ROTATION = 0
-
-  // } else if (prb(0.015)) {
-  //   HARD_BORDER = true
-  //   BORDER_PADDING = rnd(15, 25)/SCALE
-  //   BORDER_BLEED = true
-  //   BORDER_THICKNESS = rnd(1.4, 3)
-  //   BORDER_DRIFT = chance(
-  //     [5, 0],
-  //     [3, rnd(3)/SCALE],
-  //     [1, rnd(3, BORDER_PADDING/2)/SCALE]
-  //   )
-  //   ROTATION = rnd(-0.008, 0.008)
-
-  //   const div = prb(0.333) ? 2 : 1
-
-  //   X_OFF = rnd(-250, 250)/(div*SCALE)
-  //   Y_OFF = rnd(-250, 250)/(div*SCALE)
-  //   MISPRINT_ROTATION = rnd(-QUARTER_PI, QUARTER_PI)/(4*div)
-
-
-  // } else {
-  //   HARD_BORDER = borderType === 2 || prb(0.85)
-
-  //   BORDER_PADDING =
-  //     prb(0.06) ? rnd(150, 200)/SCALE :
-  //     !HARD_BORDER ? rnd(25, 40)/SCALE :
-  //     rnd(15, 25)/SCALE
-  //   BORDER_BLEED = borderType === 2
-  //   BORDER_THICKNESS = rnd(1.4, 3)
-  //   BORDER_DRIFT = chance(
-  //     [5, 0],
-  //     [3, rnd(3)/SCALE],
-  //     [1, min(180, rnd(3, BORDER_PADDING/2))/SCALE]
-  //   )
-  //   ROTATION = rnd(-0.0005, 0.0005)
-  //   X_OFF = rnd(-2, 2)/SCALE
-  //   Y_OFF = rnd(-2, 2)/SCALE
-  // }
 
   BORDER_BLEED = prb(0.5)
   HARD_BORDER = BORDER_BLEED || prb(0.8)
@@ -838,93 +835,4 @@ function setup() {
   }
 
   BORDER_DRIFT = min(180/SCALE, BORDER_DRIFT)
-
-
-  LAYERS = setLayers(layerN, baseRule, hueDiff, lightenDarks, forceGradients, maxGradient, grain, invertStreets)
-
-  console.log(JSON.stringify({
-    HASH: tokenData.hash,
-    SCALE,
-    COLOR_RULE,
-    LAYER_N: layerN,
-    BASE_RULE: baseRule,
-    HUE_DIFF: hueDiff,
-    FORCE_GRADIENTS: forceGradients,
-    HARD_CURVES,
-    DASH_RATE: DASH_RATE.toPrecision(2),
-    STREET_TURBULENCE,
-    NOISE_DIVISOR: (NOISE_DIVISOR*SCALE).toPrecision(4),
-    DENSITY,
-    TURBULENCE,
-    IGNORE_STREET_CAP,
-    KINKED_STREET_FACTOR,
-    HARD_BORDER,
-    BORDER_BLEED,
-    BORDER_DRIFT: (BORDER_DRIFT*SCALE).toPrecision(4),
-    BORDER_THICKNESS: BORDER_THICKNESS.toPrecision(2),
-    BORDER_PADDING: (BORDER_PADDING*SCALE).toPrecision(4),
-    ROTATION: ROTATION.toPrecision(2),
-    STRAIGHT_STREETS,
-    // SECONDARY_ANGLE_ADJ: SECONDARY_ANGLE_ADJ.toPrecision(2),
-    X_OFF,
-    Y_OFF,
-    MISPRINT_ROTATION,
-    MAX_GRADIENT: maxGradient,
-    GRAIN: grain,
-    SMUDGE,
-    STAR_MAP,
-    LOW_INK,
-    HUE_RULE
-  }, null, 2))
-  console.log(LAYERS)
-}
-
-
-function draw() {
-
-  noLoop()
-
-  translate(width/2, height/2)
-  scale(SCALE * SCALE_ADJ)
-
-
-  const START = Date.now()
-
-  rotate(MISPRINT_ROTATION)
-  const bgBuffer = max(abs(X_OFF), abs(Y_OFF))*1.5
-  drawBackground(T-bgBuffer, B+bgBuffer, L-bgBuffer, R+bgBuffer)
-
-  rotate(ROTATION)
-  drawStreetGrid(X_OFF, Y_OFF)
-
-
-  if (HARD_BORDER) {
-    const space =
-      BORDER_PADDING < 50
-        ? rnd(1.7, 2.1)
-        : rnd(1.98, 2.02)
-
-    let borderDotsDisplayed = 0
-    const drawBorder = (ignoreHide) => {
-      console.log(ignoreHide)
-      dotRect(X_OFF, Y_OFF, W-(BORDER_PADDING*space), H-(BORDER_PADDING*space), (x, y) => {
-        const layer = BORDER_BLEED ? findActiveLayer(x, y, true) : LAYERS[0]
-        if (!ignoreHide && (layer.hideStreets || hideStreetsOverride(layer.ix, LAYERS.length))) return
-        borderDotsDisplayed++
-        setC(x+X_OFF, y+Y_OFF, layer.colors.circle, layer.gradient)
-        circle(x, y, nsrnd(x, y, BORDER_THICKNESS/SCALE, BORDER_THICKNESS*2.5/SCALE))
-      })
-    }
-
-    drawBorder()
-    if (borderDotsDisplayed < 100) drawBorder(true)
-
-  }
-
-  // stroke(LAYERS[0])
-
-
-
-
-  console.log(Date.now() - START)
 }

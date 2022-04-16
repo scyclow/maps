@@ -1,13 +1,5 @@
-
-
-
-function drawStreetGrid(startX=0, startY=0) {
+function drawStreetGrid(startX, startY) {
   push()
-  // translate(startX, startY)
-  const scaleMultiplier = scaleModifier(1, 1.6) * (LOW_INK ? 0.7 : 1)
-  MIN_ST_W = 0.7 * scaleMultiplier
-  MAX_ST_W = 1.3 * scaleMultiplier
-
   const {
     primaryAveCoords,
     secondaryAveCoords,
@@ -16,18 +8,18 @@ function drawStreetGrid(startX=0, startY=0) {
     streetCoords
   } = generateAllCoords()
 
-  const t = TURBULENCE ? 1.75 : 0.5 // 0.5
+  const t = TURBULENCE ? 1.75 : 0.5
   const d = TURBULENCE ? 1.25 : 0
   const streetT = t * 0.4
   const streetD = d * 1.6
   const qT = t * 0.8
   const qD = d * 1.2
 
-  streetCoords.forEach((coords, i) => drawCoords(coords.coords, (x, y, progress, angle) => {
+  streetCoords.forEach((coords, i) => drawCoords(coords.coords, (x, y) => {
     const _x = x+rnd(-streetT, streetT)+startX
     const _y = y+rnd(-streetT, streetT)+startY
     const layer = findActiveLayer(_x, _y)
-    if (layer.hideStreets || hideStreetsOverride(layer.ix, LAYERS.length)) return
+    if (layer.hideStreets || hideStreetsOverride(layer.ix)) return
 
     setC(_x, _y, layer.colors.street, layer.gradient)
 
@@ -42,11 +34,11 @@ function drawStreetGrid(startX=0, startY=0) {
   }, startX, startY))
 
 
-  quarternaryAveCoords.forEach(coords => drawCoords(coords.coords, (x, y, p, angle) => {
+  quarternaryAveCoords.forEach(coords => drawCoords(coords.coords, (x, y) => {
     const _x = x+rnd(-qT, qT)+startX
     const _y = y+rnd(-qT, qT)+startY
     const layer = findActiveLayer(_x, _y)
-    if (layer.hideStreets || hideStreetsOverride(layer.ix, LAYERS.length)) return
+    if (layer.hideStreets || hideStreetsOverride(layer.ix)) return
 
     setC(_x, _y, layer.colors.quarternary, layer.gradient)
     circle(_x, _y, nsrnd(_x, _y, 2*MIN_ST_W, 2*MAX_ST_W) + qD)
@@ -54,11 +46,11 @@ function drawStreetGrid(startX=0, startY=0) {
 
 
 
-  tertiaryAveCoords.forEach(coords => drawCoords(coords.coords, (x, y, p, angle) => {
+  tertiaryAveCoords.forEach(coords => drawCoords(coords.coords, (x, y) => {
     const _x = x+rnd(-t, t)+startX
     const _y = y+rnd(-t, t)+startY
     const layer = findActiveLayer(_x, _y)
-    if (layer.hideStreets || hideStreetsOverride(layer.ix, LAYERS.length)) return
+    if (layer.hideStreets || hideStreetsOverride(layer.ix)) return
 
     setC(_x, _y, layer.colors.tertiary, layer.gradient)
     circle(_x, _y, nsrnd(_x, _y, 3.5*MIN_ST_W, 3.5*MAX_ST_W) + d)
@@ -66,22 +58,22 @@ function drawStreetGrid(startX=0, startY=0) {
 
 
 
-  secondaryAveCoords.forEach(coords => drawCoords(coords.coords, (x, y, p, angle) => {
+  secondaryAveCoords.forEach(coords => drawCoords(coords.coords, (x, y) => {
     const _x = x+rnd(-t, t)+startX
     const _y = y+rnd(-t, t)+startY
     const layer = findActiveLayer(_x, _y)
-    if (layer.hideStreets || hideStreetsOverride(layer.ix, LAYERS.length)) return
+    if (layer.hideStreets || hideStreetsOverride(layer.ix)) return
 
     setC(_x, _y, layer.colors.secondary, layer.gradient)
     circle(_x, _y, nsrnd(_x, _y, 5*MIN_ST_W, 5*MAX_ST_W) + d)
   }, startX, startY))
 
 
-  drawCoords(primaryAveCoords.coords, (x, y, progress, angle) => {
+  drawCoords(primaryAveCoords.coords, (x, y) => {
     const _x = x+rnd(-t, t)+startX
     const _y = y+rnd(-t, t)+startY
     const layer = findActiveLayer(_x, _y)
-    if (layer.hideStreets || hideStreetsOverride(layer.ix, LAYERS.length)) return
+    if (layer.hideStreets || hideStreetsOverride(layer.ix)) return
 
     setC(_x, _y, layer.colors.primary, layer.gradient)
     circle(_x, _y, nsrnd(_x, _y, 6.25*MIN_ST_W, 6.25*MAX_ST_W) + d)
@@ -106,7 +98,7 @@ function drawCoords(coords, dotFn, xOff=0, yOff=0) {
       push()
 
       const layer = findActiveLayer(x1+xOff, y1+yOff)
-      if (layer.hideStreets || hideStreetsOverride(layer.ix, LAYERS.length) || (LOW_INK && prb(0.8))) return
+      if (layer.hideStreets || hideStreetsOverride(layer.ix) || (LOW_INK && prb(0.8))) return
       setC(x1+xOff, y1+yOff, layer.colors.circle, layer.gradient)
 
       const trb = TURBULENCE
@@ -122,18 +114,15 @@ function drawCoords(coords, dotFn, xOff=0, yOff=0) {
 }
 
 
-
-
 function generateAllCoords() {
   const densityMinimum = map(SCALE, 0.2, 1.2, 0.1, 0.17)
-
 
   const densityOverride =
     DENSITY === 0 ? 0.05 :
     DENSITY === 2 ? 0.5 :
     false
 
-  const getPrb = (mn, mx, coord, override=1) =>
+  const getProb = (mn, mx, coord, override=1) =>
     densityOverride
       ? densityOverride * override
       : mn + (mx-mn) * (1-getElevation(coord.x, coord.y))
@@ -182,11 +171,9 @@ function generateAllCoords() {
   let pBranch = 0
   let lastIx = {}
   const secondaryAveCoords = primaryAveCoords.coords.map((coord, i) => {
+    const prob = getProb(densityMinimum, 0.2, coord)
 
-    const prb = getPrb(densityMinimum, 0.2, coord)
-
-    if (rnd() < prb && i < 250) {
-    // if (rnd() < prb && i < cutoff) {
+    if (prb(prob) && i < 250) {
       const branch = pBranch++
       const direction = rnd() < 0.5 ? 1 : -1
       if (lastIx[direction] && lastIx[direction] + 3 > i) return
@@ -206,9 +193,9 @@ function generateAllCoords() {
   const tertiaryAveCoords = secondaryAveCoords.flatMap((coords, i) => {
     let sBranch = 0
     return coords.coords.map(coord => {
-      const prb = getPrb(densityMinimum, 0.2, coord, 1.5)
+      const prob = getProb(densityMinimum, 0.2, coord, 1.5)
 
-      if (rnd() < prb && i < cutoff) {
+      if (prb(prob) && i < cutoff) {
 
         const direction = rnd() < 0.5 ? 1 : -1
         const angleAdj = direction === -1 ? HALF_PI : PI+HALF_PI
@@ -228,9 +215,9 @@ function generateAllCoords() {
 
 
   const quarternaryAveCoords = tertiaryAveCoords.flatMap(coords => coords.coords.map(coord => {
-    const prb = getPrb(densityMinimum*2, 0.4, coord, 1.5)
+    const prob = getProb(densityMinimum*2, 0.4, coord, 1.5)
 
-    if (rnd() < prb) {
+    if (prb(prob)) {
       const direction = rnd() < 0.5 ? 1 : -1
       const angleAdj = direction === -1 ? HALF_PI : PI+HALF_PI
 
@@ -258,11 +245,11 @@ function generateAllCoords() {
         ...quarternaryAveCoords,
       ]
     }
-    const prb = getPrb(0.25, 1, coord, 2)
+    const prob = getProb(0.25, 1, coord, 2)
 
     return [
-      rnd() < prb && generateStreetCoords(coord.x, coord.y, coord.angle + HALF_PI, streetParams),
-      rnd() < prb && generateStreetCoords(coord.x, coord.y, coord.angle + HALF_PI + PI, streetParams),
+      prb(prob) && generateStreetCoords(coord.x, coord.y, coord.angle + HALF_PI, streetParams),
+      prb(prob) && generateStreetCoords(coord.x, coord.y, coord.angle + HALF_PI + PI, streetParams),
     ].filter(exists)
   }))
 
@@ -329,8 +316,6 @@ function generateStreetCoords(startX, startY, startAngle, params={}) {
 
 const drawStar = (x, y, d) => {
   push()
-
-
   const getXY = i => getXYRotation(i*TWO_PI/10, i % 2 === 0 ? d/2 : d, x, y)
   beginShape()
   curveVertex(...getXY(-1))

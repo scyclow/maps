@@ -1,8 +1,3 @@
-
-const Q_PI = Math.PI/4
-const NEG_Q_PI = -Math.PI/4
-
-
 function drawBackground(t, b, l, r) {
   push()
   const baseLayer = LAYERS[0]
@@ -71,9 +66,9 @@ function drawBackgroundStroke(x, y, layer, strokeSize, strokeParams) {
 
   }
 
-  const hGrain = layer.grain * 45 + 3
-  const sGrain = layer.grain * 10 + 5
-  const bGrain = layer.grain * 5 * (strokeParams.potentialMismatch ? 0 : 1)
+  const hGrain = GRAIN * 45 + 3
+  const sGrain = GRAIN * 10 + 5
+  const bGrain = GRAIN * 5 * (strokeParams.potentialMismatch ? 0 : 1)
   stroke(
     adjColor(
       hfix(hue(layer.colors.bg) + hAdj + rnd(-hGrain, hGrain)),
@@ -83,8 +78,18 @@ function drawBackgroundStroke(x, y, layer, strokeSize, strokeParams) {
   )
   const angle = noise(x+NOISE_OFFSET, y+NOISE_OFFSET)
 
-  const [x0, y0] = getXYRotation(PI+angle+rnd(NEG_Q_PI, Q_PI), 5, x+rnd(-offset, offset+SMUDGE), y+rnd(-offset, offset))
-  const [x1, y1] = getXYRotation(angle+rnd(NEG_Q_PI, Q_PI), 5, x, y)
+  const [x0, y0] = getXYRotation(
+    PI + angle + rnd(NEG_Q_PI, Q_PI),
+    5,
+    x + rnd(-offset, offset+SMUDGE),
+    y + rnd(-offset, offset)
+  )
+  const [x1, y1] = getXYRotation(
+    angle + rnd(NEG_Q_PI, Q_PI),
+    5,
+    x,
+    y
+  )
 
   line(x0, y0, x1, y1)
 }

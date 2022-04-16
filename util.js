@@ -48,15 +48,6 @@ function scaleModifier(mn, mx) {
   return map(s, 0, 0.15, mn, mx)
 }
 
-// function scaleModifier2(mn, mx) {
-//   const s =
-//     SCALE < 0.4 && SCALE >= 0.3 ? 0.05 :
-//     SCALE < 0.3 ? 0.35 - SCALE :
-//     0
-
-//   return map(0.35 - SCALE, 0, 0.15, mn, mx)
-// }
-
 const coordToTuple = ({ x, y }) => [x, y]
 
 function findIntersectionPoint(c1, c2, coordLists) {
@@ -196,8 +187,6 @@ function times(t, fn) {
 }
 
 let __randomSeed = parseInt(tokenData.hash.slice(50, 58), 16)
-
-const resetRandomSeed = () => { __randomSeed = parseInt(tokenData.hash.slice(50, 58), 16) }
 
 const rndint = (mn, mx) => int(rnd(mn, mx))
 function rnd(mn, mx) {
