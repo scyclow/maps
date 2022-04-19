@@ -50,6 +50,8 @@ function scaleModifier(mn, mx) {
   return map(s, 0, 0.15, mn, mx)
 }
 
+const sample = (a) => a[int(rnd(a.length))]
+
 function chance(...chances) {
   const total = chances.reduce((t, c) => t + c[0], 0)
   const seed = rnd()
@@ -315,25 +317,23 @@ function hideStreetsOverride(layer, layerN) {
 
   BORDER_DRIFT = min(180/SCALE, BORDER_DRIFT)
 
-  SHADOW_X = 0
-  SHADOW_Y = 0
-  SHADOW_MAGNITUDE = 0
-  SHADOW_SATURATION = 0
-  if (prb(0.8)) {
-    SHADOW_X = rnd(-8, 8)
-    SHADOW_Y = rnd(-8, 8)
-    SHADOW_MAGNITUDE = rnd(1000, 2300)
-    SHADOW_SATURATION = rnd(0.2, 1)
-  }
+  SHADOW_X = 5 * posOrNeg()
+  SHADOW_Y = 5 * posOrNeg()
+  SHADOW_MAGNITUDE = chance(
+    [15, 0],
+    [80, 1],
+    [4, 2],
+    [MAX_GRADIENT > 200 ? 20 : 1, 10],
+  )
 
   return {
     HASH: tokenData.hash,
     SCALE,
     COLOR_RULE,
-    LAYER_N: layerN,
-    BASE_RULE: baseRule,
-    HUE_DIFF: hueDiff,
-    FORCE_GRADIENTS: forceGradients,
+    LAYER_N,
+    BASE_RULE,
+    HUE_DIFF,
+    FORCE_GRADIENTS,
     HARD_CURVES,
     DASH_RATE: DASH_RATE.toPrecision(2),
     STREET_TURBULENCE,
@@ -352,17 +352,15 @@ function hideStreetsOverride(layer, layerN) {
     X_OFF,
     Y_OFF,
     MISPRINT_ROTATION,
-    MAX_GRADIENT: maxGradient,
-    GRAIN: grain,
+    MAX_GRADIENT,
+    GRAIN,
     SMUDGE,
     STAR_MAP,
     LOW_INK,
-    HUE_RULE
     HUE_RULE,
     SHADOW_X,
     SHADOW_Y,
     SHADOW_MAGNITUDE,
-    SHADOW_SATURATION,
   }
 
 }

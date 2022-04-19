@@ -577,7 +577,6 @@ function setup() {
     SHADOW_X,
     SHADOW_Y,
     SHADOW_MAGNITUDE,
-    SHADOW_SATURATION,
   }, null, 2))
   console.log(LAYERS)
 }
@@ -837,14 +836,12 @@ function setFeatures() {
 
   BORDER_DRIFT = min(180/SCALE, BORDER_DRIFT)
 
-  SHADOW_X = 0
-  SHADOW_Y = 0
-  SHADOW_MAGNITUDE = 0
-  SHADOW_SATURATION = 0
-  if (prb(0.8)) {
-    SHADOW_X = rnd(-8, 8)
-    SHADOW_Y = rnd(-8, 8)
-    SHADOW_MAGNITUDE = rnd(1000, 2300)
-    SHADOW_SATURATION = rnd(0.2, 1)
-  }
+  SHADOW_X = 5 * posOrNeg()
+  SHADOW_Y = 5 * posOrNeg()
+  SHADOW_MAGNITUDE = chance(
+    [15, 0],
+    [80, 1],
+    [4, 2],
+    [MAX_GRADIENT > 200 ? 20 : 1, 10],
+  )
 }

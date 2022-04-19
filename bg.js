@@ -48,6 +48,7 @@ function drawBackgroundStroke(x, y, layer, strokeSize, strokeParams) {
   if (LOW_INK && prb(0.5)) return
   const diam = rnd(strokeSize, strokeSize*2) * strokeParams.multiplier/3.5
   const offset = strokeParams.multiplier > 1 ? diam*2 : 0
+  const e = getElevation(x, y)
 
   strokeWeight(diam)
 
@@ -55,20 +56,19 @@ function drawBackgroundStroke(x, y, layer, strokeSize, strokeParams) {
   let sAdj = 0
   let bAdj = 0
   if (layer.gradient) {
+
     const d = layer.gradient.useElevation
-      ? getElevation(x, y) * 10
+      ? e * 10
       : dist(x, y, layer.gradient.focalPoint.x, layer.gradient.focalPoint.y)
         / dist(L, B, R, T)
 
     hAdj = map(d, 0, 1, 0, layer.gradient.hue)
     sAdj = map(d, 0, 1, 0, layer.gradient.sat)
     bAdj = map(d, 0, 1, 0, layer.gradient.brt)
-
   }
-  const shadow = max(
-    0,
-    getElevation(x+SHADOW_X, y+SHADOW_Y) - getElevation(x, y),
-  ) * SHADOW_MAGNITUDE
+
+
+  const { bShadow, sShadow } = getShadow(x, y, e, layer)
 
 
   const hGrain = GRAIN * 45 + 3
@@ -77,8 +77,8 @@ function drawBackgroundStroke(x, y, layer, strokeSize, strokeParams) {
   stroke(
     adjColor(
       hfix(hue(layer.colors.bg) + hAdj + rnd(-hGrain, hGrain)),
-      saturation(layer.colors.bg) + sAdj + rnd(-sGrain, sGrain) + shadow * SHADOW_SATURATION,
-      brightness(layer.colors.bg) + bAdj + rnd(-10 - bGrain, 0) - shadow,
+      saturation(layer.colors.bg) + sAdj + rnd(-sGrain, sGrain) + sShadow,
+      brightness(layer.colors.bg) + bAdj + rnd(-10 - bGrain, 0) - bShadow,
     )
   )
   const angle = noise(x+NOISE_OFFSET, y+NOISE_OFFSET)
@@ -97,4 +97,30 @@ function drawBackgroundStroke(x, y, layer, strokeSize, strokeParams) {
   )
 
   line(x0, y0, x1, y1)
+}
+
+function getShadow(x, y, e, layer) {
+  const shadow = max(
+    0,
+    getElevation(x+SHADOW_X, y+SHADOW_Y) - e,
+  ) * SHADOW_MAGNITUDE * (NOISE_DIVISOR*SCALE)/300
+
+  const l = map(luminance(layer.colors.bg), 0, 255, 0.5, 1)
+  const g = layer.gradient ? min(abs(layer.gradient.hue)/50, 1)*4 : 1
+  let bShadow = 0, sShadow = 0
+  if (layer.isDark) {
+    bShadow = shadow * 500
+    sShadow = shadow * 500
+
+  } else if (layer.isColor) {
+    magnitude = g * 150 * l
+    bShadow = shadow * magnitude
+    sShadow = shadow * magnitude * (layer.gradient ? 4 : 2)
+
+  } else if (layer.isLight) {
+    bShadow = shadow*100*g
+    sShadow = shadow*100*g
+  }
+
+  return { sShadow, bShadow }
 }
