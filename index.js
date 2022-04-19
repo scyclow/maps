@@ -573,7 +573,11 @@ function setup() {
     SMUDGE,
     STAR_MAP,
     LOW_INK,
-    HUE_RULE
+    HUE_RULE,
+    SHADOW_X,
+    SHADOW_Y,
+    SHADOW_MAGNITUDE,
+    SHADOW_SATURATION,
   }, null, 2))
   console.log(LAYERS)
 }
@@ -678,10 +682,7 @@ function setFeatures() {
   INVERT_STREETS = false
   LIGHTEN_DARKS = false
 
-  HUE_RULE = chance(
-    [1, 'path'],
-    [1, 'preset'],
-  )
+  HUE_RULE = sample(['path', 'preset'])
 
   if (COLOR_RULE === 1) {
     HUE_DIFF = 0
@@ -835,4 +836,15 @@ function setFeatures() {
   }
 
   BORDER_DRIFT = min(180/SCALE, BORDER_DRIFT)
+
+  SHADOW_X = 0
+  SHADOW_Y = 0
+  SHADOW_MAGNITUDE = 0
+  SHADOW_SATURATION = 0
+  if (prb(0.8)) {
+    SHADOW_X = rnd(-8, 8)
+    SHADOW_Y = rnd(-8, 8)
+    SHADOW_MAGNITUDE = rnd(1000, 2300)
+    SHADOW_SATURATION = rnd(0.2, 1)
+  }
 }

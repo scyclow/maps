@@ -65,6 +65,11 @@ function drawBackgroundStroke(x, y, layer, strokeSize, strokeParams) {
     bAdj = map(d, 0, 1, 0, layer.gradient.brt)
 
   }
+  const shadow = max(
+    0,
+    getElevation(x+SHADOW_X, y+SHADOW_Y) - getElevation(x, y),
+  ) * SHADOW_MAGNITUDE
+
 
   const hGrain = GRAIN * 45 + 3
   const sGrain = GRAIN * 10 + 5
@@ -72,8 +77,8 @@ function drawBackgroundStroke(x, y, layer, strokeSize, strokeParams) {
   stroke(
     adjColor(
       hfix(hue(layer.colors.bg) + hAdj + rnd(-hGrain, hGrain)),
-      saturation(layer.colors.bg) + sAdj + rnd(-sGrain, sGrain),
-      brightness(layer.colors.bg) + bAdj + rnd(-10 - bGrain, 0),
+      saturation(layer.colors.bg) + sAdj + rnd(-sGrain, sGrain) + shadow * SHADOW_SATURATION,
+      brightness(layer.colors.bg) + bAdj + rnd(-10 - bGrain, 0) - shadow,
     )
   )
   const angle = noise(x+NOISE_OFFSET, y+NOISE_OFFSET)

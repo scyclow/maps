@@ -95,15 +95,9 @@ function hideStreetsOverride(layer, layerN) {
   SMUDGE = prb(0.01) ? rnd(30, 100) : 0
 
   KINKED_STREET_FACTOR =
-    rnd() < 0.15
+    prb(0.15)
       ? rnd(QUARTER_PI/2, QUARTER_PI) * posOrNeg()
       : 0
-
-
-  // SECONDARY_ANGLE_ADJ = chance(
-  //   [1, 0],
-  //   [STRAIGHT_STREETS ? 0 : 0.15, HALF_PI/3],
-  // )
 
   NOISE_DIVISOR = rnd(150, 750) / SCALE
 
@@ -121,14 +115,15 @@ function hideStreetsOverride(layer, layerN) {
     [5, 2], // all light
     [11, 3], // all dark
     [27, 4], // all color
-    [hideStreetsOverride(1, 50) ? 0 : 2, 5], // topographic
+    [SCALE >= 1 && TURBULENCE ? 0 : 2, 5], // topographic
   )
 
   const layerNScaleAdj =
     STREET_TURBULENCE || HARD_CURVES
       ? 10
       : map(SCALE, 1.2, 0.2, 1, 15)
-  let layerN = chance(
+
+  LAYER_N = chance(
     [layerNScaleAdj, 1],
     [6, 2],
     [36, 3],
@@ -139,18 +134,18 @@ function hideStreetsOverride(layer, layerN) {
   )
 
 
-  let baseRule = chance(
-    [layerN <= 4 ? 20 : 0, 'paper'],
-    [layerN <= 4 ? 20 : 0, 'faded'],
-    [layerN <= 4 ? 15 : 0, 'burnt'],
+  BASE_RULE = chance(
+    [LAYER_N <= 4 ? 20 : 0, 'paper'],
+    [LAYER_N <= 4 ? 20 : 0, 'faded'],
+    [LAYER_N <= 4 ? 15 : 0, 'burnt'],
 
-    [layerN <= 4 ? 10 : 5, 'bright'],
+    [LAYER_N <= 4 ? 10 : 5, 'bright'],
     [6, 'whiteAndBlack'],
     [4, 'blackAndWhite'],
     [SCALE <= 0.3 ? 0 : 4, 'neon'],
   )
 
-  let hueDiff = chance(
+  HUE_DIFF = chance(
     [3, 0],
     [2, 20],
     [1, 100],
@@ -160,32 +155,30 @@ function hideStreetsOverride(layer, layerN) {
   ) * posOrNeg()
 
 
-  let forceGradients = prb(0.02)
-  const maxGradient = prb(0.025) ? rnd(720, 3000) : 200
-  let invertStreets = false
-  let lightenDarks = false
+  FORCE_GRADIENTS = prb(0.02)
+  MAX_GRADIENT = prb(0.025) ? rnd(720, 3000) : 200
+  INVERT_STREETS = false
+  LIGHTEN_DARKS = false
 
-  HUE_RULE = chance(
-    [1, 'path'],
-    [1, 'preset'],
-  )
+  HUE_RULE = sample(['path', 'preset'])
 
   if (COLOR_RULE === 1) {
-    hueDiff = 0
-    layerN = chance(
+    HUE_DIFF = 0
+    LAYER_N = chance(
       [6, 3],
       [1, 4],
       [1, 5],
     )
 
-    baseRule = chance(
+    BASE_RULE = chance(
       [7, 'bright'],
       [3, 'whiteAndBlack'],
       [5, 'blackAndWhite'],
       [5, 'neon'],
     )
+
   } else if (COLOR_RULE === 3) {
-    baseRule = chance(
+    BASE_RULE = chance(
       [20, 'burnt'],
       [5, 'blackAndWhite'],
       [5, 'neon'],
@@ -193,19 +186,18 @@ function hideStreetsOverride(layer, layerN) {
 
     TURBULENCE = rnd() < 0.4
     STREET_TURBULENCE = rnd() < 0.3
-    lightenDarks = true
-
+    LIGHTEN_DARKS = true
 
   } else if (COLOR_RULE === 4) {
 
-    baseRule = chance(
+    BASE_RULE = chance(
       [20, 'faded'],
       [30, 'bright'],
       [10, 'paper'],
       [30, 'whiteAndBlack'],
     )
 
-    layerN = chance(
+    LAYER_N = chance(
       [25, 3],
       [35, rndint(4,6)],
       [25, rndint(6,9)],
@@ -213,36 +205,35 @@ function hideStreetsOverride(layer, layerN) {
       [!HARD_CURVES ? 5 : 0, rndint(15, 30)],
     )
 
-    hueDiff = chance(
-      [layerN >= 12 ? 2 : 1, 10],
+    HUE_DIFF = chance(
+      [LAYER_N >= 12 ? 2 : 1, 10],
       [4, 20],
-      [layerN >= 12 ? 1 : 2, 100],
+      [LAYER_N >= 12 ? 1 : 2, 100],
       [3, 120],
-      [layerN >= 12 ? 1 : 3, 150],
+      [LAYER_N >= 12 ? 1 : 3, 150],
       [3, 180],
     ) * posOrNeg()
 
-    if (rnd() < 0.05) {
-      forceGradients = true
-      invertStreets = true
-    } else if (prb(0.5) && layerN <= 4) {
-      invertStreets = true
+    if (prb(0.05)) {
+      FORCE_GRADIENTS = true
+      INVERT_STREETS = true
+    } else if (prb(0.5) && LAYER_N <= 4) {
+      INVERT_STREETS = true
     }
 
   } else if (5 === COLOR_RULE) {
     NOISE_DIVISOR = rnd(350, 1000) / SCALE
 
-    layerN = 50
+    LAYER_N = 50
 
-    baseRule = chance(
+    BASE_RULE = chance(
       [1, 'paper'],
       [1, 'faded'],
       [1, 'bright'],
       [1, 'whiteAndBlack'],
     )
 
-
-    hueDiff = chance(
+    HUE_DIFF = chance(
       [6, 0],
       [2, 20],
       [1, 120],
@@ -250,15 +241,15 @@ function hideStreetsOverride(layer, layerN) {
     ) * posOrNeg()
   }
 
-  if (baseRule === 'blackAndWhite' || baseRule === 'neon' && layerN > 2 && COLOR_RULE !== 3) {
-    hueDiff = chance(
+  if (BASE_RULE === 'blackAndWhite' || BASE_RULE === 'neon' && LAYER_N > 2 && COLOR_RULE !== 3) {
+    HUE_DIFF = chance(
         [1, 0],
         [2, 180],
       ) * posOrNeg()
   }
 
-  if (layerN === 2 && ['neon', 'burnt'].includes(baseRule)) {
-    hueDiff = chance(
+  if (LAYER_N === 2 && ['neon', 'burnt'].includes(BASE_RULE)) {
+    HUE_DIFF = chance(
       [5, 0],
       [1, 100],
       [1, 120],
@@ -267,12 +258,16 @@ function hideStreetsOverride(layer, layerN) {
     ) * posOrNeg()
   }
 
-  const grain = rnd() < 0.5 || ['blackAndWhite', 'neon', 'burnt'].includes(baseRule) ? 0 : rnd(0.2, 0.7)
+  const scaleMultiplier = scaleModifier(1, 1.6) * (LOW_INK ? 0.7 : 1)
+  MIN_ST_W = 0.7 * scaleMultiplier
+  MAX_ST_W = 1.3 * scaleMultiplier
 
+  GRAIN = rnd() < 0.5 || ['blackAndWhite', 'neon', 'burnt'].includes(BASE_RULE) ? 0 : rnd(0.2, 0.7)
 
   X_OFF = 0
   Y_OFF = 0
   MISPRINT_ROTATION = 0
+
 
   BORDER_BLEED = prb(0.5)
   HARD_BORDER = BORDER_BLEED || prb(0.8)
@@ -320,6 +315,16 @@ function hideStreetsOverride(layer, layerN) {
 
   BORDER_DRIFT = min(180/SCALE, BORDER_DRIFT)
 
+  SHADOW_X = 0
+  SHADOW_Y = 0
+  SHADOW_MAGNITUDE = 0
+  SHADOW_SATURATION = 0
+  if (prb(0.8)) {
+    SHADOW_X = rnd(-8, 8)
+    SHADOW_Y = rnd(-8, 8)
+    SHADOW_MAGNITUDE = rnd(1000, 2300)
+    SHADOW_SATURATION = rnd(0.2, 1)
+  }
 
   return {
     HASH: tokenData.hash,
@@ -344,7 +349,6 @@ function hideStreetsOverride(layer, layerN) {
     BORDER_PADDING: (BORDER_PADDING*SCALE).toPrecision(4),
     ROTATION: ROTATION.toPrecision(2),
     STRAIGHT_STREETS,
-    // SECONDARY_ANGLE_ADJ: SECONDARY_ANGLE_ADJ.toPrecision(2),
     X_OFF,
     Y_OFF,
     MISPRINT_ROTATION,
@@ -354,6 +358,11 @@ function hideStreetsOverride(layer, layerN) {
     STAR_MAP,
     LOW_INK,
     HUE_RULE
+    HUE_RULE,
+    SHADOW_X,
+    SHADOW_Y,
+    SHADOW_MAGNITUDE,
+    SHADOW_SATURATION,
   }
 
 }
