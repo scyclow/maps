@@ -106,7 +106,7 @@ function hideStreetsOverride(layer, layerN) {
   DENSITY = chance(
     [SCALE >= 0.8 ? 0.0025 : 0.015, 0],
     [0.97, 1],
-    [0.02, 2],
+    [0.05, 2],
   )
 
   DASH_RATE = prb(0.125) ? rnd(0.05, 0.2) : 0
