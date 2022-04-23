@@ -321,8 +321,8 @@ function hideStreetsOverride(layer, layerN) {
   SHADOW_Y = 5 * posOrNeg()
   SHADOW_MAGNITUDE = chance(
     [15, 0],
-    [80, 1],
-    [4, 2],
+    [64, 1],
+    [20, 2],
     [MAX_GRADIENT > 200 ? 20 : 1, 10],
   )
 

@@ -2,7 +2,50 @@ NOTES
 
 
 FEATURES
-  Texture: (still, soft, choppy)
+  Zoom: (close, medium, far)
+  padding: (thin, normal, thick)
+  border: (true/false)
+  layers: (0, 2-4, more, topological)
+  density: (high, medium, low)
+  kinks
+  dashes
+  grain (smooth, course)
+  hard curves
+  airbrush
+  base: (white, paper, bright, dark)
+  color: (a, b, c, d, e, f)
+
+  Texture: (still, soft, choppy) -> turbulence
+
+
+
+All maps are presented as-is with no guarantee of accuracy or completeness, and are provided without any warranty whatsoever, either express or implied. In no event shall The Artist be held liable for any damages or loss of profits arising from use of the maps, which may not be suitable for legal, engineering, financial, or navigational purposes.
+
+Any resemblance to real locations or biological processes is purely coincidental, and nothing perceived by the viewer is to be construed as a "legal description". All markings, sections, symbols, patterns, and other visual elements are purely aesthetic devices; they should not be interpreted as geographical, topological, meteorological, biological, economic, sociological, or political phenomena. Furthermore, all perceived textures, imperfections, shadows, and marks of damage are mere simulations of an analog printing process, and in no way imply the or existence of, or ownership over, a corresponding physical paper map or anything that the map may appear to depict.
+
+All maps are licensed under a Creative Commons Attribution-NonCommercial 4.0 License.
+
+
+
+
+
+
+
+
+
+
+
+
+
+intended to convey meaning of any kind
+
+
+including, but not limited to: geographic, topologic, meteorologic, economic, sociologic, and political phenomena.
+
+
+
+or as an attempt to convey meaning of any kind.
+either express or implied
 
 
 
@@ -10,18 +53,28 @@ FEATURES
 All Maps are sold AS IS with no guarantee of accuracy or completeness, and are provided without any warranty of any kind whatsoever, either express or implied.
 
 
+
+
+
+
+
+
+
+
+
+
 All Maps exist exclusively for aesthetic (purposes), and may not be suitable for legal, engineering, financial, or navigational (purposes).
 
 
 
 
-All markings, sections, symbols, patterns, and other visual elements exist purely for aesthetic purposes, and are not to be construed or used as a "legal description", or as an attempt to convey meaning of any kind.
 
 
 In no event shall The Artist be held liable for any damages or loss of profits arising from the use of any Map.
 
 
-The presence of visual elements such as patterns, symbols, and other markings are not meant to convey meaning of any sort, including, but not limited to: geographic, topologic, meteorologic, economic, sociologic, and political phenomena. Moreover, all perceived textures, imperfections, shadows, and marks of damage act as a simulation of physical paper, and in no way imply the existence of a corresponding physical paper map, nor do they convey ownership over a physical paper map.
+The presence of visual elements such as patterns, symbols, and other markings are not meant to convey meaning of any sort, including, but not limited to: geographic, topologic, meteorologic, economic, sociologic, and political phenomena.
+
 
 
 
@@ -33,6 +86,36 @@ Ownership of a Map does not grant ownership over anything that the map may or ma
 All sales are final, and refunds will not be given for any misprints, discolorations, inaccuracies, imprecisions, or unintended features of any kind.
 
 All code is licensed under a Creative Commons Attribution-NonCommercial 4.0 License, and is provided without warranty of any kind.
+
+
+
+
+
+
+
+
+
+
+
+
+All Maps are sold AS IS with no guarantee of accuracy or completeness, and are provided without warranty. In no event shall The Artist be held liable for any damages or loss of profits arising from the use of any Map.
+
+
+
+
+All visual elements such as patterns, markings, symbols, and other markings are meant to convey no meaning whatsoever, either express of implied, including, but not limited to: geographic, topologic, meteorologic, economic, sociologic, and political phenomena.
+
+Moreover, all perceived textures, imperfections, shadows, and marks of damage act as a simulation of physical paper, and in no way imply the existence of a corresponding physical paper map, nor do they convey ownership over a physical paper map.
+
+
+All sales are final, and refunds will not be given for any misprints, discolorations, inaccuracies, imprecisions, or unintended features of any kind. All code is licensed under a Creative Commons Attribution-NonCommercial 4.0 License, and is provided without warranty of any kind.
+
+
+Any resemblance to real locations or biological processes is purely coincidental.
+
+Ownership of a Map does not grant ownership over anything that the map may or may not represent.
+
+
 
 
 

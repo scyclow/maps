@@ -6,17 +6,16 @@ function keyPressed() {
   }
 }
 
-const Q_PI = Math.PI/4
-const NEG_Q_PI = -Math.PI/4
+Q_PI = Math.PI/4
+NEG_Q_PI = -Math.PI/4
 
 LAYERS = []
 NOISE_OFFSET = 100000
 
 function setup() {
-  SIZE = min(window.innerWidth, window.innerHeight)
+  SIZE = min(innerWidth, innerHeight)
   __canvas = createCanvas(SIZE, SIZE)
   noiseSeed(rnd(1000000) + rnd(1000000) + rnd(1000))
-  colorMode(HSB, 360, 100, 100)
 
   SCALE = rnd() + 0.2
   SCALE_ADJ = SIZE/800
@@ -28,6 +27,8 @@ function setup() {
   R = round(width/(2*sizeADJ), 4)
   T = round(-height/(2*sizeADJ), 4)
   B = round(height/(2*sizeADJ), 4)
+
+  colorMode(HSB, 360, 100, 100)
 
   setFeatures()
   setLayers()
@@ -330,8 +331,8 @@ function setFeatures() {
   SHADOW_Y = 5 * posOrNeg()
   SHADOW_MAGNITUDE = chance(
     [15, 0],
-    [80, 1],
-    [4, 2],
+    [64, 1],
+    [20, 2],
     [MAX_GRADIENT > 200 ? 20 : 1, 10],
   )
 }
