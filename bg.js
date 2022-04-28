@@ -84,13 +84,13 @@ function drawBackgroundStroke(x, y, layer, strokeSize, strokeParams) {
   const angle = noise(x+NOISE_OFFSET, y+NOISE_OFFSET)
 
   const [x0, y0] = getXYRotation(
-    PI + angle + rnd(NEG_Q_PI, Q_PI),
+    PI + angle + rnd(-QUARTER_PI, QUARTER_PI),
     5,
     x + rnd(-offset, offset+SMUDGE),
     y + rnd(-offset, offset)
   )
   const [x1, y1] = getXYRotation(
-    angle + rnd(NEG_Q_PI, Q_PI),
+    angle + rnd(-QUARTER_PI, QUARTER_PI),
     5,
     x,
     y

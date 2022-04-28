@@ -614,30 +614,6 @@ function getElevation(x, y) {
   )
 }
 
-const setContrast = (_c1, _c2, newContrast=0.4) => {
-  _contrast = contrast(_c1, _c2)
-  if (_contrast < 0) {
-    const amt = (newContrast + _contrast)/0.3
-    return {
-      c1: color(
-        hue(_c1),
-        saturation(_c1) + 20*amt,
-        brightness(_c1) - 30*amt
-      ),
-      c2: _c2
-    }
-  } else {
-    const amt = (newContrast - _contrast)/0.3
-    return {
-      c2: color(
-        hue(_c2),
-        saturation(_c2) + 20*amt,
-        brightness(_c2) - 30*amt
-      ),
-      c1: _c1
-    }
-  }
-}
 
 const setContrastC2 = (_c1, _c2, newContrast=0.4) => {
   const _contrast = contrast(_c1, _c2)

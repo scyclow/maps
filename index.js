@@ -6,9 +6,6 @@ function keyPressed() {
   }
 }
 
-Q_PI = Math.PI/4
-NEG_Q_PI = -Math.PI/4
-
 LAYERS = []
 NOISE_OFFSET = 100000
 
@@ -92,10 +89,6 @@ function draw() {
   console.log(Date.now() - START)
 }
 
-function setSize() {
-
-}
-
 function setFeatures() {
   TURBULENCE = prb(0.15)
   STREET_TURBULENCE = prb(0.1)
@@ -114,8 +107,8 @@ function setFeatures() {
   NOISE_DIVISOR = rnd(150, 750) / SCALE
 
   DENSITY = chance(
-    [SCALE >= 0.8 ? 0.0025 : 0.015, 0],
-    [0.97, 1],
+    [0.015, 0],
+    [0.935, 1],
     [0.05, 2],
   )
 

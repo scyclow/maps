@@ -1,4 +1,4 @@
-function genFeatures(tokenData) {
+function calculateFeatures(tokenData) {
   // p5 fns
   const HALF_PI = Math.PI/2
   const QUARTER_PI = Math.PI/4
@@ -18,62 +18,62 @@ function genFeatures(tokenData) {
   }
 
 
-// UTILS
+  // UTILS
 
-let __randomSeed = parseInt(tokenData.hash.slice(50, 58), 16)
+  let __randomSeed = parseInt(tokenData.hash.slice(50, 58), 16)
 
-const resetRandomSeed = () => { __randomSeed = parseInt(tokenData.hash.slice(50, 58), 16) }
+  const resetRandomSeed = () => { __randomSeed = parseInt(tokenData.hash.slice(50, 58), 16) }
 
-const rndint = (mn, mx) => int(rnd(mn, mx))
-function rnd(mn, mx) {
-  __randomSeed ^= __randomSeed << 13
-  __randomSeed ^= __randomSeed >> 17
-  __randomSeed ^= __randomSeed << 5
-  const out = (((__randomSeed < 0) ? ~__randomSeed + 1 : __randomSeed) % 1000) / 1000
-  if (mx != null) return mn + out * (mx - mn)
-  else if (mn != null) return out * mn
-  else return out
-}
-
-function hshrnd(h) {
-  const str = tokenData.hash.slice(2 + h*2, 4 + h*2)
-  return parseInt(str, 16) / 255
-}
-
-const prb = x => rnd() < x
-function scaleModifier(mn, mx) {
-  const s =
-    SCALE < 0.4 && SCALE >= 0.3 ? 0.05 :
-    SCALE < 0.3 ? 0.35 - SCALE :
-    0
-
-  return map(s, 0, 0.15, mn, mx)
-}
-
-const sample = (a) => a[int(rnd(a.length))]
-
-function chance(...chances) {
-  const total = chances.reduce((t, c) => t + c[0], 0)
-  const seed = rnd()
-  let sum = 0
-  for (let i = 0; i < chances.length; i++) {
-    sum += chances[i][0] / total
-    if (seed <= sum) return chances[i][1]
+  const rndint = (mn, mx) => int(rnd(mn, mx))
+  function rnd(mn, mx) {
+    __randomSeed ^= __randomSeed << 13
+    __randomSeed ^= __randomSeed >> 17
+    __randomSeed ^= __randomSeed << 5
+    const out = (((__randomSeed < 0) ? ~__randomSeed + 1 : __randomSeed) % 1000) / 1000
+    if (mx != null) return mn + out * (mx - mn)
+    else if (mn != null) return out * mn
+    else return out
   }
-}
-const posOrNeg = () => prb(0.5) ? 1 : -1
+
+  function hshrnd(h) {
+    const str = tokenData.hash.slice(2 + h*2, 4 + h*2)
+    return parseInt(str, 16) / 255
+  }
+
+  const prb = x => rnd() < x
+  function scaleModifier(mn, mx) {
+    const s =
+      SCALE < 0.4 && SCALE >= 0.3 ? 0.05 :
+      SCALE < 0.3 ? 0.35 - SCALE :
+      0
+
+    return map(s, 0, 0.15, mn, mx)
+  }
+
+  const sample = (a) => a[int(rnd(a.length))]
+
+  function chance(...chances) {
+    const total = chances.reduce((t, c) => t + c[0], 0)
+    const seed = rnd()
+    let sum = 0
+    for (let i = 0; i < chances.length; i++) {
+      sum += chances[i][0] / total
+      if (seed <= sum) return chances[i][1]
+    }
+  }
+  const posOrNeg = () => prb(0.5) ? 1 : -1
 
 
-function hideStreetsOverride(layer, layerN) {
-  return (
-    SCALE >= 1
-    && TURBULENCE
-    && layer.ix < layerN-1
-    && layer.ix > 0
-  )
-}
+  function hideStreetsOverride(layer, layerN) {
+    return (
+      SCALE >= 1
+      && TURBULENCE
+      && layer.ix < layerN-1
+      && layer.ix > 0
+    )
+  }
 
-// FEATURES
+  // FEATURES
 
   let NOISE_DIVISOR, TURBULENCE, IGNORE_STREET_CAP, STREET_TURBULENCE, HARD_CURVES, DENSITY,
       COLOR_RULE, STRAIGHT_STREETS, SECONDARY_ANGLE_ADJ, KINKED_STREET_FACTOR,
@@ -104,8 +104,8 @@ function hideStreetsOverride(layer, layerN) {
   NOISE_DIVISOR = rnd(150, 750) / SCALE
 
   DENSITY = chance(
-    [SCALE >= 0.8 ? 0.0025 : 0.015, 0],
-    [0.97, 1],
+    [0.015, 0],
+    [0.935, 1],
     [0.05, 2],
   )
 
@@ -326,44 +326,163 @@ function hideStreetsOverride(layer, layerN) {
     [MAX_GRADIENT > 200 ? 20 : 1, 10],
   )
 
+
+  const Zoom = SCALE > 1 ? 'Close' : SCALE < 0.4 ? 'Far' : 'Near'
+  const Padding =
+    BORDER_PADDING * SCALE > 60 ? 'Thick' :
+    'Normal'
+  const Border = !!HARD_BORDER
+  const Density = DENSITY === 0 ? 'Low' : DENSITY === 2 ? 'High' : 'Medium'
+  const Paths = STRAIGHT_STREETS ? 'Straight' : HARD_CURVES ? 'Curvy' : 'Average'
+  const Angles = KINKED_STREET_FACTOR ? 'Sharp' : 'Mild'
+  const Dashes = !!DASH_RATE
+  const Grain = GRAIN ? 'Course' : 'Fine'
+  const PathTexture = TURBULENCE ? 'Choppy' : 'Soft'
+  const Strokes = STREET_TURBULENCE ? 'Heavy' : 'Light'
+  const Base =
+    ['blackAndWhite', 'neon', 'burnt'].includes(BASE_RULE) ? 'Dark' :
+    ['bright', 'faded'].includes(BASE_RULE) ? 'Bright' :
+    BASE_RULE === 'paper' ? 'Light' :
+    'White'
+  const Theme =
+    LAYER_N === 1 ? 'A' :
+    COLOR_RULE === 5 ? 'F' :
+    LAYER_N === 30 ? 'G' :
+    COLOR_RULE === 1 ? 'B' :
+    COLOR_RULE === 3 ? 'C' :
+    COLOR_RULE === 4 ? 'E' :
+    'D'
+
+
   return {
-    HASH: tokenData.hash,
-    SCALE,
-    COLOR_RULE,
-    LAYER_N,
-    BASE_RULE,
-    HUE_DIFF,
-    FORCE_GRADIENTS,
-    HARD_CURVES,
-    DASH_RATE: DASH_RATE.toPrecision(2),
-    STREET_TURBULENCE,
-    NOISE_DIVISOR: (NOISE_DIVISOR*SCALE).toPrecision(4),
-    DENSITY,
-    TURBULENCE,
-    IGNORE_STREET_CAP,
-    KINKED_STREET_FACTOR,
-    HARD_BORDER,
-    BORDER_BLEED,
-    BORDER_DRIFT: (BORDER_DRIFT*SCALE).toPrecision(4),
-    BORDER_THICKNESS: BORDER_THICKNESS.toPrecision(2),
-    BORDER_PADDING: (BORDER_PADDING*SCALE).toPrecision(4),
-    ROTATION: ROTATION.toPrecision(2),
-    STRAIGHT_STREETS,
-    X_OFF,
-    Y_OFF,
-    MISPRINT_ROTATION,
-    MAX_GRADIENT,
-    GRAIN,
-    SMUDGE,
-    STAR_MAP,
-    LOW_INK,
-    HUE_RULE,
-    SHADOW_X,
-    SHADOW_Y,
-    SHADOW_MAGNITUDE,
+    Zoom,
+    Padding,
+    Border,
+    Density,
+    Paths,
+    Angles,
+    Dashes,
+    Grain,
+    'Path Texture': PathTexture,
+    Strokes,
+    Base,
+    Theme,
   }
 
 }
 
 
 
+
+
+
+// Features
+/*
+
+
+[
+  {
+    "name": "Zoom",
+    "type": "enum",
+    "options": [
+      "Close",
+      "Near",
+      "Far"
+    ]
+  },
+  {
+    "name": "Padding",
+    "type": "enum",
+    "options": [
+      "Thin",
+      "Normal",
+      "Thick"
+    ]
+  },
+  {
+    "name": "Border",
+    "type": "boolean"
+  },
+  {
+    "name": "Density",
+    "type": "enum",
+    "options": [
+      "High",
+      "Medium",
+      "Low"
+    ]
+  },
+  {
+    "name": "Paths",
+    "type": "enum",
+    "options": [
+      "Straight",
+      "Average",
+      "Curvy"
+    ]
+  },
+  {
+    "name": "Angles",
+    "type": "enum",
+    "options": [
+      "Sharp",
+      "Mild"
+    ]
+  },
+  {
+    "name": "Dashes",
+    "type": "boolean"
+  },
+  {
+    "name": "Grain",
+    "type": "enum",
+    "options": [
+      "Course",
+      "Fine"
+    ]
+  },
+  {
+    "name": "Path Texture",
+    "type": "enum",
+    "options": [
+      "Choppy",
+      "Soft"
+    ]
+  },
+  {
+    "name": "Strokes",
+    "type": "enum",
+    "options": [
+      "Heavy",
+      "Light"
+    ]
+  },
+  {
+    "name": "Base",
+    "type": "enum",
+    "options": [
+      "Dark",
+      "Bright",
+      "Light",
+      "White"
+    ]
+  },
+  {
+    "name": "Theme",
+    "type": "enum",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G"
+    ]
+  }
+]
+
+
+
+
+*/
