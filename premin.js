@@ -1,4 +1,3 @@
-
 const setC = (x, y, c, g) => {
 
   if (g) {
@@ -42,8 +41,8 @@ const noop = () => {}
 
 function scaleModifier(mn, mx) {
   const s =
-    g37 < 0.4 && g37 >= 0.3 ? 0.05 :
-    g37 < 0.3 ? 0.35 - g37 :
+    g38 < 0.4 && g38 >= 0.3 ? 0.05 :
+    g38 < 0.3 ? 0.35 - g38 :
     0
 
   return map(s, 0, 0.15, mn, mx)
@@ -98,8 +97,8 @@ function dotLine(x1, y1, x2, y2, dotFn, ignoreFn=noop, dash=false) {
 
     if (
       !ignoreFn(x, y)
-      && !(g34 && prb(0.7))
-      && !(g19 && prb(.2))
+      && !(g35 && prb(0.7))
+      && !(g20 && prb(.2))
     ) {
       dotFn(x, y, i/d, angle);
     }
@@ -218,10 +217,132 @@ const hfix = h => ((h%360) + 360) % 360
 
 const luminance = c => (299*red(c) + 587*green(c) + 114*blue(c))/1000
 const contrast = (c1, c2) => (luminance(c1) - luminance(c2))/255
-// Your code goes here
+function drawBackground(t, b, l, r) {
+  push()
+  const baseLayer = g36[0]
+  background(baseLayer.colors.bg)
+
+  const outsideBorders = createBorderFn(g8)
+  const baseStrokeSize = 2/g38
+
+  const strokeParams = g36.map((layer, ix) => {
+    const colorOnDark = layer.isColor && baseLayer.isDark
+    const lightOnDark = layer.isLight && baseLayer.isDark
+    const darkOnColor = baseLayer.isColor && layer.isDark
+    const colorMismatch = colorOnDark || darkOnColor
+
+    const darkOnLight = (baseLayer.isLight && layer.isDark)
+    const largeLayer = (ix === 0 || ix === g36.length - 1)
+
+    return {
+      potentialMismatch: colorMismatch || darkOnLight,
+      multiplier: (
+        largeLayer && layer.gradient ? map(g38, 0.2, 1.2, 2.6, 1.5) :
+        largeLayer && darkOnColor ? max(1, 1.1/g38) :
+        largeLayer && colorOnDark ? max(1, 0.75/g38) :
+        largeLayer && darkOnLight ? max(1, 1.5/g38) :
+        colorMismatch ? max(1, 1/g38) :
+        darkOnLight ? max(1, 0.7/g38) :
+        lightOnDark ? max(1, 0.7/g38) :
+        1
+      )
+    }
+  })
+
+  const buffer = 5/g38
+  for (let y = t-buffer; y < b+buffer; y += baseStrokeSize) {
+    let strokeSize = baseStrokeSize
+    for (let x = l-buffer; x < r+buffer; x += strokeSize) {
+      const layer = !g13 && g8 > 0 && outsideBorders(x, y)
+        ? g36[0]
+        : findActiveLayer(x, y)
+      strokeSize = baseStrokeSize/strokeParams[layer.ix].multiplier
+      drawBackgroundStroke(x, y, layer, strokeSize, strokeParams[layer.ix])
+    }
+  }
+  pop()
+}
+
+function drawBackgroundStroke(x, y, layer, strokeSize, strokeParams) {
+  if (g35 && prb(0.5)) return
+  const diam = rnd(strokeSize, strokeSize*2) * strokeParams.multiplier/3.5
+  const offset = strokeParams.multiplier > 1 ? diam*2 : 0
+  const e = getElevation(x, y)
+
+  strokeWeight(diam)
+
+  let hAdj = 0
+  let sAdj = 0
+  let bAdj = 0
+  if (layer.gradient) {
+
+    const d = layer.gradient.useElevation
+      ? e * 10
+      : dist(x, y, layer.gradient.focalPoint.x, layer.gradient.focalPoint.y)
+        / dist(L, B, R, T)
+
+    hAdj = map(d, 0, 1, 0, layer.gradient.hue)
+    sAdj = map(d, 0, 1, 0, layer.gradient.sat)
+    bAdj = map(d, 0, 1, 0, layer.gradient.brt)
+  }
 
 
-function drawStreetGrid(startX, startY) {
+  const { bShadow, sShadow } = getShadow(x, y, e, layer)
+
+
+  const hGrain = g42 * 45 + 3
+  const sGrain = g42 * 10 + 5
+  const bGrain = g42 * 5 * (strokeParams.potentialMismatch ? 0 : 1)
+  stroke(
+    adjColor(
+      hfix(hue(layer.colors.bg) + hAdj + rnd(-hGrain, hGrain)),
+      saturation(layer.colors.bg) + sAdj + rnd(-sGrain, sGrain) + sShadow,
+      brightness(layer.colors.bg) + bAdj + rnd(-10 - bGrain, 0) - bShadow,
+    )
+  )
+  const angle = noise(x+g12, y+g12)
+
+  const [x0, y0] = getXYRotation(
+    PI + angle + rnd(-QUARTER_PI, QUARTER_PI),
+    5,
+    x + rnd(-offset, offset+g37),
+    y + rnd(-offset, offset)
+  )
+  const [x1, y1] = getXYRotation(
+    angle + rnd(-QUARTER_PI, QUARTER_PI),
+    5,
+    x,
+    y
+  )
+
+  line(x0, y0, x1, y1)
+}
+
+function getShadow(x, y, e, layer) {
+  const shadow = max(
+    0,
+    getElevation(x+g29, y+g30) - e,
+  ) * g6 * (g10*g38)/300
+
+  const l = map(luminance(layer.colors.bg), 0, 255, 0.5, 1)
+  const g = layer.gradient ? min(abs(layer.gradient.hue)/50, 1)*4 : 1
+  let bShadow = 0, sShadow = 0
+  if (layer.isDark) {
+    bShadow = shadow * 500
+    sShadow = shadow * 500
+
+  } else if (layer.isColor) {
+    magnitude = g * 150 * l
+    bShadow = shadow * magnitude
+    sShadow = shadow * magnitude * (layer.gradient ? 4 : 2)
+
+  } else if (layer.isLight) {
+    bShadow = shadow*100*g
+    sShadow = shadow*100*g
+  }
+
+  return { sShadow, bShadow }
+}function drawStreetGrid(startX, startY) {
   push()
   const {
     primaryAveCoords,
@@ -231,8 +352,8 @@ function drawStreetGrid(startX, startY) {
     streetCoords
   } = generateAllCoords()
 
-  const t = g19 ? 1.75 : 0.5
-  const d = g19 ? 1.25 : 0
+  const t = g20 ? 1.75 : 0.5
+  const d = g20 ? 1.25 : 0
   const streetT = t * 0.4
   const streetD = d * 1.6
   const qT = t * 0.8
@@ -247,12 +368,12 @@ function drawStreetGrid(startX, startY) {
     setC(_x, _y, layer.colors.street, layer.gradient)
 
     if (g1) {
-      times(g34 ? 2 : 5, () => {
+      times(g35 ? 2 : 5, () => {
         const trb = nsrnd(_x, _y, 0, 20)
-        circle(_x+rnd(-trb, trb), _y+rnd(-trb, trb), rnd(1*g30, 1*g31))
+        circle(_x+rnd(-trb, trb), _y+rnd(-trb, trb), rnd(1*g31, 1*g32))
       })
     } else {
-      circle(_x, _y, nsrnd(_x, _y, g30, g31) + streetD)
+      circle(_x, _y, nsrnd(_x, _y, g31, g32) + streetD)
     }
   }, startX, startY))
 
@@ -264,7 +385,7 @@ function drawStreetGrid(startX, startY) {
     if (layer.hideStreets || hideStreetsOverride(layer.ix)) return
 
     setC(_x, _y, layer.colors.quarternary, layer.gradient)
-    circle(_x, _y, nsrnd(_x, _y, 2*g30, 2*g31) + qD)
+    circle(_x, _y, nsrnd(_x, _y, 2*g31, 2*g32) + qD)
   }, startX, startY))
 
 
@@ -276,7 +397,7 @@ function drawStreetGrid(startX, startY) {
     if (layer.hideStreets || hideStreetsOverride(layer.ix)) return
 
     setC(_x, _y, layer.colors.tertiary, layer.gradient)
-    circle(_x, _y, nsrnd(_x, _y, 3.5*g30, 3.5*g31) + d)
+    circle(_x, _y, nsrnd(_x, _y, 3.5*g31, 3.5*g32) + d)
   }, startX, startY))
 
 
@@ -288,7 +409,7 @@ function drawStreetGrid(startX, startY) {
     if (layer.hideStreets || hideStreetsOverride(layer.ix)) return
 
     setC(_x, _y, layer.colors.secondary, layer.gradient)
-    circle(_x, _y, nsrnd(_x, _y, 5*g30, 5*g31) + d)
+    circle(_x, _y, nsrnd(_x, _y, 5*g31, 5*g32) + d)
   }, startX, startY))
 
 
@@ -299,7 +420,7 @@ function drawStreetGrid(startX, startY) {
     if (layer.hideStreets || hideStreetsOverride(layer.ix)) return
 
     setC(_x, _y, layer.colors.primary, layer.gradient)
-    circle(_x, _y, nsrnd(_x, _y, 6.25*g30, 6.25*g31) + d)
+    circle(_x, _y, nsrnd(_x, _y, 6.25*g31, 6.25*g32) + d)
   }, startX, startY)
   pop()
 }
@@ -307,7 +428,7 @@ function drawStreetGrid(startX, startY) {
 function drawCoords(coords, dotFn, xOff=0, yOff=0) {
   const outsideBorders = createBorderFn(g8)
 
-  const dashLine = prb(g22)
+  const dashLine = prb(g23)
   coords.forEach((coord, i) => {
     const { x: x1, y: y1 } = coord
 
@@ -321,13 +442,13 @@ function drawCoords(coords, dotFn, xOff=0, yOff=0) {
       push()
 
       const layer = findActiveLayer(x1+xOff, y1+yOff)
-      if (layer.hideStreets || hideStreetsOverride(layer.ix) || (g34 && prb(0.8))) return
+      if (layer.hideStreets || hideStreetsOverride(layer.ix) || (g35 && prb(0.8))) return
       setC(x1+xOff, y1+yOff, layer.colors.circle, layer.gradient)
 
-      const trb = g19
+      const trb = g20
       times(10, i => {
-        const fn = g26 && prb(0.001) ? drawStar : circle
-        const d = g34 ? rnd(1, 6) : 8
+        const fn = g27 && prb(0.001) ? drawStar : circle
+        const d = g35 ? rnd(1, 6) : 8
         fn(x1+rnd(-trb, trb)+xOff, y1+rnd(-trb, trb)+yOff, d)
       })
 
@@ -338,11 +459,11 @@ function drawCoords(coords, dotFn, xOff=0, yOff=0) {
 
 
 function generateAllCoords() {
-  const densityMinimum = map(g37, 0.2, 1.2, 0.1, 0.17)
+  const densityMinimum = map(g38, 0.2, 1.2, 0.1, 0.17)
 
   const densityOverride =
-    g33 === 0 ? 0.05 :
-    g33 === 2 ? 0.5 :
+    g34 === 0 ? 0.05 :
+    g34 === 2 ? 0.5 :
     false
 
   const getProb = (mn, mx, coord, override=1) =>
@@ -491,7 +612,7 @@ function generateStreetCoords(startX, startY, startAngle, params={}) {
   const driftAmt = params.driftAmt || HALF_PI/16
   const stopAtIntersections = params.stopAtIntersections || []
   const length = params.maxLen || 150
-  const borderFn = createBorderFn(-180/g37)
+  const borderFn = createBorderFn(-180/g38)
 
   let x = startX
   let y = startY
@@ -558,21 +679,19 @@ function drawBorder() {
 
 
 
-    dotRect(g39, g40, W-(g8*space), H-(g8*space), (x, y) => {
-      const layer = g13 ? findActiveLayer(x, y, true) : g35[0]
+    dotRect(g40, g41, W-(g8*space), H-(g8*space), (x, y) => {
+      const layer = g13 ? findActiveLayer(x, y, true) : g36[0]
 
       if (layer.hideStreets || hideStreetsOverride(layer.ix)) return
 
-      setC(x+g39, y+g40, layer.colors.circle, layer.gradient)
-      circle(x, y, nsrnd(x, y, g4/g37, g4*2.5/g37))
+      setC(x+g40, y+g41, layer.colors.circle, layer.gradient)
+      circle(x, y, nsrnd(x, y, g4/g38, g4*2.5/g38))
     })
 
 
 
   }
 }
-
-
 // TODO rule neighbor probabilities, starting threshold, + spacing should be set into multiple different strategies
 
 // gradual: lower initial threshold, higher threshold diff, subtle changes
@@ -640,37 +759,37 @@ function setLayers() {
   const r = rules()
 
   const baseHue = rnd(360)
-  g35 = [{
+  g36 = [{
     ix: 0,
-    threshold: g32 >= 30 ? elevationMin : elevationAverage,
+    threshold: g33 >= 30 ? elevationMin : elevationAverage,
     hideStreets: false,
-    ...r[g21](baseHue, g15/rnd(3, 15), 0, g11)
+    ...r[g22](baseHue, g15/rnd(3, 15), 0, g11)
   }]
 
-  const baseIsLight = ['whiteAndBlack', 'paper'].includes(g21)
-  const baseIsColor = ['bright', 'faded'].includes(g21)
+  const baseIsLight = ['whiteAndBlack', 'paper'].includes(g22)
+  const baseIsColor = ['bright', 'faded'].includes(g22)
 
   const alternateRule =
-    g18 === 5 && baseIsColor ? sample(['bright', 'whiteAndBlack']) :
-    g18 === 5 && baseIsLight ? 'bright' :
+    g19 === 5 && baseIsColor ? sample(['bright', 'whiteAndBlack']) :
+    g19 === 5 && baseIsLight ? 'bright' :
     false
 
   let hueIx = 0
   const huePresets = getHuePresets(baseHue)
-  const nextHue = (previousHue) => g27 === 'path'
-    ? previousHue + g24
+  const nextHue = (previousHue) => g28 === 'path'
+    ? previousHue + g25
     : huePresets[hueIx++ % huePresets.length]
 
 
   const newLayer = (previousLayer, threshold, ix) => {
     const hideStreets = prb(0.2) && !g3
-    const maxGrad = ix === g32-1 ? g15/rnd(3, 8) : g15
+    const maxGrad = ix === g33-1 ? g15/rnd(3, 8) : g15
 
     let nextLayer
-    if (g18 === 5 && !(ix % 2)) {
-      nextLayer = g35[0]
+    if (g19 === 5 && !(ix % 2)) {
+      nextLayer = g36[0]
 
-    } else if (g18 === 5 && ix % 2) {
+    } else if (g19 === 5 && ix % 2) {
       const altHueDiff = chance(
         [1, 20],
         [1, 120],
@@ -696,13 +815,13 @@ function setLayers() {
     }
   }
 
-  for (let i = 1; i < g32; i++) {
-    const previousLayer = g35[i-1]
-    const threshold = i === g32 - 1
+  for (let i = 1; i < g33; i++) {
+    const previousLayer = g36[i-1]
+    const threshold = i === g33 - 1
       ? 1
       : previousLayer.threshold + 0.02
 
-    g35.push(newLayer(previousLayer, threshold, i))
+    g36.push(newLayer(previousLayer, threshold, i))
   }
 }
 
@@ -731,9 +850,9 @@ const rules = () => {
   return {
     blackAndWhite: (baseHue, _, ix, __) => {
       let key
-      if ([2, 4].includes(g18)) key = 'light'
-      else if (g18 === 3) key = 'dark'
-      else if (g18 === 4) key = 'color'
+      if ([2, 4].includes(g19)) key = 'light'
+      else if (g19 === 3) key = 'dark'
+      else if (g19 === 4) key = 'color'
       else key = 'all'
 
       const neighbors = {
@@ -780,14 +899,14 @@ const rules = () => {
 
     whiteAndBlack: (baseHue, _, ix, __) => {
       let key
-      if (g18 === 1) key = 'contrast'
-      else if (g18 === 3) key = 'dark'
-      else if ([2, 4].includes(g18)) key = 'color'
+      if (g19 === 1) key = 'contrast'
+      else if (g19 === 3) key = 'dark'
+      else if ([2, 4].includes(g19)) key = 'color'
       else key = 'all'
 
       const neighbors = {
         contrast: [
-          [g32 > 3 ? 1 : 0, 'bright'],
+          [g33 > 3 ? 1 : 0, 'bright'],
           [3, 'blackAndWhite'],
         ],
         dark: [
@@ -833,11 +952,11 @@ const rules = () => {
       }
 
       let key
-      if (g32 === 2) key = 'color'
-      else if (g18 === 1) key = 'contrast'
-      else if (g18 === 2) key = 'light'
-      else if (g18 === 3) key = 'dark'
-      else if (g18 === 4) key = 'color'
+      if (g33 === 2) key = 'color'
+      else if (g19 === 1) key = 'contrast'
+      else if (g19 === 2) key = 'light'
+      else if (g19 === 3) key = 'dark'
+      else if (g19 === 4) key = 'color'
       else key = 'all'
 
       const neighbors = {
@@ -891,16 +1010,16 @@ const rules = () => {
         : color(hfix(baseHue + 180), 30, 15)
 
       let key
-      if (g18 === 1) key = 'contrast'
-      else if (g18 === 2) key = 'light'
-      else if (g18 === 3) key = 'dark'
-      else if (g18 === 4) key = 'color'
+      if (g19 === 1) key = 'contrast'
+      else if (g19 === 2) key = 'light'
+      else if (g19 === 3) key = 'dark'
+      else if (g19 === 4) key = 'color'
       else key = 'all'
 
       const neighbors = {
         contrast: [
           [3, 'blackAndWhite'],
-          [g32 > 3 ? 1 : 0, 'whiteAndBlack'],
+          [g33 > 3 ? 1 : 0, 'whiteAndBlack'],
           [3, 'neon'],
         ],
         dark: [
@@ -944,21 +1063,21 @@ const rules = () => {
     paper: (baseHue, gradientMax, ix, __) => {
       const c1 = color(hfix(baseHue), 8, 91)
 
-      const c2 = invertStreetColor(baseHue + g24, 60, 30, c1)
-      const c3 = invertStreetColor(baseHue + g24 - 10, 40, 35, c1)
-      const c4 = invertStreetColor(baseHue + g24 - 20, 40, 35, c1)
+      const c2 = invertStreetColor(baseHue + g25, 60, 30, c1)
+      const c3 = invertStreetColor(baseHue + g25 - 10, 40, 35, c1)
+      const c4 = invertStreetColor(baseHue + g25 - 20, 40, 35, c1)
 
       let key
-      if (g18 === 2) key = 'light'
-      else if (g18 === 3) key = 'dark'
-      else if (g18 === 4) key = 'color'
+      if (g19 === 2) key = 'light'
+      else if (g19 === 3) key = 'dark'
+      else if (g19 === 4) key = 'color'
       else key = 'all'
 
       const neighbors = {
 
         dark: [
           [1, 'blackAndWhite'],
-          [g32 > 2 ? 1 : 0, 'neon'],
+          [g33 > 2 ? 1 : 0, 'neon'],
           [1, 'burnt'],
         ],
         light: [
@@ -972,7 +1091,7 @@ const rules = () => {
         ],
         all: [
           [6, 'blackAndWhite'],
-          [g32 > 2 ? 6 : 0, 'neon'],
+          [g33 > 2 ? 6 : 0, 'neon'],
           [7, 'burnt'],
           [1, 'whiteAndBlack'],
           [1, 'bright'],
@@ -1002,14 +1121,14 @@ const rules = () => {
 
     faded: (baseHue, gradientMax, ix, __) => {
       const c1 = adjColor(baseHue, 35, 95)
-      const c2 = invertStreetColor(baseHue+g24, 85, 30, c1)
-      const c3 = invertStreetColor(baseHue+g24-10, 85, 30, c1)
-      const c4 = invertStreetColor(baseHue+g24-20, 85, 30, c1)
+      const c2 = invertStreetColor(baseHue+g25, 85, 30, c1)
+      const c3 = invertStreetColor(baseHue+g25-10, 85, 30, c1)
+      const c4 = invertStreetColor(baseHue+g25-20, 85, 30, c1)
 
       let key
-      if (g18 === 2) key = 'light'
-      else if (g18 === 3) key = 'dark'
-      else if (g18 === 4) key = 'color'
+      if (g19 === 2) key = 'light'
+      else if (g19 === 3) key = 'dark'
+      else if (g19 === 4) key = 'color'
       else key = 'all'
 
       const neighbors = {
@@ -1058,17 +1177,17 @@ const rules = () => {
 
     burnt: (baseHue, gradientMax, ix, lightenDarks) => {
       const c1 = color(hfix(baseHue), 35, lightenDarks ? 17 : 15)
-      const d = g24 > 0 ? 1 : -1
+      const d = g25 > 0 ? 1 : -1
 
-      const c2 = color(hfix(baseHue + g24), 50, 85)
-      const c3 = color(hfix(baseHue + g24-30*d), 50, 85)
-      const c4 = color(hfix(baseHue + g24-60*d), 50, 85)
+      const c2 = color(hfix(baseHue + g25), 50, 85)
+      const c3 = color(hfix(baseHue + g25-30*d), 50, 85)
+      const c4 = color(hfix(baseHue + g25-60*d), 50, 85)
 
       let key
-      if (g32 === 2) key = 'color'
-      else if (g18 === 2) key = 'light'
-      else if (g18 === 3) key = 'dark'
-      else if (g18 === 4) key = 'color'
+      if (g33 === 2) key = 'color'
+      else if (g19 === 2) key = 'light'
+      else if (g19 === 3) key = 'dark'
+      else if (g19 === 4) key = 'color'
       else key = 'all'
 
       const neighbors = {
@@ -1127,9 +1246,9 @@ function invertStreetColor(_hue, sat, brt, c1) {
 
 function hideStreetsOverride(layerIx) {
   return (
-    g37 >= 1
-    && g19
-    && layerIx < g32-1
+    g38 >= 1
+    && g20
+    && layerIx < g33-1
     && layerIx > 0
   )
 }
@@ -1138,16 +1257,16 @@ function hideStreetsOverride(layerIx) {
 function findActiveLayer(x, y) {
   const n = getElevation(x, y)
 
-  for (let i = 0; i < g35.length; i++) {
-    if (n < g35[i].threshold) return g35[i]
+  for (let i = 0; i < g36.length; i++) {
+    if (n < g36[i].threshold) return g36[i]
   }
 
-  return g35[g35.length - 1]
+  return g36[g36.length - 1]
 }
 
 
 function getHuePresets(baseHue) {
-  switch (abs(g24)) {
+  switch (abs(g25)) {
     case 0: return [baseHue]
     case 10: return [baseHue, baseHue+10, baseHue+20, baseHue+30, baseHue+40, baseHue+50, baseHue+60]
     case 20: return [baseHue, baseHue + 20, baseHue - 20]
@@ -1164,7 +1283,7 @@ function findAvgElevation() {
   let elevationIx = 0
   let elevationMin = 1
   let elevationMax = 0
-  const step = 30/g37
+  const step = 30/g38
   for (let x = L; x < R; x += step)
   for (let y = T; y < B; y += step) {
     const elevation = getElevation(x, y)
@@ -1189,7 +1308,6 @@ function getElevation(x, y) {
 }
 
 
-
 const setContrastC2 = (_c1, _c2, newContrast=0.4) => {
   const _contrast = contrast(_c1, _c2)
 
@@ -1202,154 +1320,23 @@ const setContrastC2 = (_c1, _c2, newContrast=0.4) => {
   )
 }
 
-function drawBackground(t, b, l, r) {
-  push()
-  const baseLayer = g35[0]
-  background(baseLayer.colors.bg)
-
-  const outsideBorders = createBorderFn(g8)
-  const baseStrokeSize = 2/g37
-
-  const strokeParams = g35.map((layer, ix) => {
-    const colorOnDark = layer.isColor && baseLayer.isDark
-    const lightOnDark = layer.isLight && baseLayer.isDark
-    const darkOnColor = baseLayer.isColor && layer.isDark
-    const colorMismatch = colorOnDark || darkOnColor
-
-    const darkOnLight = (baseLayer.isLight && layer.isDark)
-    const largeLayer = (ix === 0 || ix === g35.length - 1)
-
-    return {
-      potentialMismatch: colorMismatch || darkOnLight,
-      multiplier: (
-        largeLayer && layer.gradient ? map(g37, 0.2, 1.2, 2.6, 1.5) :
-        largeLayer && darkOnColor ? max(1, 1.1/g37) :
-        largeLayer && colorOnDark ? max(1, 0.75/g37) :
-        largeLayer && darkOnLight ? max(1, 1.5/g37) :
-        colorMismatch ? max(1, 1/g37) :
-        darkOnLight ? max(1, 0.7/g37) :
-        lightOnDark ? max(1, 0.7/g37) :
-        1
-      )
-    }
-  })
-
-  const buffer = 5/g37
-  for (let y = t-buffer; y < b+buffer; y += baseStrokeSize) {
-    let strokeSize = baseStrokeSize
-    for (let x = l-buffer; x < r+buffer; x += strokeSize) {
-      const layer = !g13 && g8 > 0 && outsideBorders(x, y)
-        ? g35[0]
-        : findActiveLayer(x, y)
-      strokeSize = baseStrokeSize/strokeParams[layer.ix].multiplier
-      drawBackgroundStroke(x, y, layer, strokeSize, strokeParams[layer.ix])
-    }
-  }
-  pop()
-}
-
-function drawBackgroundStroke(x, y, layer, strokeSize, strokeParams) {
-  if (g34 && prb(0.5)) return
-  const diam = rnd(strokeSize, strokeSize*2) * strokeParams.multiplier/3.5
-  const offset = strokeParams.multiplier > 1 ? diam*2 : 0
-  const e = getElevation(x, y)
-
-  strokeWeight(diam)
-
-  let hAdj = 0
-  let sAdj = 0
-  let bAdj = 0
-  if (layer.gradient) {
-
-    const d = layer.gradient.useElevation
-      ? e * 10
-      : dist(x, y, layer.gradient.focalPoint.x, layer.gradient.focalPoint.y)
-        / dist(L, B, R, T)
-
-    hAdj = map(d, 0, 1, 0, layer.gradient.hue)
-    sAdj = map(d, 0, 1, 0, layer.gradient.sat)
-    bAdj = map(d, 0, 1, 0, layer.gradient.brt)
-  }
-
-
-  const { bShadow, sShadow } = getShadow(x, y, e, layer)
-
-
-  const hGrain = g41 * 45 + 3
-  const sGrain = g41 * 10 + 5
-  const bGrain = g41 * 5 * (strokeParams.potentialMismatch ? 0 : 1)
-  stroke(
-    adjColor(
-      hfix(hue(layer.colors.bg) + hAdj + rnd(-hGrain, hGrain)),
-      saturation(layer.colors.bg) + sAdj + rnd(-sGrain, sGrain) + sShadow,
-      brightness(layer.colors.bg) + bAdj + rnd(-10 - bGrain, 0) - bShadow,
-    )
-  )
-  const angle = noise(x+g12, y+g12)
-
-  const [x0, y0] = getXYRotation(
-    PI + angle + rnd(g23, g42),
-    5,
-    x + rnd(-offset, offset+g36),
-    y + rnd(-offset, offset)
-  )
-  const [x1, y1] = getXYRotation(
-    angle + rnd(g23, g42),
-    5,
-    x,
-    y
-  )
-
-  line(x0, y0, x1, y1)
-}
-
-function getShadow(x, y, e, layer) {
-  const shadow = max(
-    0,
-    getElevation(x+g28, y+g29) - e,
-  ) * g6 * (g10*g37)/300
-
-  const l = map(luminance(layer.colors.bg), 0, 255, 0.5, 1)
-  const g = layer.gradient ? min(abs(layer.gradient.hue)/50, 1)*4 : 1
-  let bShadow = 0, sShadow = 0
-  if (layer.isDark) {
-    bShadow = shadow * 500
-    sShadow = shadow * 500
-
-  } else if (layer.isColor) {
-    magnitude = g * 150 * l
-    bShadow = shadow * magnitude
-    sShadow = shadow * magnitude * (layer.gradient ? 4 : 2)
-
-  } else if (layer.isLight) {
-    bShadow = shadow*100*g
-    sShadow = shadow*100*g
-  }
-
-  return { sShadow, bShadow }
-}
-
-
 function keyPressed() {
   if (keyCode === 83) {
     saveCanvas(__canvas, 'maps-' + Date.now(), 'png');
   }
 }
 
-g42 = Math.PI/4
-g23 = -Math.PI/4
-
-g35 = []
+g36 = []
 g12 = 100000
 
 function setup() {
-  g43 = min(innerWidth, innerHeight)
-  __canvas = createCanvas(g43, g43)
+  g44 = min(innerWidth, innerHeight)
+  __canvas = createCanvas(g44, g44)
   noiseSeed(rnd(1000000) + rnd(1000000) + rnd(1000))
 
-  g37 = rnd() + 0.2
-  g20 = g43/800
-  const sizeADJ = g37*g20
+  g38 = rnd() + 0.2
+  g21 = g44/800
+  const sizeADJ = g38*g21
 
   W = width/sizeADJ
   H = height/sizeADJ
@@ -1363,105 +1350,66 @@ function setup() {
   setFeatures()
   setLayers()
 
-  console.log(JSON.stringify({
-    g44: tokenData.hash,
-    g37,
-    g18,
-    g32,
-    g21,
-    g24,
-    g7,
-    g16,
-    g22: g22.toPrecision(2),
-    g1,
-    g10: (g10*g37).toPrecision(4),
-    g33,
-    g19,
-    g2,
-    g0,
-    g17,
-    g13,
-    g14: (g14*g37).toPrecision(4),
-    g4: g4.toPrecision(2),
-    g8: (g8*g37).toPrecision(4),
-    g25: g25.toPrecision(2),
-    g5,
-    g39,
-    g40,
-    g3,
-    g15,
-    g41,
-    g36,
-    g26,
-    g34,
-    g27,
-    g28,
-    g29,
-    g6,
-  }, null, 2))
-  console.log(g35)
+  console.log('What are you looking for?')
 }
 
 
 function draw() {
   noLoop()
-  const START = Date.now()
 
   translate(width/2, height/2)
-  scale(g37 * g20)
+  scale(g38 * g21)
 
-  const bgBuffer = max(abs(g39), abs(g40))*1.5
+  const bgBuffer = max(abs(g40), abs(g41))*1.5
   rotate(g3)
   drawBackground(T-bgBuffer, B+bgBuffer, L-bgBuffer, R+bgBuffer)
 
-  rotate(g25)
-  drawStreetGrid(g39, g40)
+  rotate(g26)
+  drawStreetGrid(g40, g41)
 
   drawBorder()
-
-  console.log(Date.now() - START)
 }
 
 function setFeatures() {
-  g19 = prb(0.15)
+  g20 = prb(0.15)
   g1 = prb(0.1)
   g2 = prb(0.1)
   g16 = prb(0.05)
   g5 = prb(scaleModifier(0.05, 0.1))
-  g26 = prb(0.02)
-  g34 = prb(0.01)
-  g36 = prb(0.01) ? rnd(30, 100) : 0
+  g27 = prb(0.02)
+  g35 = prb(0.01)
+  g37 = prb(0.01) ? rnd(30, 100) : 0
 
   g0 =
     prb(0.15)
       ? rnd(QUARTER_PI/2, QUARTER_PI) * posOrNeg()
       : 0
 
-  g10 = rnd(150, 750) / g37
+  g10 = rnd(150, 750) / g38
 
-  g33 = chance(
+  g34 = chance(
     [0.015, 0],
     [0.935, 1],
     [0.05, 2],
   )
 
-  g22 = prb(0.125) ? rnd(0.05, 0.2) : 0
+  g23 = prb(0.125) ? rnd(0.05, 0.2) : 0
 
-  g18 = chance(
+  g19 = chance(
     [40, 0], // anything goes
     [15, 1], // contrast
     [5, 2], // all light
     [11, 3], // all dark
     [27, 4], // all color
-    [g37 >= 1 && g19 ? 0 : 2, 5], // topographic
+    [g38 >= 1 && g20 ? 0 : 2, 5], // topographic
   )
 
   const layerNScaleAdj =
     g1 || g16
       ? 10
-      : map(g37, 1.2, 0.2, 1, 15)
+      : map(g38, 1.2, 0.2, 1, 15)
 
-  g32 = chance(
+  g33 = chance(
     [layerNScaleAdj, 1],
     [6, 2],
     [36, 3],
@@ -1472,18 +1420,18 @@ function setFeatures() {
   )
 
 
-  g21 = chance(
-    [g32 <= 4 ? 20 : 0, 'paper'],
-    [g32 <= 4 ? 20 : 0, 'faded'],
-    [g32 <= 4 ? 15 : 0, 'burnt'],
+  g22 = chance(
+    [g33 <= 4 ? 20 : 0, 'paper'],
+    [g33 <= 4 ? 20 : 0, 'faded'],
+    [g33 <= 4 ? 15 : 0, 'burnt'],
 
-    [g32 <= 4 ? 10 : 5, 'bright'],
+    [g33 <= 4 ? 10 : 5, 'bright'],
     [6, 'whiteAndBlack'],
     [4, 'blackAndWhite'],
-    [g37 <= 0.3 ? 0 : 4, 'neon'],
+    [g38 <= 0.3 ? 0 : 4, 'neon'],
   )
 
-  g24 = chance(
+  g25 = chance(
     [3, 0],
     [2, 20],
     [1, 100],
@@ -1498,44 +1446,44 @@ function setFeatures() {
   g9 = false
   g11 = false
 
-  g27 = sample(['path', 'preset'])
+  g28 = sample(['path', 'preset'])
 
-  if (g18 === 1) {
-    g24 = 0
-    g32 = chance(
+  if (g19 === 1) {
+    g25 = 0
+    g33 = chance(
       [6, 3],
       [1, 4],
       [1, 5],
     )
 
-    g21 = chance(
+    g22 = chance(
       [7, 'bright'],
       [3, 'whiteAndBlack'],
       [5, 'blackAndWhite'],
       [5, 'neon'],
     )
 
-  } else if (g18 === 3) {
-    g21 = chance(
+  } else if (g19 === 3) {
+    g22 = chance(
       [20, 'burnt'],
       [5, 'blackAndWhite'],
       [5, 'neon'],
     )
 
-    g19 = rnd() < 0.4
+    g20 = rnd() < 0.4
     g1 = rnd() < 0.3
     g11 = true
 
-  } else if (g18 === 4) {
+  } else if (g19 === 4) {
 
-    g21 = chance(
+    g22 = chance(
       [20, 'faded'],
       [30, 'bright'],
       [10, 'paper'],
       [30, 'whiteAndBlack'],
     )
 
-    g32 = chance(
+    g33 = chance(
       [25, 3],
       [35, rndint(4,6)],
       [25, rndint(6,9)],
@@ -1543,35 +1491,35 @@ function setFeatures() {
       [!g16 ? 5 : 0, rndint(15, 30)],
     )
 
-    g24 = chance(
-      [g32 >= 12 ? 2 : 1, 10],
+    g25 = chance(
+      [g33 >= 12 ? 2 : 1, 10],
       [4, 20],
-      [g32 >= 12 ? 1 : 2, 100],
+      [g33 >= 12 ? 1 : 2, 100],
       [3, 120],
-      [g32 >= 12 ? 1 : 3, 150],
+      [g33 >= 12 ? 1 : 3, 150],
       [3, 180],
     ) * posOrNeg()
 
     if (prb(0.05)) {
       g7 = true
       g9 = true
-    } else if (prb(0.5) && g32 <= 4) {
+    } else if (prb(0.5) && g33 <= 4) {
       g9 = true
     }
 
-  } else if (5 === g18) {
-    g10 = rnd(350, 1000) / g37
+  } else if (5 === g19) {
+    g10 = rnd(150, 500) / g38
 
-    g32 = 50
+    g33 = 50
 
-    g21 = chance(
+    g22 = chance(
       [1, 'paper'],
       [1, 'faded'],
       [1, 'bright'],
       [1, 'whiteAndBlack'],
     )
 
-    g24 = chance(
+    g25 = chance(
       [6, 0],
       [2, 20],
       [1, 120],
@@ -1579,15 +1527,15 @@ function setFeatures() {
     ) * posOrNeg()
   }
 
-  if (g21 === 'blackAndWhite' || g21 === 'neon' && g32 > 2 && g18 !== 3) {
-    g24 = chance(
+  if (g22 === 'blackAndWhite' || g22 === 'neon' && g33 > 2 && g19 !== 3) {
+    g25 = chance(
         [1, 0],
         [2, 180],
       ) * posOrNeg()
   }
 
-  if (g32 === 2 && ['neon', 'burnt'].includes(g21)) {
-    g24 = chance(
+  if (g33 === 2 && ['neon', 'burnt'].includes(g22)) {
+    g25 = chance(
       [5, 0],
       [1, 100],
       [1, 120],
@@ -1596,14 +1544,14 @@ function setFeatures() {
     ) * posOrNeg()
   }
 
-  const scaleMultiplier = scaleModifier(1, 1.6) * (g34 ? 0.7 : 1)
-  g30 = 0.7 * scaleMultiplier
-  g31 = 1.3 * scaleMultiplier
+  const scaleMultiplier = scaleModifier(1, 1.6) * (g35 ? 0.7 : 1)
+  g31 = 0.7 * scaleMultiplier
+  g32 = 1.3 * scaleMultiplier
 
-  g41 = rnd() < 0.5 || ['blackAndWhite', 'neon', 'burnt'].includes(g21) ? 0 : rnd(0.2, 0.7)
+  g42 = rnd() < 0.5 || ['blackAndWhite', 'neon', 'burnt'].includes(g22) ? 0 : rnd(0.2, 0.7)
 
-  g39 = 0
   g40 = 0
+  g41 = 0
   g3 = 0
 
 
@@ -1614,47 +1562,47 @@ function setFeatures() {
     [5, rnd(175, 200)],
     [75, rnd(30, 60)],
     [20, rnd(20, 30)],
-  ) / g37
+  ) / g38
 
-  g4 = map(g37, 0.2, 1.2, 1.6, 2.8) + rnd(-.2, .2)
+  g4 = map(g38, 0.2, 1.2, 1.6, 2.8) + rnd(-.2, .2)
   g14 = chance(
     [5, 0],
-    [3, rnd(3)/g37],
-    [1, rnd(3, g8/2)/g37]
+    [3, rnd(3)/g38],
+    [1, rnd(3, g8/2)/g38]
   )
-  g25 = rnd(-0.0005, 0.0005)
-  g39 = rnd(-2, 2)/g37
-  g40 = rnd(-2, 2)/g37
+  g26 = rnd(-0.0005, 0.0005)
+  g40 = rnd(-2, 2)/g38
+  g41 = rnd(-2, 2)/g38
 
-  IS_MISPRINT = prb(0.015)
+  g18 = prb(0.015)
 
-  if (!g17 && g8*g37 <= 30) {
-    g14 = g8 - 5/g37
+  if (!g17 && g8*g38 <= 30) {
+    g14 = g8 - 5/g38
     g17 = false
     g13 = false
   }
 
-  if (IS_MISPRINT) {
+  if (g18) {
     g17 = true
     g13 = true
     g4 = rnd(1.4, 3)
     g14 = chance(
       [5, 0],
-      [3, rnd(3)/g37],
-      [1, rnd(3, g8/2)/g37]
+      [3, rnd(3)/g38],
+      [1, rnd(3, g8/2)/g38]
     )
 
     const div = prb(0.333) ? 2 : 1
 
-    g39 = rnd(-250, 250)/(div*g37)
-    g40 = rnd(-250, 250)/(div*g37)
+    g40 = rnd(-250, 250)/(div*g38)
+    g41 = rnd(-250, 250)/(div*g38)
     g3 = rnd(-QUARTER_PI, QUARTER_PI)/(4*div)
   }
 
-  g14 = min(180/g37, g14)
+  g14 = min(180/g38, g14)
 
-  g28 = 5 * posOrNeg()
   g29 = 5 * posOrNeg()
+  g30 = 5 * posOrNeg()
   g6 = chance(
     [15, 0],
     [64, 1],

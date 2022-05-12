@@ -49,12 +49,23 @@ const globals = [
 ].sort((a, b) => b.length - a.length)
 
 
-let script = fs.readFileSync('./premin.js', 'utf8')
+
+
+
+const util = fs.readFileSync('./util.js', 'utf8')
+const bg = fs.readFileSync('./bg.js', 'utf8')
+const grid = fs.readFileSync('./grid.js', 'utf8')
+const border = fs.readFileSync('./border.js', 'utf8')
+const layerRules = fs.readFileSync('./layerRules.js', 'utf8')
+const index = fs.readFileSync('./index.js', 'utf8')
+
+
+let script = util + bg + grid + border + layerRules + index
 
 
 
 for (let i=0; i < globals.length; i++) {
-  console.log(globals[i])
+  // console.log(globals[i])
   script = script.replaceAll(globals[i], 'g'+i)
 }
 

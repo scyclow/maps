@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "minify": "node replaceGlobals.js && uglifyjs premin.js --config-file uglify.config.json -o min.js"
   },
   "dependencies": {
     "uglify-js": "^3.15.4"

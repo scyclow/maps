@@ -30,49 +30,12 @@ function setup() {
   setFeatures()
   setLayers()
 
-  console.log(JSON.stringify({
-    HASH: tokenData.hash,
-    SCALE,
-    COLOR_RULE,
-    LAYER_N,
-    BASE_RULE,
-    HUE_DIFF,
-    FORCE_GRADIENTS,
-    HARD_CURVES,
-    DASH_RATE: DASH_RATE.toPrecision(2),
-    STREET_TURBULENCE,
-    NOISE_DIVISOR: (NOISE_DIVISOR*SCALE).toPrecision(4),
-    DENSITY,
-    TURBULENCE,
-    IGNORE_STREET_CAP,
-    KINKED_STREET_FACTOR,
-    HARD_BORDER,
-    BORDER_BLEED,
-    BORDER_DRIFT: (BORDER_DRIFT*SCALE).toPrecision(4),
-    BORDER_THICKNESS: BORDER_THICKNESS.toPrecision(2),
-    BORDER_PADDING: (BORDER_PADDING*SCALE).toPrecision(4),
-    ROTATION: ROTATION.toPrecision(2),
-    STRAIGHT_STREETS,
-    X_OFF,
-    Y_OFF,
-    MISPRINT_ROTATION,
-    MAX_GRADIENT,
-    GRAIN,
-    SMUDGE,
-    STAR_MAP,
-    LOW_INK,
-    HUE_RULE,
-    SHADOW_X,
-    SHADOW_Y,
-    SHADOW_MAGNITUDE,
-  }, null, 2))
-  console.log(LAYERS)
+  console.log('What are you looking for?')
 }
 
 
 function draw() {
   noLoop()
-  const START = Date.now()
 
   translate(width/2, height/2)
   scale(SCALE * SCALE_ADJ)
@@ -85,8 +48,6 @@ function draw() {
   drawStreetGrid(X_OFF, Y_OFF)
 
   drawBorder()
-
-  console.log(Date.now() - START)
 }
 
 function setFeatures() {
@@ -227,7 +188,7 @@ function setFeatures() {
     }
 
   } else if (5 === COLOR_RULE) {
-    NOISE_DIVISOR = rnd(350, 1000) / SCALE
+    NOISE_DIVISOR = rnd(150, 500) / SCALE
 
     LAYER_N = 50
 

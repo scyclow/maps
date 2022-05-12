@@ -224,7 +224,7 @@ function calculateFeatures(tokenData) {
     }
 
   } else if (5 === COLOR_RULE) {
-    NOISE_DIVISOR = rnd(350, 1000) / SCALE
+    NOISE_DIVISOR = rnd(150, 500) / SCALE
 
     LAYER_N = 50
 
@@ -394,7 +394,6 @@ function calculateFeatures(tokenData) {
     "name": "Padding",
     "type": "enum",
     "options": [
-      "Thin",
       "Normal",
       "Thick"
     ]
