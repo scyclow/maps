@@ -87,29 +87,29 @@ function calculateFeatures(tokenData) {
 
   SCALE = rnd(0.2, 1.2)
 
-  TURBULENCE = prb(0.15)
-  STREET_TURBULENCE = prb(0.1)
+  TURBULENCE = prb(0.2)
+  STREET_TURBULENCE = prb(0.15)
   IGNORE_STREET_CAP = prb(0.1)
-  HARD_CURVES = prb(0.05)
-  STRAIGHT_STREETS = prb(scaleModifier(0.05, 0.1))
+  HARD_CURVES = prb(0.1)
+  STRAIGHT_STREETS = prb(scaleModifier(0.05, 0.15))
   STAR_MAP = prb(0.02)
   LOW_INK = prb(0.01)
   SMUDGE = prb(0.01) ? rnd(30, 100) : 0
 
   KINKED_STREET_FACTOR =
-    prb(0.15)
+    prb(0.2)
       ? rnd(QUARTER_PI/2, QUARTER_PI) * posOrNeg()
       : 0
 
   NOISE_DIVISOR = rnd(150, 750) / SCALE
 
   DENSITY = chance(
-    [0.015, 0],
-    [0.935, 1],
-    [0.05, 2],
+    [0.02, 0],
+    [0.9, 1],
+    [0.08, 2],
   )
 
-  DASH_RATE = prb(0.125) ? rnd(0.05, 0.2) : 0
+  DASH_RATE = prb(0.175) ? rnd(0.05, 0.2) : 0
 
   COLOR_RULE = chance(
     [40, 0], // anything goes
@@ -122,8 +122,8 @@ function calculateFeatures(tokenData) {
 
   const layerNScaleAdj =
     STREET_TURBULENCE || HARD_CURVES
-      ? 10
-      : map(SCALE, 1.2, 0.2, 1, 15)
+      ? 15
+      : map(SCALE, 1.2, 0.2, 1, 20)
 
   LAYER_N = chance(
     [layerNScaleAdj, 1],
@@ -157,8 +157,8 @@ function calculateFeatures(tokenData) {
   ) * posOrNeg()
 
 
-  FORCE_GRADIENTS = prb(0.02)
-  MAX_GRADIENT = prb(0.025) ? rnd(720, 3000) : 200
+  FORCE_GRADIENTS = prb(0.03)
+  MAX_GRADIENT = prb(0.035) ? rnd(720, 3000) : 200
   INVERT_STREETS = false
   LIGHTEN_DARKS = false
 
@@ -275,7 +275,7 @@ function calculateFeatures(tokenData) {
   HARD_BORDER = BORDER_BLEED || prb(0.8)
 
   BORDER_PADDING = chance(
-    [5, rnd(175, 200)],
+    [6.25, rnd(175, 200)],
     [75, rnd(30, 60)],
     [20, rnd(20, 30)],
   ) / SCALE
@@ -321,9 +321,9 @@ function calculateFeatures(tokenData) {
   SHADOW_Y = 5 * posOrNeg()
   SHADOW_MAGNITUDE = chance(
     [15, 0],
-    [64, 1],
-    [20, 2],
-    [MAX_GRADIENT > 200 ? 20 : 1, 10],
+    [50, 1],
+    [30, 2],
+    [MAX_GRADIENT > 200 ? 20 : 1, 15],
   )
 
 
