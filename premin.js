@@ -1371,29 +1371,29 @@ function draw() {
 }
 
 function setFeatures() {
-  g20 = prb(0.15)
-  g1 = prb(0.1)
+  g20 = prb(0.18)
+  g1 = prb(0.15)
   g2 = prb(0.1)
-  g16 = prb(0.05)
-  g5 = prb(scaleModifier(0.05, 0.1))
+  g16 = prb(0.1)
+  g5 = prb(scaleModifier(0.05, 0.15))
   g27 = prb(0.02)
   g35 = prb(0.01)
   g37 = prb(0.01) ? rnd(30, 100) : 0
 
   g0 =
-    prb(0.15)
+    prb(0.2)
       ? rnd(QUARTER_PI/2, QUARTER_PI) * posOrNeg()
       : 0
 
   g10 = rnd(150, 750) / g38
 
   g34 = chance(
-    [0.015, 0],
-    [0.935, 1],
-    [0.05, 2],
+    [0.03, 0],
+    [0.89, 1],
+    [0.08, 2],
   )
 
-  g23 = prb(0.125) ? rnd(0.05, 0.2) : 0
+  g23 = prb(0.25) ? rnd(0.05, 0.2) : 0
 
   g19 = chance(
     [40, 0], // anything goes
@@ -1406,8 +1406,8 @@ function setFeatures() {
 
   const layerNScaleAdj =
     g1 || g16
-      ? 10
-      : map(g38, 1.2, 0.2, 1, 15)
+      ? 15
+      : map(g38, 1.2, 0.2, 1, 20)
 
   g33 = chance(
     [layerNScaleAdj, 1],
@@ -1416,7 +1416,7 @@ function setFeatures() {
     [34, rndint(4, 7)],
     [!g16 ? 10 : 0, rndint(7, 10)],
     [!g16 ? 4 : 0, rndint(10, 15)],
-    [!g16 ? 1 : 0, 30],
+    [!g16 ? 2 : 0, 30],
   )
 
 
@@ -1441,8 +1441,8 @@ function setFeatures() {
   ) * posOrNeg()
 
 
-  g7 = prb(0.02)
-  g15 = prb(0.025) ? rnd(720, 3000) : 200
+  g7 = prb(0.03)
+  let maxGradientPrb = 0.035
   g9 = false
   g11 = false
 
@@ -1475,7 +1475,7 @@ function setFeatures() {
     g11 = true
 
   } else if (g19 === 4) {
-
+    maxGradientPrb = 0.05
     g22 = chance(
       [20, 'faded'],
       [30, 'bright'],
@@ -1527,6 +1527,9 @@ function setFeatures() {
     ) * posOrNeg()
   }
 
+  g15 = prb(maxGradientPrb) ? rnd(720, 3000) : 200
+
+
   if (g22 === 'blackAndWhite' || g22 === 'neon' && g33 > 2 && g19 !== 3) {
     g25 = chance(
         [1, 0],
@@ -1556,10 +1559,10 @@ function setFeatures() {
 
 
   g13 = prb(0.5)
-  g17 = g13 || prb(0.8)
+  g17 = g13 || prb(0.75)
 
   g8 = chance(
-    [5, rnd(175, 200)],
+    [6.25, rnd(175, 200)],
     [75, rnd(30, 60)],
     [20, rnd(20, 30)],
   ) / g38
@@ -1605,8 +1608,8 @@ function setFeatures() {
   g30 = 5 * posOrNeg()
   g6 = chance(
     [15, 0],
-    [64, 1],
-    [20, 2],
-    [g15 > 200 ? 20 : 1, 10],
+    [50, 1],
+    [30, 2],
+    [g15 > 200 ? 20 : 1, 15],
   )
 }

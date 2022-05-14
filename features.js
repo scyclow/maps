@@ -87,7 +87,7 @@ function calculateFeatures(tokenData) {
 
   SCALE = rnd(0.2, 1.2)
 
-  TURBULENCE = prb(0.2)
+  TURBULENCE = prb(0.18)
   STREET_TURBULENCE = prb(0.15)
   IGNORE_STREET_CAP = prb(0.1)
   HARD_CURVES = prb(0.1)
@@ -104,12 +104,12 @@ function calculateFeatures(tokenData) {
   NOISE_DIVISOR = rnd(150, 750) / SCALE
 
   DENSITY = chance(
-    [0.02, 0],
-    [0.9, 1],
+    [0.03, 0],
+    [0.89, 1],
     [0.08, 2],
   )
 
-  DASH_RATE = prb(0.175) ? rnd(0.05, 0.2) : 0
+  DASH_RATE = prb(0.25) ? rnd(0.05, 0.2) : 0
 
   COLOR_RULE = chance(
     [40, 0], // anything goes
@@ -132,7 +132,7 @@ function calculateFeatures(tokenData) {
     [34, rndint(4, 7)],
     [!HARD_CURVES ? 10 : 0, rndint(7, 10)],
     [!HARD_CURVES ? 4 : 0, rndint(10, 15)],
-    [!HARD_CURVES ? 1 : 0, 30],
+    [!HARD_CURVES ? 2 : 0, 30],
   )
 
 
@@ -158,7 +158,7 @@ function calculateFeatures(tokenData) {
 
 
   FORCE_GRADIENTS = prb(0.03)
-  MAX_GRADIENT = prb(0.035) ? rnd(720, 3000) : 200
+  let maxGradientPrb = 0.035
   INVERT_STREETS = false
   LIGHTEN_DARKS = false
 
@@ -191,7 +191,7 @@ function calculateFeatures(tokenData) {
     LIGHTEN_DARKS = true
 
   } else if (COLOR_RULE === 4) {
-
+    maxGradientPrb = 0.05
     BASE_RULE = chance(
       [20, 'faded'],
       [30, 'bright'],
@@ -243,6 +243,9 @@ function calculateFeatures(tokenData) {
     ) * posOrNeg()
   }
 
+  MAX_GRADIENT = prb(maxGradientPrb) ? rnd(720, 3000) : 200
+
+
   if (BASE_RULE === 'blackAndWhite' || BASE_RULE === 'neon' && LAYER_N > 2 && COLOR_RULE !== 3) {
     HUE_DIFF = chance(
         [1, 0],
@@ -272,7 +275,7 @@ function calculateFeatures(tokenData) {
 
 
   BORDER_BLEED = prb(0.5)
-  HARD_BORDER = BORDER_BLEED || prb(0.8)
+  HARD_BORDER = BORDER_BLEED || prb(0.75)
 
   BORDER_PADDING = chance(
     [6.25, rnd(175, 200)],
