@@ -142,8 +142,8 @@ function calculateFeatures(tokenData) {
     [LAYER_N <= 4 ? 15 : 0, 'burnt'],
 
     [LAYER_N <= 4 ? 10 : 5, 'bright'],
-    [6, 'whiteAndBlack'],
-    [4, 'blackAndWhite'],
+    [LAYER_N === 1 ? 15 : 6, 'whiteAndBlack'],
+    [LAYER_N === 1 ? 10: 4, 'blackAndWhite'],
     [SCALE <= 0.3 ? 0 : 4, 'neon'],
   )
 
@@ -329,14 +329,13 @@ function calculateFeatures(tokenData) {
     [MAX_GRADIENT > 200 ? 20 : 1, 15],
   )
 
-
   const Zoom = SCALE > 1 ? 'Close' : SCALE < 0.4 ? 'Far' : 'Near'
   const Padding =
     BORDER_PADDING * SCALE > 60 ? 'Thick' :
     'Normal'
   const Border = !!HARD_BORDER
   const Density = DENSITY === 0 ? 'Low' : DENSITY === 2 ? 'High' : 'Medium'
-  const Paths = STRAIGHT_STREETS ? 'Straight' : HARD_CURVES ? 'Curvy' : 'Average'
+  const Paths = HARD_CURVES ? 'Curvy' : STRAIGHT_STREETS ? 'Straight' : 'Average'
   const Angles = KINKED_STREET_FACTOR ? 'Sharp' : 'Mild'
   const Dashes = !!DASH_RATE
   const Grain = GRAIN ? 'Course' : 'Fine'

@@ -259,10 +259,10 @@ const rules = () => {
       }
 
       let key
-      if (LAYER_N === 2) key = 'color'
+      if (COLOR_RULE === 3) key = 'dark'
+      else if (LAYER_N === 2) key = 'color'
       else if (COLOR_RULE === 1) key = 'contrast'
       else if (COLOR_RULE === 2) key = 'light'
-      else if (COLOR_RULE === 3) key = 'dark'
       else if (COLOR_RULE === 4) key = 'color'
       else key = 'all'
 
@@ -491,9 +491,9 @@ const rules = () => {
       const c4 = color(hfix(baseHue + HUE_DIFF-60*d), 50, 85)
 
       let key
-      if (LAYER_N === 2) key = 'color'
+      if (COLOR_RULE === 3) key = 'dark'
+      else if (LAYER_N === 2) key = 'color'
       else if (COLOR_RULE === 2) key = 'light'
-      else if (COLOR_RULE === 3) key = 'dark'
       else if (COLOR_RULE === 4) key = 'color'
       else key = 'all'
 

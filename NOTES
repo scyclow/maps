@@ -1,6 +1,156 @@
 NOTES
 
 
+All maps are presented as-is with no guarantee of accuracy or completeness, and are provided without any warranty whatsoever, either express or implied. In no event shall The Artist be held liable for any damages or loss of profits arising from use of the maps, which may not be suitable for legal, engineering, financial, or navigational purposes.
+
+Any resemblance to real locations or biological processes is purely coincidental, and nothing perceived by the viewer is to be construed as a "legal description". All markings, sections, symbols, patterns, and other visual elements are purely aesthetic devices; they should not be interpreted as geographical, topological, meteorological, biological, economic, sociological, or political phenomena. Furthermore, all perceived textures, imperfections, shadows, and marks of damage are mere simulations of an analog printing process, and in no way imply the or existence of, or ownership over, a corresponding physical paper map or anything that the map may appear to depict.
+
+The maps are not intended to provide any utility to the buyer. All sales are final, and refunds will not be given for any misprints, discolorations, inaccuracies, imprecisions, or unintended features of any kind.
+
+All maps are licensed under a Creative Commons Attribution-NonCommercial 4.0 License.
+
+
+
+
+
+CG: Steve, thank you once again for joining my to talk about your newest project, Maps of Nothing.
+
+SP: Of course, thank you once again for having me.
+
+CG: Let's get right into it. This is an amazingly versatile and visually stunning project. I was completely transfixed scrolling through the test collection you sent me. And while it definitely has a certain steviep flair that I can't quite put my finger on, I'll be honest -- This wasn't quite what I was expecting your next big project to be. So I just have to ask: why maps?
+
+SP: You know, I want to keep everyone on their toes.
+
+CG: Haha, clearly!
+
+SP: Honestly, the reason is quite simple. When I started seriously exploring generative art, specifically the so-called "long-form" genre that Art Blocks specializes in, I asked myself what projects I could work on that were both conceptually rich and visually striking. And I came up with two answers: money and maps. The money was higher priority, so that cam first. But once Fake Internet Money was wrapped up I started thinking about what a generative map project could look like.
+
+CG: What do you find so visually appealing about maps?
+
+SP: I'm not sure. I think it's just one of those things where, from a purely visual standpoint, it's an incredibly detailed pattern that doesn't always have an obvious order to it. If you cut a splotch out from a map and used some advanced machine learning model to predict and redraw the missing segment, you probably couldn't do it in a lot of cases. But at the same time, maps aren't total chaos. There's still a logic and a flow to it, and I think your brain picks up on that even if it can't quite predict it. And I think that tension is really interesting.
+
+And of course, the reason for all of this is that maps are an abstract representation of something else. If we're talking about street maps, for example, then the grid is really a function of geography and social happenstance. So looking at a map of Brooklyn, for example, there are plenty of places where the stree grid makes total sense... but then it randomly morphes into a completely different grid. Why is that? Well, sometimes it's an artifact of two towns that grew into each other 200 years ago. Sometimes the topography shifts and a different logic makes sense. And those ar things that you're not really going to pick up on from just looking at visual patterns.
+
+CG: As the french philosophers like to say, the map is not the territory.
+
+SP: Exactly. And I think that starts to get into why this is such a conceptually rich territory. As Baudrillard highlighted on the first page of Simulacra and Simulation, maps are a very good metaphor for how our society is becoming increasingly based on abstractions. He started by quoting the Borges short story where the Cartographers Guild of an empire decide to make map so detailed that it is as large and detailed as the empire itself. And this is, of course, absurd because a map with no abstraction over reality is totally useless. But it makes for an interesting metaphor because at that scale it really blurs the distinction between map and territory. So Baudrillard uses that as a starting point to explore how we've moved to a point where this distinction is even more blurred: Where the Borges story describes a scenario in which the territory precedes the map, we've sort of built a world where the map often precedes the territory.
+
+CG: Right, and one obvious example that comes to mind for me is parts of the DeFi ecosystem. Typically you try to build financial systems that map to some sort of existing economic value. But it some of the more Ponzi-driven corners of the DeFi system you have people building things that claim to create economic value out of thin air, and then reality adapts to that made-up system.
+
+SP: Even in the traditional finance world you have plenty of examples of how the model is either confused with reality, or it dictates reality all together. Pretty much every major financial meltdown over the last 50 years has occurred because financial institutions come up with a really specific model of reality, build complex financial positions based on that model, and then blow up when actual reality deviates from their model.
+
+CG: It seems like, in a lot of ways, Maps of Nothing is about blurring the lines between map and territory.
+
+SP: You could say that. I think one sort of funny aspect of this pr
+
+
+
+
+
+REALLY, THE POINT:
+  - about the interplay between what reads as part of the paper map and what reads as part of the platonic map
+
+
+SIMULATED PRINTING ERRORS
+  - subtle rotations
+  - misaligned misprints
+  - star
+  - colors block out street
+  - ink runs
+  - bg blur
+  - low ink
+
+
+Are they errors?
+  - splotches, espescially the ones that
+
+
+
+
+
+
+
+
+
+There's an underlying topology of the system, and
+
+
+
+SP:
+
+
+
+CG: How do you see this project fitting into your larger body of work? Because on one hand it's a definite departure from the typical content and aesthetics you tend to focus on. But on the other hand, I'm seeing a lot of thematic overlap.
+
+SP: Yeah, I think that's fair. One thing that occurred to me very early on in this project was that my last big project generative was Fake Internet Money, and here I'm essentially generating fake internet maps. So, given that maps themselves are already an abstraction over reality,
+
+
+
+In fact, someone recently pointed out to me that FIM had a lot similarities to Magritte's The Treachery of Images. And one of the early working titles of this project was The Treachery of Maps.
+
+
+
+CG: We've talked a lot about what was going through your mind with this project. I was hoping we could also talk a bit a bout how you explored these themes visully.
+
+SP: Sure. I think the most obvious way is that I chosed to give the maps a very papery texture, which adds an interesting dimension. Without that texture you're looking at a simulation of a digital map
+
+
+
+I think the most obvious way was to give the maps a very papery feel. The background is very textured and has subtle and not-so-subtle shadows, the ink runs when lines are drawn, colors bleed outside the lines, and generally there are subtle imperfections all over. And what makes all of this kind of funny, in my opinion, is that
+
+
+
+So really, I think this project is the blurring of the map and territory.
+
+But Baudrillard notes that we've moved beyond
+
+https://kwarc.info/teaching/TDM/Borges.pdf
+
+
+
+
+I, of course, have not read much Baudrillard because he's a bad and very dense writer, but I've watched a lot of youtube videos about him and read his wikipedia page!
+
+
+
+But there obviously is a logic to it because it's an abstract representation of
+
+
+
+, and at a high level there doesn't really seem to be any order to it. But as you look closer, you realize there is a logic and a flow to it.
+
+
+
+CG: other map projects you like?
+CG: where does this fit into your body of work?
+
+
+
+
+
+
+
+
+The biggest thing on my mind as I look over the test collection for this project is how different it appears from your other work. And yet, when I look at it I see a distinct steviep flavor that I can't quite put my finger on. I think what's most impressive about this project is how it shows your versatility as an artist, but I was hoping you could talk a bit about how this project fits into your larger body of work.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 FINAL NOTES
   - maybe bump up probabilities
@@ -35,11 +185,7 @@ FEATURES
 
 
 
-All maps are presented as-is with no guarantee of accuracy or completeness, and are provided without any warranty whatsoever, either express or implied. In no event shall The Artist be held liable for any damages or loss of profits arising from use of the maps, which may not be suitable for legal, engineering, financial, or navigational purposes.
 
-Any resemblance to real locations or biological processes is purely coincidental, and nothing perceived by the viewer is to be construed as a "legal description". All markings, sections, symbols, patterns, and other visual elements are purely aesthetic devices; they should not be interpreted as geographical, topological, meteorological, biological, economic, sociological, or political phenomena. Furthermore, all perceived textures, imperfections, shadows, and marks of damage are mere simulations of an analog printing process, and in no way imply the or existence of, or ownership over, a corresponding physical paper map or anything that the map may appear to depict.
-
-All maps are licensed under a Creative Commons Attribution-NonCommercial 4.0 License.
 
 
 

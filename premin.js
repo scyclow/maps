@@ -952,10 +952,10 @@ const rules = () => {
       }
 
       let key
-      if (g33 === 2) key = 'color'
+      if (g19 === 3) key = 'dark'
+      else if (g33 === 2) key = 'color'
       else if (g19 === 1) key = 'contrast'
       else if (g19 === 2) key = 'light'
-      else if (g19 === 3) key = 'dark'
       else if (g19 === 4) key = 'color'
       else key = 'all'
 
@@ -1184,9 +1184,9 @@ const rules = () => {
       const c4 = color(hfix(baseHue + g25-60*d), 50, 85)
 
       let key
-      if (g33 === 2) key = 'color'
+      if (g19 === 3) key = 'dark'
+      else if (g33 === 2) key = 'color'
       else if (g19 === 2) key = 'light'
-      else if (g19 === 3) key = 'dark'
       else if (g19 === 4) key = 'color'
       else key = 'all'
 
@@ -1426,8 +1426,8 @@ function setFeatures() {
     [g33 <= 4 ? 15 : 0, 'burnt'],
 
     [g33 <= 4 ? 10 : 5, 'bright'],
-    [6, 'whiteAndBlack'],
-    [4, 'blackAndWhite'],
+    [g33 === 1 ? 15 : 6, 'whiteAndBlack'],
+    [g33 === 1 ? 10: 4, 'blackAndWhite'],
     [g38 <= 0.3 ? 0 : 4, 'neon'],
   )
 

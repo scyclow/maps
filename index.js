@@ -106,8 +106,8 @@ function setFeatures() {
     [LAYER_N <= 4 ? 15 : 0, 'burnt'],
 
     [LAYER_N <= 4 ? 10 : 5, 'bright'],
-    [6, 'whiteAndBlack'],
-    [4, 'blackAndWhite'],
+    [LAYER_N === 1 ? 15 : 6, 'whiteAndBlack'],
+    [LAYER_N === 1 ? 10: 4, 'blackAndWhite'],
     [SCALE <= 0.3 ? 0 : 4, 'neon'],
   )
 
