@@ -2,7 +2,7 @@
 
 function keyPressed() {
   if (keyCode === 83) {
-    saveCanvas(__canvas, 'maps-' + Date.now(), 'png');
+    saveCanvas(__canvas, 'mapsOfNothing-' + tokenData.hash, 'png');
   }
 }
 

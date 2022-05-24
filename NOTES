@@ -1,9 +1,13 @@
 NOTES
 
 
+UACC Endaoment https://app.endaoment.org/orgs/133206226
+
+
+
 All maps are presented as-is with no guarantee of accuracy or completeness, and are provided without any warranty whatsoever, either express or implied. In no event shall The Artist be held liable for any damages or loss of profits arising from use of the maps, which may not be suitable for legal, engineering, financial, or navigational purposes.
 
-Any resemblance to real locations or biological processes is purely coincidental, and nothing perceived by the viewer is to be construed as a "legal description". All markings, sections, symbols, patterns, and other visual elements are purely aesthetic devices; they should not be interpreted as geographical, topological, meteorological, biological, economic, sociological, or political phenomena. Furthermore, all perceived textures, imperfections, shadows, and marks of damage are mere simulations of an analog printing process, and in no way imply the or existence of, or ownership over, a corresponding physical paper map or anything that the map may appear to depict.
+Any resemblance to real locations or biological processes is purely coincidental, and nothing perceived by the viewer is to be construed as a "legal description". All markings, sections, symbols, patterns, and other visual elements are purely aesthetic devices; they should not be interpreted as geographical, topographical, meteorological, biological, economic, sociological, or political phenomena. Furthermore, all perceived textures, imperfections, shadows, and marks of damage are mere simulations of an analog printing process, and in no way imply the or existence of, or ownership over, a corresponding physical paper map or anything that the map may appear to depict.
 
 The maps are not intended to provide any utility to the buyer. All sales are final, and refunds will not be given for any misprints, discolorations, inaccuracies, imprecisions, or unintended features of any kind.
 
@@ -23,17 +27,82 @@ SP: You know, I want to keep everyone on their toes.
 
 CG: Haha, clearly!
 
-SP: Honestly, the reason is quite simple. When I started seriously exploring generative art, specifically the so-called "long-form" genre that Art Blocks specializes in, I asked myself what projects I could work on that were both conceptually rich and visually striking. And I came up with two answers: money and maps. The money was higher priority, so that cam first. But once Fake Internet Money was wrapped up I started thinking about what a generative map project could look like.
+SP: Honestly, the reason is quite simple. When I started seriously exploring generative art, specifically the so-called "long-form" genre that Art Blocks specializes in, I asked myself what projects I could work on that were both conceptually rich and visually striking. And I came up with two answers: money and maps. The money was higher priority, so that came first. But once Fake Internet Money was wrapped up I started thinking about what a generative map project could look like.
 
 CG: What do you find so visually appealing about maps?
 
-SP: I'm not sure. I think it's just one of those things where, from a purely visual standpoint, it's an incredibly detailed pattern that doesn't always have an obvious order to it. If you cut a splotch out from a map and used some advanced machine learning model to predict and redraw the missing segment, you probably couldn't do it in a lot of cases. But at the same time, maps aren't total chaos. There's still a logic and a flow to it, and I think your brain picks up on that even if it can't quite predict it. And I think that tension is really interesting.
+SP: I'm not sure. I think it's just one of those things where, from a purely visual standpoint, it's an incredibly detailed pattern that doesn't always have an obvious order to it. If you cut a splotch out from a map and used some machine learning model to predict and redraw the missing segment, you probably couldn't do it in a lot of cases. But at the same time, maps aren't total chaos. There's still a logic and a flow to them, and I think your brain picks up on that even if it can't quite predict it. And I think that tension is really interesting.
 
-And of course, the reason for all of this is that maps are an abstract representation of something else. If we're talking about street maps, for example, then the grid is really a function of geography and social happenstance. So looking at a map of Brooklyn, for example, there are plenty of places where the stree grid makes total sense... but then it randomly morphes into a completely different grid. Why is that? Well, sometimes it's an artifact of two towns that grew into each other 200 years ago. Sometimes the topography shifts and a different logic makes sense. And those ar things that you're not really going to pick up on from just looking at visual patterns.
+And of course, the reason for all of this is that maps are an abstract representation of something else. If we're talking about street maps, for example, then the grid is really a function of geography and social happenstance. So looking at a map of Brooklyn, for example, there are plenty of places where the stree grid makes total sense... but then it randomly morphes into a completely different grid. Why is that? Well, sometimes it's an artifact of two towns that grew into each other 200 years ago. Sometimes the topography shifts and a different logic makes sense. And those are things that you're not really going to pick up on from just looking at visual patterns.
 
 CG: As the french philosophers like to say, the map is not the territory.
 
-SP: Exactly. And I think that starts to get into why this is such a conceptually rich territory. As Baudrillard highlighted on the first page of Simulacra and Simulation, maps are a very good metaphor for how our society is becoming increasingly based on abstractions. He started by quoting the Borges short story where the Cartographers Guild of an empire decide to make map so detailed that it is as large and detailed as the empire itself. And this is, of course, absurd because a map with no abstraction over reality is totally useless. But it makes for an interesting metaphor because at that scale it really blurs the distinction between map and territory. So Baudrillard uses that as a starting point to explore how we've moved to a point where this distinction is even more blurred: Where the Borges story describes a scenario in which the territory precedes the map, we've sort of built a world where the map often precedes the territory.
+SP: Exactly. And I think that starts to get into why this is such a conceptually rich territory. Maps, along with money, are both these amazing tools of abstraction. But it's interesting how they work in opposite directions. On one hand, money is sort of a reification -- there's a $2 word I learned recently -- of the idea of "value". We take this very abstract idea, and we create a concrete stand in for it. On the other hand, maps are a totally abstracted representation of a physical space.
+
+CG: Right, and I think what's really funny about your last two Art Blocks projects is that you've created the abstraction (or reification) without their counterparts.
+
+SP: You took the words right out of my mouth. So that's why I think the names *Fake* Internet Money, and Maps of *Nothing* are so important to the concepts behind the projects.
+
+CG: They're both such good names, and they really made things click for me. The legalese descriptions are also great. It really elevated FIM, espescially. It feels like a little less obvious of a choice with the maps though.
+
+SP: Yeah, that's a fair point. It wasn't obvious to me either, to be honest. But I chose to do it for a couple reasons. First, it draws a clearer through line between these two projects, which I think helps tease out some of those themes we were just talking about. Second, I think it's a really good way to highlight certain elements of the project without highlighting them. So for example, instead of saying "hey everyone, did you notice how the splotches sort of look like topography sometimes?", you can to say "whatever you do, don't interpret the splotches as topography". And this immediately puts the idea in the head of the viewer without telling them that it *should* look a certain way. It lets them come to their own conclusion, even if you're guiding them. Third, I think this also creates an interesting context in which to view the project. Like, by saying the maps have "no guarantee of accuracy or completeness, and are provided without any warranty whatsoever, either express or implied.", it sort of creates the impression that someone could actually mistake these for real maps, and purchase them with that intention.
+
+CG: It makes me wonder, who the hell are these people buying these maps expecting it to accurately depict reality?
+
+SP: Hey, my lawyers are really strict about these things and I'm just trying to cover all of my bases.
+
+CG: That's true. You don't want a bunch of apes thinking that they have claim to some steviep-created metaverse land.
+
+SP: Seriously though, at the end of the day I also think it's important to remind people that this is an artwork that they're buying, and that they shouldn't necessarily expect utility or a monetary profit from them.
+
+CG: I'd like to dive into some of the ways that you're visually exploring these themes.
+
+
+SP: Sure. I think it sort of boils down to the idea that these are simulations of paper maps -- each piece is faking the abstraction as well as the material that the abstraction is presented on. So all of the interesting visuals come out of the interplay between what reads as part of the "platonic" map being represented, and what reads as an artifact of the printing process representing that map. The spoltches are probably the best example, where it's never entirely obvious what they're supposed to be. Sometimes they look like they're aspects of the geopgraphy that a city grid is built on top of. Sometimes they look like they're supposed to be crime heat maps. Sometimes they just look like someone spilled coffee on the map. Some of my favorite outputs are the ones where the splotches either fade out or extend beyond the border of the drawn map. It can create a weird effect where they start out feeling like they're part of the "platonic" map, and end up as part of the printed map. The shadows are another example. Sometimes they look like they're cast by mountains, and other times they look like they're cast by paper crumples.
+
+CG: And adding to that, another through line between this project and Fake Internet Money is the inclusion of obvious misprints. And again, this is very funny because you have these very analogue errors injected into this thing that's supposed to be digitally rendered. Like, there's no reason for a map to be drasticlaly printed off center, or to be printed with low ink. It adds an appreciated level of absurdity to it. And this, combined with the project description really makes me wonder about the origin story of some of these maps. Like, what was the context in which this map was printed in such a fucked up way? Who's out there preparing a law suit against you because one of your maps failed to help them navigate their way to a dentist appointment?
+
+SP: We'll leave that as an exercise to the viewer.
+
+CG: Steve, thank you for joining me once again. It's always a pleasure, and I look forward to our next conversation.
+
+SP: The pleasure is all mine.
+
+
+
+
+
+
+
+
+
+
+the simulated imperfections and misprints throughout the collection.
+
+
+
+
+
+
+
+legalese obviously fits in perfectly with the money, but it was a less obvious fit with the maps. And I chose it for two re
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+As Baudrillard highlighted on the first page of Simulacra and Simulation, maps are a very good metaphor for how our society is becoming increasingly based on abstractions. He started by quoting the Borges short story where the Cartographers Guild of an empire decide to make map so detailed that it is as large and detailed as the empire itself. And this is, of course, absurd because a map with no abstraction over reality is totally useless. But it makes for an interesting metaphor because at that scale it really blurs the distinction between map and territory. So Baudrillard uses that as a starting point to explore how we've moved to a point where this distinction is even more blurred: Where the Borges story describes a scenario in which the territory precedes the map, we've sort of built a world where the map often precedes the territory.
 
 CG: Right, and one obvious example that comes to mind for me is parts of the DeFi ecosystem. Typically you try to build financial systems that map to some sort of existing economic value. But it some of the more Ponzi-driven corners of the DeFi system you have people building things that claim to create economic value out of thin air, and then reality adapts to that made-up system.
 
@@ -49,6 +118,11 @@ SP: You could say that. I think one sort of funny aspect of this pr
 
 REALLY, THE POINT:
   - about the interplay between what reads as part of the paper map and what reads as part of the platonic map
+  - whereas FIM is all about calling out the misprings, Maps is about obscuring what is a misprint and what isn't a misprint. i think in that sense, it's a project that can only exist as a generative project, and furthermore one that can only exist on something like art blocks.
+
+
+
+What I find really interesting about this project is that each piece tells a different origin story. on one hand, there's the origin story of the platonic thing that the map is representing (or, not representing). there's also the origin story of the representation itself.
 
 
 SIMULATED PRINTING ERRORS
@@ -171,7 +245,7 @@ FEATURES
   Zoom: (close, medium, far)
   padding: (thin, normal, thick)
   border: (true/false)
-  layers: (0, 2-4, more, topological)
+  layers: (0, 2-4, more, topographical)
   density: (high, medium, low)
   kinks
   dashes

@@ -1,0 +1,101 @@
+
+[
+  {
+    "name": "Zoom",
+    "type": "enum",
+    "options": [
+      "Close",
+      "Near",
+      "Far"
+    ]
+  },
+  {
+    "name": "Padding",
+    "type": "enum",
+    "options": [
+      "Normal",
+      "Thick"
+    ]
+  },
+  {
+    "name": "Border",
+    "type": "boolean"
+  },
+  {
+    "name": "Density",
+    "type": "enum",
+    "options": [
+      "High",
+      "Medium",
+      "Low"
+    ]
+  },
+  {
+    "name": "Paths",
+    "type": "enum",
+    "options": [
+      "Straight",
+      "Average",
+      "Curvy"
+    ]
+  },
+  {
+    "name": "Angles",
+    "type": "enum",
+    "options": [
+      "Sharp",
+      "Mild"
+    ]
+  },
+  {
+    "name": "Dashes",
+    "type": "boolean"
+  },
+  {
+    "name": "Grain",
+    "type": "enum",
+    "options": [
+      "Course",
+      "Fine"
+    ]
+  },
+  {
+    "name": "Path Texture",
+    "type": "enum",
+    "options": [
+      "Choppy",
+      "Soft"
+    ]
+  },
+  {
+    "name": "Strokes",
+    "type": "enum",
+    "options": [
+      "Heavy",
+      "Light"
+    ]
+  },
+  {
+    "name": "Base",
+    "type": "enum",
+    "options": [
+      "Dark",
+      "Bright",
+      "Light",
+      "White"
+    ]
+  },
+  {
+    "name": "Theme",
+    "type": "enum",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G"
+    ]
+  }
+]
