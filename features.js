@@ -335,7 +335,7 @@ function calculateFeatures(tokenData) {
     'Normal'
   const Border = !!HARD_BORDER
   const Density = DENSITY === 0 ? 'Low' : DENSITY === 2 ? 'High' : 'Medium'
-  const Paths = HARD_CURVES ? 'Curvy' : STRAIGHT_STREETS ? 'Straight' : 'Average'
+  const Paths = HARD_CURVES ? 'Curly' : STRAIGHT_STREETS ? 'Straight' : 'Average'
   const Angles = KINKED_STREET_FACTOR ? 'Sharp' : 'Mild'
   const Dashes = !!DASH_RATE
   const Grain = GRAIN ? 'Course' : 'Fine'
