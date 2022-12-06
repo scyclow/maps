@@ -11,7 +11,7 @@ NOISE_OFFSET = 100000
 
 function setup() {
   SIZE = min(innerWidth, innerHeight)
-  __canvas = createCanvas(innerWidth, innerHeight)
+  __canvas = createCanvas(SIZE, SIZE)
   noiseSeed(rnd(1000000) + rnd(1000000) + rnd(1000))
 
   SCALE = rnd() + 0.2

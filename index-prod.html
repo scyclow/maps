@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Maps of Nothing</title>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="HandheldFriendly" content="true">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta id="header-theme" name="theme-color" content="#000000">
+
+    <script src="./min.p5.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+
+
+    <style type="text/css">
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      canvas {
+        padding: 0;
+        margin: auto;
+        display: block;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
+    </style>
+
+    <script>
+      function genTokenData(projectNum) {
+
+        const mapsHashesLookedAt = JSON.parse(localStorage.getItem('mapsHashesLookedAt')) || 0
+        const tokenId = String(projectNum * 1000000 + Math.floor(Math.random() * 1000))
+        let hash = '0x'
+        if (window.location.search.includes('?hash=')) {
+          hash = window.location.search.slice(6)
+        } else {
+          for (let i = 0; i < 64; i++) {
+            hash += Math.floor(Math.random() * 16).toString(16)
+          }
+          window.location.hash = '#' + hash
+
+          const last10hashes = JSON.parse(localStorage.getItem('last10Hashes')) || []
+          last10hashes.unshift(hash)
+
+          localStorage.setItem('last10Hashes', JSON.stringify(last10hashes.slice(0, 10)))
+          localStorage.setItem('mapsHashesLookedAt', JSON.stringify(mapsHashesLookedAt+1))
+        }
+        return {
+          hash,
+          // hash: '0xfeff8806ffe0ff004900b6104392c062d40f238839029c82ed000ffff3cb2003',
+          tokenId
+        }
+      }
+
+      const tokenData = genTokenData(999)
+      console.log(tokenData.hash)
+    </script>
+  </head>
+  <body></body>
+
+
+  <script src="./util.js"></script>
+  <script src="./layerRules.js"></script>
+  <script src="./bg.js"></script>
+  <script src="./grid.js"></script>
+  <!-- <script src="./grid2.js"></script> -->
+  <script src="./border.js"></script>
+  <script src="./index-prod.js"></script>
+  <!-- <script src="./plot.js"></script> -->
+
+
+
+</html>
